@@ -318,6 +318,13 @@
       call MPI_BCAST(bcturbs  ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(horizturb,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(doimpl   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      !=========================================================================
+      ! DRM Parameters. XS 11/16/2018
+      call MPI_BCAST(reconstr  ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(dyn_scalar,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(dyn_all   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(dyn_correct,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      !=========================================================================
       call MPI_BCAST(irdamp   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(hrdamp   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(psolver  ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -453,6 +460,10 @@
       call MPI_BCAST(output_tke    ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(output_km     ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(output_kh     ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      !=========================================================================
+      ! DRM parameter. XS 11/16/2018
+      call MPI_BCAST(output_drm    ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      !=========================================================================
       call MPI_BCAST(output_qv     ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(output_qvpert ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(output_q      ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -1383,14 +1394,20 @@
       ENDIF
       !-----
       IF( idoles )THEN
-      IF( sgsmodel.lt.0 .or. sgsmodel.gt.6 )THEN
+      !==========================================
+      ! sgsmodel is allowed to be 7 here for DRM.
+      ! XS 11/16/218
+      !==========================================
+      !IF( sgsmodel.lt.0 .or. sgsmodel.gt.6 )THEN
+      IF( sgsmodel.lt.0 .or. sgsmodel.gt.7 )THEN
         if(myid.eq.0)then
         print *
         print *,'  idoles   = ',idoles
         print *,'  cm1setup = ',cm1setup
         print *,'  sgsmodel  = ',sgsmodel
         print *
-        print *,'  for idoles, sgsmodel must be either 0,1,2,3,4,5,6 '
+        !print *,'  for idoles, sgsmodel must be either 0,1,2,3,4,5,6 '
+        print *,'  for idoles, sgsmodel must be either 0,1,2,3,4,5,6,7 '
         print *
         print *,'   stopping model .... '
         print *
@@ -1401,6 +1418,53 @@
         call stopcm1
       ENDIF
       ENDIF
+
+      !-----
+      IF( idoles )THEN      
+      !==========================================
+      ! sgsmodel requires at least 3 ghost points
+      ! XS 12/4/2018
+      !==========================================
+      IF( sgsmodel.eq.7 .and. ngxy.lt.3)THEN
+        if(myid.eq.0)then
+        print *
+        print *,'  sgsmodel  = ',sgsmodel
+        print *
+        print *,'  for using DRM, at least 3 ghost points are needed '
+        print *
+        print *,'   stopping model .... '
+        print *
+        endif
+#ifdef MPI
+        call MPI_BARRIER (MPI_COMM_WORLD,ierr)
+#endif
+        call stopcm1
+      ENDIF
+      ENDIF
+
+      !-----
+      IF( idoles )THEN      
+      !==========================================
+      ! DRM doesnot work with passive tracers
+      ! XS 12/4/2018
+      !==========================================
+      IF( sgsmodel.eq.7 .and. iptra.eq.1)THEN
+        if(myid.eq.0)then
+        print *
+        print *,'  sgsmodel  = ',sgsmodel
+        print *
+        print *,'  DRM does not work with passive tracers now. '
+        print *
+        print *,'   stopping model .... '
+        print *
+        endif
+#ifdef MPI
+        call MPI_BARRIER (MPI_COMM_WORLD,ierr)
+#endif
+        call stopcm1
+      ENDIF
+      ENDIF
+      
       !-----
       IF( idoles )THEN
       IF( sgsmodel.ge.3 .and. sgsmodel.le.6 )THEN
@@ -2863,6 +2927,13 @@
       if(dowr) write(outfile,*) 'bcturbs   =',bcturbs
       if(dowr) write(outfile,*) 'horizturb =',horizturb
       if(dowr) write(outfile,*) 'doimpl    =',doimpl
+      !==================================================
+      ! DRM parameters. XS 11/16/2018
+      if(dowr) write(outfile,*) 'reconstr  =',reconstr
+      if(dowr) write(outfile,*) 'dyn_scalar=',dyn_scalar
+      if(dowr) write(outfile,*) 'dyn_all   =',dyn_all
+      if(dowr) write(outfile,*) 'dyn_correct=',dyn_correct
+      !==================================================
       if(dowr) write(outfile,*) 'irdamp    =',irdamp
       if(dowr) write(outfile,*) 'hrdamp    =',hrdamp
       if(dowr) write(outfile,*) 'psolver   =',psolver
@@ -4659,6 +4730,10 @@
       output_tke     = max(0,min(1,output_tke))
       output_km      = max(0,min(1,output_km))
       output_kh      = max(0,min(1,output_kh))
+      !==================================================
+      ! DRM parameter. XS 11/16/2018
+      output_drm      = max(0,min(1,output_drm))
+      !==================================================
       output_qv      = max(0,min(1,output_qv))
       output_qvpert  = max(0,min(1,output_qvpert))
       output_q       = max(0,min(1,output_q))
@@ -5136,6 +5211,25 @@
         kbnba=1
         kenba=1
       endif
+
+      !===========================================
+      ! DRM indices. XS 11/05/2018
+      if( (sgsmodel.eq.7) .or. (sgsmodel.eq.6 .and. reconstr.ge.0) )then  ! if DRM is used !SACP
+        ibdrm=ib
+        iedrm=ie
+        jbdrm=jb
+        jedrm=je
+        kbdrm=kb
+        kedrm=ke
+      else
+        ibdrm=1
+        iedrm=1
+        jbdrm=1
+        jedrm=1
+        kbdrm=1
+        kedrm=1
+      endif
+      !===========================================
 
       if( cuparam.ge.1 )then
         ibcu=ib
