@@ -2043,7 +2043,9 @@
                         upten,vpten,ucuten,vcuten,                              &
                         reqs_u,reqs_v,reqs_w,reqs_s,reqs_p,reqs_tk,             &
                         nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                        &
+                        n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,                &  ! added for DRM
                         pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,                        &
+                        pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,                &  ! added for DRM, XS 2/17/2019
                         uw31,uw32,ue31,ue32,us31,us32,un31,un32,                &
                         vw31,vw32,ve31,ve32,vs31,vs32,vn31,vn32,                &
                         ww31,ww32,we31,we32,ws31,ws32,wn31,wn32,                &
@@ -2112,6 +2114,12 @@
       real, intent(inout), dimension(kmt) :: nw1,nw2,ne1,ne2,sw1,sw2,se1,se2
       real, intent(inout), dimension(jmp,kmp) :: pw1,pw2,pe1,pe2
       real, intent(inout), dimension(imp,kmp) :: ps1,ps2,pn1,pn2
+      !-------------------------------------------------------------------------
+      real, intent(inout), dimension(cmp,jmp,kmp)   :: pw31,pw32,pe31,pe32
+      real, intent(inout), dimension(imp,cmp,kmp)   :: ps31,ps32,pn31,pn32
+      real, intent(inout), dimension(cmp,cmp,kmt+1) :: n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2
+      ! added for MPI of rho for DRM. XS 2/17/2019
+      !-------------------------------------------------------------------------
       real, dimension(cmp,jmp,kmp)   :: uw31,uw32,ue31,ue32
       real, dimension(imp+1,cmp,kmp) :: us31,us32,un31,un32
       real, dimension(cmp,jmp+1,kmp) :: vw31,vw32,ve31,ve32
@@ -2176,31 +2184,43 @@
       nu=0
       nv=0
       nw=0
+      
+      ! "getcorner*3" added for DRM. XS 2/17/2019
 
       call comm_3u_start(ua,uw31,uw32,ue31,ue32,   &
                             us31,us32,un31,un32,reqs_u)
       call comm_3u_end(ua,uw31,uw32,ue31,ue32,   &
                           us31,us32,un31,un32,reqs_u)
+      call getcorneru3(ua,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                           s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))  
 
       call comm_3v_start(va,vw31,vw32,ve31,ve32,   &
                             vs31,vs32,vn31,vn32,reqs_v)
       call comm_3v_end(va,vw31,vw32,ve31,ve32,   &
                           vs31,vs32,vn31,vn32,reqs_v)
+      call getcornerv3(va,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                           s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
 
       call comm_3w_start(wa,ww31,ww32,we31,we32,   &
                             ws31,ws32,wn31,wn32,reqs_w)
       call comm_3w_end(wa,ww31,ww32,we31,we32,   &
                           ws31,ws32,wn31,wn32,reqs_w)
+      call getcornerw3(wa,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1)) 
 
       call comm_3s_start(ppi,sw31,sw32,se31,se32,   &
                              ss31,ss32,sn31,sn32,reqs_s)
       call comm_3s_end(ppi,sw31,sw32,se31,se32,   &
                            ss31,ss32,sn31,sn32,reqs_s)
+      call getcorner3(ppi,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                            s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
 
       call comm_3s_start(tha,sw31,sw32,se31,se32,   &
                              ss31,ss32,sn31,sn32,reqs_s)
       call comm_3s_end(tha,sw31,sw32,se31,se32,   &
                            ss31,ss32,sn31,sn32,reqs_s)
+      call getcorner3(tha,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
 
       IF(imoist.eq.1)THEN
         do n=1,numq
@@ -2208,6 +2228,8 @@
                                                ss31,ss32,sn31,sn32,reqs_s)
           call comm_3s_end(qa(ibm,jbm,kbm,n),sw31,sw32,se31,se32,   &
                                              ss31,ss32,sn31,sn32,reqs_s)
+          call getcorner3(qa(ibm,jbm,kbm,n),n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
         enddo
       ENDIF
 
@@ -2423,10 +2445,16 @@
 
         call bcs(rho)
 #ifdef MPI
-        call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_p)
-        call comm_1s_end(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_p)
+        ! call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_p)
+        ! call comm_1s_end(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_p)
+        ! call bcs2(rho)
+        ! call getcorner(rho,nw1(1),nw2(1),ne1(1),ne2(1),sw1(1),sw2(1),se1(1),se2(1))
+        !XS
+        call comm_3s_start(rho,pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,reqs_p)
+        call comm_3s_end(rho,pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,reqs_p)
         call bcs2(rho)
-        call getcorner(rho,nw1(1),nw2(1),ne1(1),ne2(1),sw1(1),sw2(1),se1(1),se2(1))
+        call getcorner3(rho,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1),  &
+                               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
 #endif
 
       !$omp parallel do default(shared)  &
