@@ -107,6 +107,62 @@
       real, dimension(:,:), allocatable :: dtu,dtu0,dtv,dtv0
       real, dimension(:,:,:), allocatable :: divx,rho,rr,rf,prs
       real, dimension(:,:,:), allocatable :: t11,t12,t13,t22,t23,t33
+      !=========================================================================
+      ! DRM variables
+      ! XS 10/26/2018
+      !-------------------
+      ! Stress of canopy model.
+      real, dimension(:,:,:), allocatable :: t13wall, t23wall
+      !-------------------
+      ! Lij and Hij for Dynamic Wong-Lilly
+      real, dimension(:,:,:), allocatable :: l11,l12,l13,l22,l23,l33,l21,l31,l32
+      real, dimension(:,:,:), allocatable :: h11,h12,h13,h22,h23,h33,h21,h31,h32
+      real, dimension(:,:,:), allocatable :: lh11,lh12,lh13,lh22,lh23,lh33
+      !-------------------
+      ! products of different velocity components and scalars
+      real, dimension(:,:,:), allocatable :: u1u1,u1u2,u1u3,u2u2,u2u3,u3u3
+      real, dimension(:,:,:), allocatable :: u1u1_filt,u1u2_filt,u1u3_filt, &
+                                             u2u2_filt,u2u3_filt,u3u3_filt
+      real, dimension(:,:,:), allocatable :: u1s,u2s,u3s
+      real, dimension(:,:,:), allocatable :: u1s_filt,u2s_filt,u3s_filt
+      !-------------------
+      ! theta at w points
+      real, dimension(:,:,:), allocatable :: th8w
+      ! full theta = theta perturbation + reference value
+      real, dimension(:,:,:), allocatable :: th_total
+      !-------------------
+      ! *_re -- reconstructed RSFS stress/velocity
+      real, dimension(:,:,:), allocatable :: t11_re,t12_re,t13_re,t22_re,t23_re,t33_re
+      real, dimension(:,:,:), allocatable :: u1th_re,u2th_re,u3th_re  ! theta fluxes
+      real, dimension(:,:,:), allocatable :: u1s_re_w,u2s_re_w  ! flux at w points
+      real, dimension(:,:,:), allocatable :: u1th,u2th,u3th  ! velocity * theta
+      real, dimension(:,:,:), allocatable :: u_re,v_re,w_re  ! reconstructed velocities
+      real, dimension(:,:,:), allocatable :: u_re_filt,v_re_filt,w_re_filt  ! filtered u_re, v_re, w_re
+      real, dimension(:,:,:), allocatable :: u_te_filt,v_te_filt,w_te_filt  ! test-filtered u_re, v_re, w_re
+      real, dimension(:,:,:), allocatable :: u_re_add,v_re_add,w_re_add  ! high order terms in reconstruction
+      !-------------------
+      ! moist variables
+      real, dimension(:,:,:), allocatable :: q_total  ! total mixing ratio/number concentration
+      real, dimension(:,:,:,:), allocatable :: u1q_re, u2q_re, u3q_re
+                                                      ! reconstructed moist variable fluxes
+      !-------------------
+      ! eddy diffusivity
+      real, dimension(:,:,:), allocatable :: kqh,kqv,knh,knv
+      ! kmh,kmv,khh,khv are created below and needed for any choice of turbulence scheme
+      real, dimension(:,:,:,:), allocatable :: kq4d, kqv4d
+      ! kq4d and kqv4d store eddy the diffusivity for each scalar separately (DRM-ALL)
+      !-------------------
+      ! numerator and denominator in DWL computation
+      real, dimension(:,:,:), allocatable :: m_numer_h,m_numer_v,m_denom_h,m_denom_v
+      real, dimension(:,:,:), allocatable :: th_numer_h,th_numer_v,th_denom_h,th_denom_v
+      real, dimension(:,:,:), allocatable :: q_numer_h,q_numer_v,q_denom_h,q_denom_v
+      real, dimension(:,:,:), allocatable :: m_numer_h_filt,m_numer_v_filt,m_denom_h_filt,m_denom_v_filt
+      real, dimension(:,:,:), allocatable :: th_numer_h_filt,th_numer_v_filt,th_denom_h_filt,th_denom_v_filt
+      real, dimension(:,:,:), allocatable :: q_numer_h_filt,q_numer_v_filt,q_denom_h_filt,q_denom_v_filt
+      !-------------------
+      ! stability correction factor and Prandtl number
+      real, dimension(:,:,:), allocatable :: c_b,prandtl_t
+      !=========================================================================
       real, dimension(:,:,:), allocatable :: m11,m12,m13,m22,m23,m33
       real, dimension(:,:,:), allocatable :: rru,ua,u3d,uten,uten1
       real, dimension(:,:,:), allocatable :: rrv,va,v3d,vten,vten1
@@ -205,6 +261,35 @@
       real, dimension(:,:,:), allocatable :: ks1,ks2,kn1,kn2
       real, dimension(:,:,:,:), allocatable :: tw1,tw2,te1,te2
       real, dimension(:,:,:,:), allocatable :: ts1,ts2,tn1,tn2
+      !=========================================================================
+      ! DRM's MPI arrays
+      ! XS 11/01/2018
+      !-------------------
+      ! MPI arrays for filtered scalars
+      real, dimension(:,:,:), allocatable :: filtw31,filtw32,filte31,filte32
+      real, dimension(:,:,:), allocatable :: filts31,filts32,filtn31,filtn32
+      ! MPI array for filtered u, v, w
+      real, dimension(:,:,:), allocatable :: filtuw31,filtuw32,filtue31,filtue32
+      real, dimension(:,:,:), allocatable :: filtus31,filtus32,filtun31,filtun32
+      real, dimension(:,:,:), allocatable :: filtvw31,filtvw32,filtve31,filtve32
+      real, dimension(:,:,:), allocatable :: filtvs31,filtvs32,filtvn31,filtvn32
+      real, dimension(:,:,:), allocatable :: filtww31,filtww32,filtwe31,filtwe32
+      real, dimension(:,:,:), allocatable :: filtws31,filtws32,filtwn31,filtwn32
+      ! MPI array for numerators of Dynamic Wong-Lilly
+      real, dimension(:,:,:), allocatable :: nhw31,nhw32,nhe31,nhe32
+      real, dimension(:,:,:), allocatable :: nhs31,nhs32,nhn31,nhn32
+      real, dimension(:,:,:), allocatable :: nvw31,nvw32,nve31,nve32
+      real, dimension(:,:,:), allocatable :: nvs31,nvs32,nvn31,nvn32
+      ! MPI arrays for denominators of Dynamic Wong-Lilly
+      real, dimension(:,:,:), allocatable :: dhw31,dhw32,dhe31,dhe32
+      real, dimension(:,:,:), allocatable :: dhs31,dhs32,dhn31,dhn32
+      real, dimension(:,:,:), allocatable :: dvw31,dvw32,dve31,dve32
+      real, dimension(:,:,:), allocatable :: dvs31,dvs32,dvn31,dvn32
+      ! MPI arrays for rho
+      real, dimension(:,:,:), allocatable :: pw31,pw32,pe31,pe32
+      real, dimension(:,:,:), allocatable :: ps31,ps32,pn31,pn32
+
+      !=========================================================================
 
       ! arrays for elliptic solver:
       real, dimension(:,:,:),    allocatable :: cfb
@@ -1216,22 +1301,198 @@
       allocate( tkn2(imp,cmp,kmt) )
       tkn2 = 0.0
 
-      allocate( kw1(jmp,kmt,4) )
+      ! allocate( kw1(jmp,kmt,4) )
+      ! kw1 = 0.0
+      ! allocate( kw2(jmp,kmt,4) )
+      ! kw2 = 0.0
+      ! allocate( ke1(jmp,kmt,4) )
+      ! ke1 = 0.0
+      ! allocate( ke2(jmp,kmt,4) )
+      ! ke2 = 0.0
+      ! allocate( ks1(imp,kmt,4) )
+      ! ks1 = 0.0
+      ! allocate( ks2(imp,kmt,4) )
+      ! ks2 = 0.0
+      ! allocate( kn1(imp,kmt,4) )
+      ! kn1 = 0.0
+      ! allocate( kn2(imp,kmt,4) )
+      ! kn2 = 0.0
+
+      
+      !XS last index change from 4 to 8 
+      allocate( kw1(jmp,kmt,8) )
       kw1 = 0.0
-      allocate( kw2(jmp,kmt,4) )
+      allocate( kw2(jmp,kmt,8) )
       kw2 = 0.0
-      allocate( ke1(jmp,kmt,4) )
+      allocate( ke1(jmp,kmt,8) )
       ke1 = 0.0
-      allocate( ke2(jmp,kmt,4) )
+      allocate( ke2(jmp,kmt,8) )
       ke2 = 0.0
-      allocate( ks1(imp,kmt,4) )
+      allocate( ks1(imp,kmt,8) )
       ks1 = 0.0
-      allocate( ks2(imp,kmt,4) )
+      allocate( ks2(imp,kmt,8) )
       ks2 = 0.0
-      allocate( kn1(imp,kmt,4) )
+      allocate( kn1(imp,kmt,8) )
       kn1 = 0.0
-      allocate( kn2(imp,kmt,4) )
+      allocate( kn2(imp,kmt,8) )
       kn2 = 0.0
+
+      !=========================================================================
+      ! Allocate DRM's MPI arrays
+      ! XS 11/01/2018
+      !--------------------------
+      ! for filtered U
+      allocate( filtuw31(cmp,jmp,kmp) )
+      filtuw31 = 0.0
+      allocate( filtuw32(cmp,jmp,kmp) )
+      filtuw32 = 0.0
+      allocate( filtue31(cmp,jmp,kmp) )
+      filtue31 = 0.0
+      allocate( filtue32(cmp,jmp,kmp) )
+      filtue32 = 0.0
+      allocate( filtus31(imp+1,cmp,kmp) )
+      filtus31 = 0.0
+      allocate( filtus32(imp+1,cmp,kmp) )
+      filtus32 = 0.0
+      allocate( filtun31(imp+1,cmp,kmp) )
+      filtun31 = 0.0
+      allocate( filtun32(imp+1,cmp,kmp) )
+      filtun32 = 0.0
+      ! for filtered V
+      allocate( filtvw31(cmp,jmp+1,kmp) )
+      filtvw31 = 0.0
+      allocate( filtvw32(cmp,jmp+1,kmp) )
+      filtvw32 = 0.0
+      allocate( filtve31(cmp,jmp+1,kmp) )
+      filtve31 = 0.0
+      allocate( filtve32(cmp,jmp+1,kmp) )
+      filtve32 = 0.0
+      allocate( filtvs31(imp,cmp,kmp) )
+      filtvs31 = 0.0
+      allocate( filtvs32(imp,cmp,kmp) )
+      filtvs32 = 0.0
+      allocate( filtvn31(imp,cmp,kmp) )
+      filtvn31 = 0.0
+      allocate( filtvn32(imp,cmp,kmp) )
+      filtvn32 = 0.0
+      ! for filtered W
+      allocate( filtww31(cmp,jmp,kmp-1) )
+      filtww31 = 0.0
+      allocate( filtww32(cmp,jmp,kmp-1) )
+      filtww32 = 0.0
+      allocate( filtwe31(cmp,jmp,kmp-1) )
+      filtwe31 = 0.0
+      allocate( filtwe32(cmp,jmp,kmp-1) )
+      filtwe32 = 0.0
+      allocate( filtws31(imp,cmp,kmp-1) )
+      filtws31 = 0.0
+      allocate( filtws32(imp,cmp,kmp-1) )
+      filtws32 = 0.0
+      allocate( filtwn31(imp,cmp,kmp-1) )
+      filtwn31 = 0.0
+      allocate( filtwn32(imp,cmp,kmp-1) )
+      filtwn32 = 0.0
+      ! for filtered scalars
+      allocate( filtw31(cmp,jmp,kmp) )
+      filtw31 = 0.0
+      allocate( filtw32(cmp,jmp,kmp) )
+      filtw32 = 0.0
+      allocate( filte31(cmp,jmp,kmp) )
+      filte31 = 0.0
+      allocate( filte32(cmp,jmp,kmp) )
+      filte32 = 0.0
+      allocate( filts31(imp,cmp,kmp) )
+      filts31 = 0.0
+      allocate( filts32(imp,cmp,kmp) )
+      filts32 = 0.0
+      allocate( filtn31(imp,cmp,kmp) )
+      filtn31 = 0.0
+      allocate( filtn32(imp,cmp,kmp) )
+      filtn32 = 0.0
+      ! for numerators of DWL
+      allocate( nhw31(cmp,jmp,kmp-1) )
+      nhw31 = 0.0
+      allocate( nhw32(cmp,jmp,kmp-1) )
+      nhw32 = 0.0
+      allocate( nhe31(cmp,jmp,kmp-1) )
+      nhe31 = 0.0
+      allocate( nhe32(cmp,jmp,kmp-1) )
+      nhe32 = 0.0
+      allocate( nhs31(imp,cmp,kmp-1) )
+      nhs31 = 0.0
+      allocate( nhs32(imp,cmp,kmp-1) )
+      nhs32 = 0.0
+      allocate( nhn31(imp,cmp,kmp-1) )
+      nhn31 = 0.0
+      allocate( nhn32(imp,cmp,kmp-1) )
+      nhn32 = 0.0
+      allocate( nvw31(cmp,jmp,kmp-1) )
+      nvw31 = 0.0
+      allocate( nvw32(cmp,jmp,kmp-1) )
+      nvw32 = 0.0
+      allocate( nve31(cmp,jmp,kmp-1) )
+      nve31 = 0.0
+      allocate( nve32(cmp,jmp,kmp-1) )
+      nve32 = 0.0
+      allocate( nvs31(imp,cmp,kmp-1) )
+      nvs31 = 0.0
+      allocate( nvs32(imp,cmp,kmp-1) )
+      nvs32 = 0.0
+      allocate( nvn31(imp,cmp,kmp-1) )
+      nvn31 = 0.0
+      allocate( nvn32(imp,cmp,kmp-1) )
+      nvn32 = 0.0
+      ! for denominators of DWL
+      allocate( dhw31(cmp,jmp,kmp-1) )
+      dhw31 = 0.0
+      allocate( dhw32(cmp,jmp,kmp-1) )
+      dhw32 = 0.0
+      allocate( dhe31(cmp,jmp,kmp-1) )
+      dhe31 = 0.0
+      allocate( dhe32(cmp,jmp,kmp-1) )
+      dhe32 = 0.0
+      allocate( dhs31(imp,cmp,kmp-1) )
+      dhs31 = 0.0
+      allocate( dhs32(imp,cmp,kmp-1) )
+      dhs32 = 0.0
+      allocate( dhn31(imp,cmp,kmp-1) )
+      dhn31 = 0.0
+      allocate( dhn32(imp,cmp,kmp-1) )
+      dhn32 = 0.0
+      allocate( dvw31(cmp,jmp,kmp-1) )
+      dvw31 = 0.0
+      allocate( dvw32(cmp,jmp,kmp-1) )
+      dvw32 = 0.0
+      allocate(dve31(cmp,jmp,kmp-1) )
+      dve31 = 0.0
+      allocate( dve32(cmp,jmp,kmp-1) )
+      dve32 = 0.0
+      allocate( dvs31(imp,cmp,kmp-1) )
+      dvs31 = 0.0
+      allocate( dvs32(imp,cmp,kmp-1) )
+      dvs32 = 0.0
+      allocate( dvn31(imp,cmp,kmp-1) )
+      dvn31 = 0.0
+      allocate( dvn32(imp,cmp,kmp-1) )
+      dvn32 = 0.0
+
+      allocate( pw31(cmp,jmp,kmp) )
+      pw31 = 0.0
+      allocate( pw32(cmp,jmp,kmp) )
+      pw32 = 0.0
+      allocate( pe31(cmp,jmp,kmp) )
+      pe31 = 0.0
+      allocate( pe32(cmp,jmp,kmp) )
+      pe32 = 0.0
+      allocate( ps31(imp,cmp,kmp) )
+      ps31 = 0.0
+      allocate( ps32(imp,cmp,kmp) )
+      ps32 = 0.0
+      allocate( pn31(imp,cmp,kmp) )
+      pn31 = 0.0
+      allocate( pn32(imp,cmp,kmp) )
+      pn32 = 0.0
+      !=========================================================================
 
       call       param(dt,dtlast,stattim,taptim,rsttim,radtim,prcltim,  &
                        cloudvar,rhovar,qmag,qname,qunit,budname,        &
@@ -1978,6 +2239,254 @@
 
       ! end radiation
       !-----------------
+
+      !=========================================================================  
+      ! Allocate DRM variables
+      ! XS 11/01/2018
+      if ((sgsmodel .eq. 7) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then  ! only allocate these when DRM is used !SACP
+
+        allocate(  l11(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l11 = 0.0
+        allocate(  l12(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l12 = 0.0
+        allocate(  l13(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l13 = 0.0
+        allocate(  l22(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l22 = 0.0
+        allocate(  l23(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l23 = 0.0
+        allocate(  l33(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l33 = 0.0
+        allocate(  l21(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l21 = 0.0
+        allocate(  l31(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l31 = 0.0
+        allocate(  l32(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        l32 = 0.0
+
+        allocate(  h11(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h11 = 0.0
+        allocate(  h12(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h12 = 0.0
+        allocate(  h13(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h13 = 0.0
+        allocate(  h22(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h22 = 0.0
+        allocate(  h23(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h23 = 0.0
+        allocate(  h33(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h33 = 0.0
+        allocate(  h21(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h21 = 0.0
+        allocate(  h31(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h31 = 0.0
+        allocate(  h32(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        h32 = 0.0
+
+        allocate(  lh11(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        lh11 = 0.0
+        allocate(  lh12(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        lh12 = 0.0
+        allocate(  lh13(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        lh13 = 0.0
+        allocate(  lh22(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        lh22 = 0.0
+        allocate(  lh23(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        lh23 = 0.0
+        allocate(  lh33(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        lh33 = 0.0
+
+        allocate(  u1u1(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1u1 = 0.0
+        allocate(  u1u2(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1u2 = 0.0
+        allocate(  u1u3(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1u3 = 0.0
+        allocate(  u2u2(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2u2 = 0.0
+        allocate(  u2u3(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2u3 = 0.0
+        allocate(  u3u3(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u3u3 = 0.0
+
+        allocate(  u1s(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1s = 0.0
+        allocate(  u2s(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2s = 0.0
+        allocate(  u3s(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u3s = 0.0
+
+        allocate(  u1u1_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1u1_filt = 0.0
+        allocate(  u1u2_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1u2_filt = 0.0
+        allocate(  u1u3_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1u3_filt = 0.0
+        allocate(  u2u2_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2u2_filt = 0.0
+        allocate(  u2u3_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2u3_filt = 0.0
+        allocate(  u3u3_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u3u3_filt = 0.0
+
+        allocate(  u1s_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1s_filt = 0.0
+        allocate(  u2s_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2s_filt = 0.0
+        allocate(  u3s_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u3s_filt = 0.0
+
+        allocate(  t11_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t11_re = 0.0
+        allocate(  t12_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t12_re = 0.0
+        allocate(  t13_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t13_re = 0.0
+        allocate(  t22_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t22_re = 0.0
+        allocate(  t23_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t23_re = 0.0
+        allocate(  t33_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t33_re = 0.0
+        allocate(  u1th_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1th_re = 0.0
+        allocate(  u2th_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2th_re = 0.0
+        allocate(  u3th_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u3th_re = 0.0
+
+        allocate(  u1th(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u1th = 0.0
+        allocate(  u2th(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u2th = 0.0
+        allocate(  u3th(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        u3th = 0.0
+
+        allocate(  u1s_re_w(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        u1s_re_w = 0.0
+        allocate(  u2s_re_w(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        u2s_re_w = 0.0
+
+        allocate(   u_re(ibdrm:iedrm+1,jbdrm:jedrm,kbdrm:kedrm) )
+        u_re = 0.0
+        allocate(   u_re_filt(ibdrm:iedrm+1,jbdrm:jedrm,kbdrm:kedrm) )
+        u_re_filt = 0.0
+        allocate(   u_te_filt(ibdrm:iedrm+1,jbdrm:jedrm,kbdrm:kedrm) )
+        u_te_filt = 0.0
+        allocate(   u_re_add(ibdrm:iedrm+1,jbdrm:jedrm,kbdrm:kedrm) )
+        u_re_add = 0.0
+
+        allocate(   v_re(ibdrm:iedrm,jbdrm:jedrm+1,kbdrm:kedrm) )
+        v_re = 0.0
+        allocate(   v_re_filt(ibdrm:iedrm,jbdrm:jedrm+1,kbdrm:kedrm) )
+        v_re_filt = 0.0
+        allocate(   v_te_filt(ibdrm:iedrm,jbdrm:jedrm+1,kbdrm:kedrm) )
+        v_te_filt = 0.0
+        allocate(   v_re_add(ibdrm:iedrm,jbdrm:jedrm+1,kbdrm:kedrm) )
+        v_re_add = 0.0
+
+        allocate(   w_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        w_re = 0.0
+        allocate(   w_re_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        w_re_filt = 0.0
+        allocate(   w_te_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        w_te_filt = 0.0
+        allocate(   w_re_add(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        w_re_add = 0.0
+
+        allocate(   q_total(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        q_total = 0.0
+        allocate(   u1q_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) )
+        u1q_re = 0.0
+        allocate(   u2q_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) )
+        u2q_re = 0.0
+        allocate(   u3q_re(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) )
+        u3q_re = 0.0
+
+        allocate(   th8w(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th8w = 0.0
+        allocate(   th_total(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        th_total = 0.0
+
+        allocate(   t13wall(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t13wall = 0.0
+        allocate(   t23wall(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
+        t23wall = 0.0
+
+        allocate(    kqh(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        kqh = 0.0
+        allocate(    kqv(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        kqv = 0.0
+        allocate(    knh(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        knh = 0.0
+        allocate(    knv(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        knv = 0.0
+        allocate(    kq4d(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) )
+        kq4d = 0.0
+        allocate(    kqv4d(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) )
+        kqv4d = 0.0
+
+        allocate(   m_numer_h(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_numer_h = 0.0
+        allocate(   m_numer_v(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_numer_v = 0.0
+        allocate(   m_denom_h(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_denom_h = 0.0
+        allocate(   m_denom_v(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_denom_v = 0.0
+
+        allocate(   m_numer_h_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_numer_h_filt = 0.0
+        allocate(   m_numer_v_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_numer_v_filt = 0.0
+        allocate(   m_denom_h_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_denom_h_filt = 0.0
+        allocate(   m_denom_v_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        m_denom_v_filt = 0.0
+
+        allocate(   th_numer_h(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_numer_h = 0.0
+        allocate(   th_numer_v(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_numer_v = 0.0
+        allocate(   th_denom_h(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_denom_h = 0.0
+        allocate(   th_denom_v(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_denom_v = 0.0
+
+        allocate(   th_numer_h_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_numer_h_filt = 0.0
+        allocate(   th_numer_v_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_numer_v_filt = 0.0
+        allocate(   th_denom_h_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_denom_h_filt = 0.0
+        allocate(   th_denom_v_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        th_denom_v_filt = 0.0
+
+        allocate(   q_numer_h(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_numer_h = 0.0
+        allocate(   q_numer_v(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_numer_v = 0.0
+        allocate(   q_denom_h(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_denom_h = 0.0
+        allocate(   q_denom_v(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_denom_v = 0.0
+
+        allocate(   q_numer_h_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_numer_h_filt = 0.0
+        allocate(   q_numer_v_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_numer_v_filt = 0.0
+        allocate(   q_denom_h_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_denom_h_filt = 0.0
+        allocate(   q_denom_v_filt(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        q_denom_v_filt = 0.0
+
+        allocate(     c_b(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )  ! buoyancy correction
+        c_b = 1.0
+        allocate(prandtl_t(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) )
+        prandtl_t = 0.0
+
+      end if
+      !=========================================================================
 
 #ifdef MPI
           call MPI_BARRIER (MPI_COMM_WORLD,ierr)
@@ -2895,7 +3404,9 @@
                         upten,vpten,ucuten,vcuten,                              &
                         reqs_u,reqs_v,reqs_w,reqs_s,reqs_p,reqs_tk,             &
                         nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                        &
+                        n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,                &  ! added for DRM, XS 2/17/2019
                         pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,                        &
+                        pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,                &  ! added for DRM
                         uw31,uw32,ue31,ue32,us31,us32,un31,un32,                &
                         vw31,vw32,ve31,ve32,vs31,vs32,vn31,vn32,                &
                         ww31,ww32,we31,we32,ws31,ws32,wn31,wn32,                &
@@ -3327,6 +3838,14 @@
                    dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,     &
                    divx,rho,rr,rf,prs,                               &
                    t11,t12,t13,t22,t23,t33,                          &
+                   !===================================================
+                   ! DRM variables. XS 11/04/2018
+                   u1s_re_w,u2s_re_w,u1u1_filt,u1u2_filt,             &
+                   t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,         &
+                   u1th_re,u2th_re,u3th_re,                           &
+                   u1q_re,u2q_re,u3q_re,                              &
+                   kqh,kqv,knh,knv,kq4d,kqv4d,                        &
+                   !===================================================
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,ua,u3d,uten1,                                  &
                    v0,va,v3d,vten1,                                  &
@@ -3368,6 +3887,14 @@
                    dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,     &
                    divx,rho,rr,rf,prs,                               &
                    t11,t12,t13,t22,t23,t33,                          &
+                   !===================================================
+                   ! DRM variables. XS 11/04/2018
+                   u1s_re_w,u2s_re_w,u1u1_filt,u1u2_filt,             &
+                   t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,         &
+                   u1th_re,u2th_re,u3th_re,                           &
+                   u1q_re,u2q_re,u3q_re,                              &
+                   kqh,kqv,knh,knv,kq4d,kqv4d,                        &
+                   !===================================================
                    u0,rru,ua,u3d,uten,uten1,                         &
                    v0,rrv,va,v3d,vten,vten1,                         &
                    rrw,wa,w3d,wten,wten1,                            &
@@ -3389,6 +3916,10 @@
                    vw31,vw32,ve31,ve32,vs31,vs32,vn31,vn32,          &
                    ww31,ww32,we31,we32,ws31,ws32,wn31,wn32,          &
                    sw31,sw32,se31,se32,ss31,ss32,sn31,sn32,          &
+                   !------------------------------------------------------------
+                   pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,          &
+                   ! added for MPI comm. of rho for DRM. XS 2/4/2019
+                   !------------------------------------------------------------
                    rw31,rw32,re31,re32,rs31,rs32,rn31,rn32,          &
                    qw31,qw32,qe31,qe32,qs31,qs32,qn31,qn32,          &
                    tkw1,tkw2,tke1,tke2,tks1,tks2,tkn1,tkn2,          &
@@ -3462,6 +3993,10 @@
                    vw31,vw32,ve31,ve32,vs31,vs32,vn31,vn32,          &
                    ww31,ww32,we31,we32,ws31,ws32,wn31,wn32,          &
                    sw31,sw32,se31,se32,ss31,ss32,sn31,sn32,          &
+                   !------------------------------------------------------------
+                   pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,          &
+                   ! added for MPI comm. of rho for DRM. XS 2/4/2019
+                   !------------------------------------------------------------
                    rw31,rw32,re31,re32,rs31,rs32,rn31,rn32,          &
                    qw31,qw32,qe31,qe32,qs31,qs32,qn31,qn32,          &
                    tkw1,tkw2,tke1,tke2,tks1,tks2,tkn1,tkn2,          &
@@ -3745,6 +4280,34 @@
                    dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,     &
                    divx,rho,rr,rf,prs,                               &
                    t11,t12,t13,t22,t23,t33,                          &
+                   !==================================================
+                   ! DRM variabls. XS 11/14/2018
+                   th8w,t13wall,t23wall,                             &
+                   u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,u1s,u2s,u3s,        &
+                   u1u1_filt,u1u2_filt,u1u3_filt,u2u2_filt,u2u3_filt,&
+                   u3u3_filt,u1s_filt,u2s_filt,u3s_filt,             &
+                   l11,l12,l13,l22,l23,l33,l21,l31,l32,              &
+                   h11,h12,h13,h22,h23,h33,h21,h31,h32,              &
+                   lh11,lh12,lh13,lh22,lh23,lh33,                    &
+                   t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,        &
+                   u1th_re,u2th_re,u3th_re,u1th,u2th,u3th,           &
+                   u1q_re,u2q_re,u3q_re,                             &
+                   u_re,v_re,w_re,u_re_filt,v_re_filt,w_re_filt,     &
+                   u_te_filt,v_te_filt,w_te_filt,                    &
+                   u_re_add,v_re_add,w_re_add,                       &
+                   th_total,q_total,                                 &
+                   kqh,kqv,knh,knv,kq4d,kqv4d,                        &
+                   m_numer_h,m_numer_v,m_denom_h,m_denom_v,          &
+                   th_numer_h,th_numer_v,th_denom_h,th_denom_v,      &
+                   q_numer_h,q_numer_v,q_denom_h,q_denom_v,          &
+                   m_numer_h_filt,m_numer_v_filt,                    &
+                   m_denom_h_filt,m_denom_v_filt,                    &
+                   th_numer_h_filt,th_numer_v_filt,                  &
+                   th_denom_h_filt,th_denom_v_filt,                  &
+                   q_numer_h_filt,q_numer_v_filt,                    &
+                   q_denom_h_filt,q_denom_v_filt,                    &
+                   c_b,prandtl_t,                                    &
+                   !==================================================  
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,rru,u3d,uten,uten1,                            &
                    v0,rrv,v3d,vten,vten1,                            &
@@ -3783,6 +4346,26 @@
                    uw31,uw32,ue31,ue32,us31,us32,un31,un32,          &
                    sw31,sw32,se31,se32,ss31,ss32,sn31,sn32,          &
                    kw1,kw2,ke1,ke2,ks1,ks2,kn1,kn2,reqk,             &
+                   !==================================================
+                   ! DRM MPI arrays. XS 11/14/2018
+                   filtw31,filtw32,filte31,filte32,                  &
+                   filts31,filts32,filtn31,filtn32,                  &
+                   filtuw31,filtuw32,filtue31,filtue32,              &
+                   filtus31,filtus32,filtun31,filtun32,              &
+                   filtvw31,filtvw32,filtve31,filtve32,              &
+                   filtvs31,filtvs32,filtvn31,filtvn32,              &
+                   filtww31,filtww32,filtwe31,filtwe32,              &
+                   filtws31,filtws32,filtwn31,filtwn32,              &
+                   nhw31,nhw32,nhe31,nhe32,                          &
+                   nhs31,nhs32,nhn31,nhn32,                          &
+                   nvw31,nvw32,nve31,nve32,                          &
+                   nvs31,nvs32,nvn31,nvn32,                          &
+                   dhw31,dhw32,dhe31,dhe32,                          &
+                   dhs31,dhs32,dhn31,dhn32,                          &
+                   dvw31,dvw32,dve31,dve32,                          &
+                   dvs31,dvs32,dvn31,dvn32,                          &
+                   n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,          &
+                   !==================================================  
                    flag  ,out2d,out3d,rtime,update_sfc,dotbud,dotdwrite,restarted,  &
                    dowriteout,doazimwrite,dostat)
         ! end_sfc_and_turb
@@ -3952,6 +4535,13 @@
                         cd,ch,cq,tlh,f2d,psmth,prate,ustt,cm0,                                 &
                         dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,                          &
                         t11,t12,t13,t22,t23,t33,rho,prs,divx,                                  &
+                        !=======================================================================
+                        ! DRM variables. XS 11/14/2018
+                        t13wall,t23wall,                                                       &
+                        t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,                             &
+                        u1th_re,u2th_re,u3th_re,u1q_re,u2q_re,u3q_re,                          &
+                        kqh,kqv,knh,knv,kq4d,kqv4d,                                            &
+                        !=======================================================================
                         rru,u3d,uten,uten1,rrv,v3d,vten,vten1,rrw,w3d,wten,pp3d,th3d,phi2,     &
                         sadv,thten,nm,defv,defh,lenscl,dissten,epst,epsd1,epsd2,               &
                         thpten,qvpten,qcpten,qipten,upten,vpten,qnipten,qncpten,xkzh,xkzq,xkzm, &
