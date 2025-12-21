@@ -88,6 +88,14 @@
                    dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,     &
                    divx,rho,rr,rf,prs,                               &
                    t11,t12,t13,t22,t23,t33,                          &
+                   !===================================================
+                   ! DRM variables. XS 11/04/2018
+                   u1s_re_w,u2s_re_w,u1u1_filt,u1u2_filt,            &
+                   t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,        &
+                   u1th_re,u2th_re,u3th_re,                          &
+                   u1q_re,u2q_re,u3q_re,                             &
+                   kqh,kqv,knh,knv,kq4d,kqv4d,                       &
+                   !===================================================
                    u0,rru,ua,u3d,uten,uten1,                         &
                    v0,rrv,va,v3d,vten,vten1,                         &
                    rrw,wa,w3d,wten,wten1,                            &
@@ -100,6 +108,10 @@
                    reqs_u,reqs_v,reqs_w,reqs_s,reqs_p,reqs_p2,reqs_p3, &
                    reqs_x,reqs_y,reqs_z,reqs_tk,reqs_tk2,reqs_q,reqs_t, &
                    nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                  &
+                   !---------------------------------------------------------
+                   !added for drm
+                   n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,    &
+                   !---------------------------------------------------------
                    ww1,ww2,we1,we2,ws1,ws2,wn1,wn2,                  &
                    pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,                  &
                    p2w1,p2w2,p2e1,p2e2,p2s1,p2s2,p2n1,p2n2,          &
@@ -109,6 +121,10 @@
                    vw31,vw32,ve31,ve32,vs31,vs32,vn31,vn32,          &
                    ww31,ww32,we31,we32,ws31,ws32,wn31,wn32,          &
                    sw31,sw32,se31,se32,ss31,ss32,sn31,sn32,          &
+                   !------------------------------------------------------------
+                   pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,          &
+                   ! added for MPI comm. of rho for DRM. XS 2/4/2019
+                   !------------------------------------------------------------
                    rw31,rw32,re31,re32,rs31,rs32,rn31,rn32,          &
                    qw31,qw32,qe31,qe32,qs31,qs32,qn31,qn32,          &
                    tkw1,tkw2,tke1,tke2,tks1,tks2,tkn1,tkn2,          &
@@ -177,6 +193,20 @@
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: divx,rho,rr,rf,prs
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: t11,t12,t13,t22,t23,t33
+      !=========================================================================
+      ! DRM variables. XS 11/16/2018
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re, &
+                                                     t22_re,t23_re,t33_re,  &
+                                                     u1th_re,u2th_re,u3th_re
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: kqh,kqv,knh,knv
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: u1s_re_w,u2s_re_w
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1u1_filt,u1u2_filt
+                              ! these two arrays above are used for temperary storage
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) :: u1q_re,u2q_re,u3q_re
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) :: kq4d, kqv4d
+                              ! kq4d and kqv4d are needed only when each cloud species
+                              ! has its own eddy diffusivity (DWL-A)
+      !=========================================================================
       real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: u0
       real, intent(inout), dimension(ib:ie+1,jb:je,kb:ke) :: rru,ua,u3d,uten,uten1
       real, intent(in), dimension(ib:ie,jb:je+1,kb:ke) :: v0
@@ -200,6 +230,9 @@
       integer, intent(inout), dimension(rmp,numq) :: reqs_q
       integer, intent(inout), dimension(rmp,npt) :: reqs_t
       real, intent(inout), dimension(kmt) :: nw1,nw2,ne1,ne2,sw1,sw2,se1,se2
+      !-----------------------------added for DRM, XS---------------------------
+      real, intent(inout), dimension(cmp,cmp,kmt+1) :: n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2
+      !-----------------------------------------------------------------------
       real, intent(inout), dimension(jmp,kmp-1) :: ww1,ww2,we1,we2
       real, intent(inout), dimension(imp,kmp-1) :: ws1,ws2,wn1,wn2
       real, intent(inout), dimension(jmp,kmp) :: pw1,pw2,pe1,pe2
@@ -218,6 +251,11 @@
       real, intent(inout), dimension(imp,cmp,kmp-1) :: ws31,ws32,wn31,wn32
       real, intent(inout), dimension(cmp,jmp,kmp)   :: sw31,sw32,se31,se32
       real, intent(inout), dimension(imp,cmp,kmp)   :: ss31,ss32,sn31,sn32
+       !-------------------------------------------------------------------------
+      real, intent(inout), dimension(cmp,jmp,kmp)   :: pw31,pw32,pe31,pe32
+      real, intent(inout), dimension(imp,cmp,kmp)   :: ps31,ps32,pn31,pn32
+      ! added for MPI of rho for DRM. XS 2/4/2019
+      !-------------------------------------------------------------------------
       real, intent(inout), dimension(cmp,jmp,kmp)   :: rw31,rw32,re31,re32
       real, intent(inout), dimension(imp,cmp,kmp)   :: rs31,rs32,rn31,rn32
       real, intent(inout), dimension(cmp,jmp,kmp,numq) :: qw31,qw32,qe31,qe32
@@ -476,10 +514,19 @@
 #ifdef MPI
           call comm_3u_end(u3d,uw31,uw32,ue31,ue32,   &
                                us31,us32,un31,un32,reqs_u)
+          call getcorneru3(u3d,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                            s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))   
           call comm_3v_end(v3d,vw31,vw32,ve31,ve32,   &
                                vs31,vs32,vn31,vn32,reqs_v)
+          call getcornerv3(v3d,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                            s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
           call comm_3w_end(w3d,ww31,ww32,we31,we32,   &
                                ws31,ws32,wn31,wn32,reqs_w)
+          call getcornerw3(w3d,n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+          call bcu2(u3d)
+          call bcv2(v3d)
+          call bcw2(w3d)
+                               ! corner values are need by DRM. XS 2/5/2019
 #endif
           if(terrain_flag)then
             call bcwsfc(gz,dzdx,dzdy,u3d,v3d,w3d)
@@ -874,8 +921,13 @@
 !--------------------------------------------------------------------
 #ifdef MPI
         IF(nrk.ge.2)THEN
-          call comm_1s_end(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
-          call getcorner(rho,nw1(1),nw2(1),ne1(1),ne2(1),sw1(1),sw2(1),se1(1),se2(1))
+          !call comm_1s_end(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
+          !call getcorner(rho,nw1(1),nw2(1),ne1(1),ne2(1),sw1(1),sw2(1),se1(1),se2(1))
+          !XS
+          call comm_3s_end(rho,pw31, pw32, pe31, pe32, &
+                                  ps31, ps32, pn31, pn32, reqs_s)
+          call getcorner3(rho,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1),  &
+                               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
           call bcs2(rho)
         ENDIF
 #endif
@@ -1313,6 +1365,10 @@
         IF(nrk.ge.2)THEN
           call comm_3s_end(th3d,rw31,rw32,re31,re32,   &
                                 rs31,rs32,rn31,rn32,reqs_y)
+          call getcorner3(th3d,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1),  &
+                                s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bcs2(th3d)
+                                ! cornner values need by DRM. XS 2/5/2019                      
         ENDIF
 #endif
 
@@ -1678,11 +1734,20 @@
       call comm_3w_start(w3d,ww31,ww32,we31,we32,   &
                              ws31,ws32,wn31,wn32,reqs_w)
 #endif
-      IF(nrk.lt.nrkmax)THEN
-        call bcp(rho)
+      !IF(nrk.lt.nrkmax)THEN
+        !call bcp(rho)
+!#ifdef MPI
+        !call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
+!#endif
+      if( nrk.lt.nrkmax )then
+        call bcs(rho)
 #ifdef MPI
-        call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
+        call comm_3s_start(rho, pw31, pw32, pe31, pe32, &
+                                ps31, ps32, pn31, pn32, reqs_s)
 #endif
+! XS 2/3/2019. comm_3s, in lieu of comm_1s, is used for DRM.
+
+    endif
         call bcp(pp3d)
 #ifdef MPI
         call comm_1s_start(pp3d,vw1,vw2,ve1,ve2,vs1,vs2,vn1,vn2,reqs_x)
