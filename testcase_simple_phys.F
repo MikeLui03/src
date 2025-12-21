@@ -30,7 +30,8 @@
                    zh,zf,dum1,dum2,dum3,dum4,dum5,dum6,              &
                    ufrc,vfrc,thfrc,qvfrc,ug,vg,dvdr,                 &
                    uavg,vavg,thavg,qavg,cavg,                        &
-                   ua,va,tha,qa,uten1,vten1,thten1,qten,             &
+                   ua,va,tha,qa,uten1,vten1,thten1,qten,pi0,ppi,     &
+                   !                                    ------- XS added, 1/3/2019
                    frad,thraten,zir,ruh,ruf,rvh,rvf,mtime)
       use input
       use constants
@@ -62,6 +63,9 @@
       real, intent(in), dimension(ib:ie+1) :: ruf
       real, intent(in), dimension(jb:je) :: rvh
       real, intent(in), dimension(jb:je+1) :: rvf
+      !--------------------- XS added 01/03/2019 for DRM test ------------------
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: pi0, ppi
+      !-------------------------------------------------------------------------
       double precision, intent(in   ) :: mtime
 
       integer :: i,j,k,n
@@ -82,7 +86,10 @@
         do k=1,nk
         do j=1,nj
         do i=1,ni
-          thraten(i,j,k) = -(frad(i,j,k+1)-frad(i,j,k))*rdz*mh(i,j,k)/(cp*rhoi)
+          !thraten(i,j,k) = -(frad(i,j,k+1)-frad(i,j,k))*rdz*mh(i,j,k)/(cp*rhoi)
+          thraten(i,j,k)=-(frad(i,j,k+1)-frad(i,j,k))*rdz*mh(i,j,k)  &
+                                        /(cp*rhoi) / (pi0(i,j,k) + ppi(i,j,k))
+                                        ! XS modified for DRM test. 2/3/2019
           thten1(i,j,k) = thten1(i,j,k)+thraten(i,j,k)
         enddo
         enddo
