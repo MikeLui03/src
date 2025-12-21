@@ -91,6 +91,14 @@
                    dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,     &
                    divx,rho,rr,rf,prs,                               &
                    t11,t12,t13,t22,t23,t33,                          &
+                   !===================================================
+                   ! DRM variables. XS 11/04/2018
+                   u1s_re_w,u2s_re_w,u1u1_filt,u1u2_filt,            &
+                   t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,        &
+                   u1th_re,u2th_re,u3th_re,                          &
+                   u1q_re,u2q_re,u3q_re,                             &
+                   kqh,kqv,knh,knv,kq4d,kqv4d,                       &
+                   !===================================================
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,ua,u3d,uten1,                                  &
                    v0,va,v3d,vten1,                                  &
@@ -168,6 +176,20 @@
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: divx,rho,rr,rf,prs
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: t11,t12,t13,t22,t23,t33
+      !=========================================================================
+      ! DRM variables. XS 11/16/2018
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re, &
+                                                     t22_re,t23_re,t33_re,  &
+                                                     u1th_re,u2th_re,u3th_re
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: kqh,kqv,knh,knv
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: u1s_re_w,u2s_re_w
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1u1_filt,u1u2_filt
+                              ! these two arrays above are used for temperary storage
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) :: u1q_re,u2q_re,u3q_re
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) :: kq4d, kqv4d
+                              ! kq4d and kqv4d are needed only when each cloud species
+                              ! has its own eddy diffusivity (DWL-A)
+      !=========================================================================
       real, intent(in), dimension(ibnba:ienba,jbnba:jenba,kbnba:kenba) :: m11,m12,m13,m22,m23,m33
       real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: u0
       real, intent(inout), dimension(ib:ie+1,jb:je,kb:ke) :: ua,u3d,uten1
@@ -1124,13 +1146,22 @@
           call turbu(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,ua,uten1,wa,m11,m12,m13,m22,kmv,cm0, &
+                     !-------------- DRM variables ----------------
+                     t11_re,t12_re,t13_re,                        &
+                     !-------------- XS 12/27/2018 ----------------
                      kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
           call turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,va,vten1,wa,m12,m22,m23,kmv,cm0, &
+                     !--------- RSFS stress from DRM -------------
+                    t12_re,t22_re,t23_re,                               &
+                     !-------------- XS 12/27/2018 --------------- 
                      kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
           call turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                      dum1,dum2,dum3,dum4,dum5,dum6,wa,wten1,m13,m23,m33,m22,kmh,cm0,  &
+                     !-------------- RSFS stress from DRM ----------------
+                     t13_re,t23_re,t33_re,                                        &
+                     !---------------------------------------------------- 
                      dowbud,wdiag)
 
         elseif( sgsmodel.eq.3 )then
@@ -1140,13 +1171,22 @@
           call turbu(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,ua,uten1,wa,t11,t12,t13,t22,rrw,cm0, &
+                     !-------------- DRM variables ----------------
+                     t11_re,t12_re,t13_re,                        &
+                     !-------------- XS 12/27/2018 ----------------
                      kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
           call turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,va,vten1,wa,t12,t22,t23,rrw,cm0, &
+                     !--------- RSFS stress from DRM -------------
+                     t12_re,t22_re,t23_re,                               &
+                     !-------------- XS 12/27/2018 ---------------
                      kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
           call turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                      dum1,dum2,dum3,dum4,dum5,dum6,wa,wten1,t13,t23,t33,t22,wten,cm0,  &
+                     !-------------- RSFS stress from DRM ----------------
+                     t13_re,t23_re,t33_re,                                        &
+                     !---------------------------------------------------- 
                      dowbud,wdiag)
 
         else
@@ -1155,13 +1195,22 @@
           call turbu(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,ua,uten1,wa,t11,t12,t13,t22,kmv,cm0, &
+                     !-------------- DRM variables ----------------
+                     t11_re,t12_re,t13_re,                        &
+                     !-------------- XS 12/27/2018 ----------------
                      kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
           call turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,va,vten1,wa,t12,t22,t23,kmv,cm0, &
+                     !--------- RSFS stress from DRM -------------
+                    t12_re,t22_re,t23_re,                               &
+                     !-------------- XS 12/27/2018 ---------------
                      kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
           call turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                      dum1,dum2,dum3,dum4,dum5,dum6,wa,wten1,t13,t23,t33,t22,kmh,cm0,  &
+                     !-------------- RSFS stress from DRM ----------------
+                     t13_re,t23_re,t33_re,                                        &
+                     !---------------------------------------------------
                      dowbud,wdiag)
 
         endif
@@ -1214,15 +1263,145 @@
           ! moisture:
           do n=1,numq
             if( n.eq.nqv )then
+              if (sgsmodel.ne.7 .or. (sgsmodel.eq.7 .and. dyn_scalar.eq.0)) then !XS
               call turbs(1,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
                          rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                          dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),khh,khv,cm0,dum7,dum8, &
+                         !-------------- DRM variables ----------------
+                         u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
+                         !---------------------------------------------
                          doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2)
+              !================================DRM==============================
+              elseif (dyn_all.eq.0) then   ! sgsmodel.eq.3 .and. dyn_scalar.eq.1, DRM-D
+!$omp parallel do default(shared)  &
+!$omp private(i,j,k)
+                do k=1,nk
+                  do j=1,nj
+                    do i=1,ni
+                      u1u1_filt(i,j,k) = kqv(i,j,k  )*mf(i,j,k  )*rf(i,j,k  )*mh(i,j,k)*rr(i,j,k)
+                      u1u2_filt(i,j,k) = kqv(i,j,k+1)*mf(i,j,k+1)*rf(i,j,k+1)*mh(i,j,k)*rr(i,j,k)
+                    enddo
+                  enddo
+                enddo
+                call turbs(1,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
+                         rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                         dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),kqh,kqv,cm0,u1u1_filt,u1u2_filt, &
+                         !-------------- DRM variables ----------------
+                         u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
+                         !---------------------------------------------
+                         doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2)!2 the end
+              elseif (dyn_all.eq.1) then   ! DRM-A
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+                do k = kbc, kec
+                  do j = jbc, jec
+                    do i = ibc, iec
+                      kqh(i,j,k) = kq4d(i,j,k,n)
+                      kqv(i,j,k) = kqv4d(i,j,k,n)
+                    end do
+                  end do
+                end do
+!$omp parallel do default(shared)  &
+!$omp private(i,j,k)
+                do k=1,nk
+                  do j=1,nj
+                    do i=1,ni
+                      u1u1_filt(i,j,k) = kqv(i,j,k  )*mf(i,j,k  )*rf(i,j,k  )*mh(i,j,k)*rr(i,j,k)
+                      u1u2_filt(i,j,k) = kqv(i,j,k+1)*mf(i,j,k+1)*rf(i,j,k+1)*mh(i,j,k)*rr(i,j,k)
+                    enddo
+                  enddo
+                enddo
+                call turbs(1,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
+                         rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                         dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),kqh,kqv,cm0,u1u1_filt,u1u2_filt, &
+                         !-------------- DRM variables ----------------
+                         u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
+                         !---------------------------------------------
+                         doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2) !2 the end
+              endif
+            !==================================================================================================
             else
+              if (sgsmodel.ne.7 .or. (sgsmodel.eq.7 .and. dyn_scalar.eq.0)) then
               call turbs(0,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
                          rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                          dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),khh,khv,cm0,dum7,dum8, &
+                         !-------------- DRM variables ----------------
+                         u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
+                         !---------------------------------------------
                          .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)
+              !================================DRM==============================
+              elseif (dyn_all.eq.0) then   ! ! .eq.3 .and. dyn_scalar.eq.1, DRM-D
+                if ((n.lt.nnc1 .and. nnc1.ne.1) .or. (nnc1.eq.1)) then
+                   ! the following assignment is not necessary since it is already done above
+! !$omp parallel do default(shared)  &
+! !$omp private(i,j,k)
+!                   do k=1,nk
+!                     do j=1,nj
+!                       do i=1,ni
+!                         u1u1_filt(i,j,k) = kqv(i,j,k  )*mf(i,j,k  )*rf(i,j,k  )*mh(i,j,k)*rr(i,j,k)
+!                         u1u2_filt(i,j,k) = kqv(i,j,k+1)*mf(i,j,k+1)*rf(i,j,k+1)*mh(i,j,k)*rr(i,j,k)
+!                       enddo
+!                     enddo
+!                   enddo
+                  call turbs(0,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
+                           rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                           dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),kqh,kqv,cm0,u1u1_filt,u1u2_filt, &
+                           !-------------- DRM variables ----------------
+                           u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
+                           !---------------------------------------------
+                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,2)
+                else
+                  if (n.eq.nnc1) then
+!$omp parallel do default(shared)  &
+!$omp private(i,j,k)
+                    do k=1,nk
+                      do j=1,nj
+                        do i=1,ni
+                          u1u1_filt(i,j,k) = knv(i,j,k  )*mf(i,j,k  )*rf(i,j,k  )*mh(i,j,k)*rr(i,j,k)
+                          u1u2_filt(i,j,k) = knv(i,j,k+1)*mf(i,j,k+1)*rf(i,j,k+1)*mh(i,j,k)*rr(i,j,k)
+                        enddo
+                      enddo
+                    enddo
+                  end if
+                  call turbs(0,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
+                           rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                           dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),knh,knv,cm0,u1u1_filt,u1u2_filt, &
+                           !-------------- DRM variables ----------------
+                           u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
+                           !---------------------------------------------
+                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,2)
+                end if
+              elseif (dyn_all.eq.1) then   ! DRM-A
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+                do k = kbc, kec
+                  do j = jbc, jec
+                    do i = ibc, iec
+                      kqh(i,j,k) = kq4d(i,j,k,n)
+                      kqv(i,j,k) = kqv4d(i,j,k,n)
+                    end do
+                  end do
+                end do
+!$omp parallel do default(shared)  &
+!$omp private(i,j,k)
+                do k=1,nk
+                  do j=1,nj
+                    do i=1,ni
+                      u1u1_filt(i,j,k) = kqv(i,j,k  )*mf(i,j,k  )*rf(i,j,k  )*mh(i,j,k)*rr(i,j,k)
+                      u1u2_filt(i,j,k) = kqv(i,j,k+1)*mf(i,j,k+1)*rf(i,j,k+1)*mh(i,j,k)*rr(i,j,k)
+                    enddo
+                  enddo
+                enddo
+                call turbs(0,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
+                         rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                         dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),kqh,kqv,cm0,u1u1_filt,u1u2_filt, &
+                         !-------------- DRM variables ----------------
+                         u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
+                         !---------------------------------------------
+                         .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,2)
+              end if
+
+!===========================================================================================
             endif
           enddo
         ENDIF
@@ -1233,6 +1412,11 @@
             call turbs(0,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
                        rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                        dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,pta(ib,jb,kb,n),ptten(ib,jb,kb,n),khh,khv,cm0,dum7,dum8, &
+                       !---------------------------------------------
+                       ! DRM currently does not work for passive tracers. This line is just a place holder.
+                       ! XS 12/31/2018
+                       u1th_re,u2th_re,u3th_re,u1s_re_w,u2s_re_w,                              &
+                       !---------------------------------------------
                        .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)
           enddo
         ENDIF
@@ -1498,7 +1682,8 @@
                    zh,zf,dum1,dum2,dum3,dum4,dum5,dum6,              &
                    ufrc,vfrc,thfrc,qvfrc,ug,vg,dvdr,                 &
                    uavg,vavg,thavg,qavg,cavg,                        &
-                   ua,va,tha,qa,uten1,vten1,thten1,qten,             &
+                   ua,va,tha,qa,uten1,vten1,thten1,qten,pi0,ppi,     &
+                   !                                    ------- XS added, 1/3/2019
                    o30 ,thraten,zir,ruh,ruf,rvh,rvf,mtime)
         if(timestats.ge.1) time_misc=time_misc+mytime()
 
