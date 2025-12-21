@@ -107,6 +107,10 @@
                    vw31,vw32,ve31,ve32,vs31,vs32,vn31,vn32,          &
                    ww31,ww32,we31,we32,ws31,ws32,wn31,wn32,          &
                    sw31,sw32,se31,se32,ss31,ss32,sn31,sn32,          &
+                   !------------------------------------------------------------
+                   pw31,pw32,pe31,pe32,ps31,ps32,pn31,pn32,          &
+                   ! added for MPI comm. of rho for DRM. XS 2/4/2019
+                   !------------------------------------------------------------
                    rw31,rw32,re31,re32,rs31,rs32,rn31,rn32,          &
                    qw31,qw32,qe31,qe32,qs31,qs32,qn31,qn32,          &
                    tkw1,tkw2,tke1,tke2,tks1,tks2,tkn1,tkn2,          &
@@ -198,14 +202,21 @@
       real, intent(inout), dimension(imp,cmp,kmp-1) :: ws31,ws32,wn31,wn32
       real, intent(inout), dimension(cmp,jmp,kmp)   :: sw31,sw32,se31,se32
       real, intent(inout), dimension(imp,cmp,kmp)   :: ss31,ss32,sn31,sn32
+      !-------------------------------------------------------------------------
+      real, intent(inout), dimension(cmp,jmp,kmp)   :: pw31,pw32,pe31,pe32
+      real, intent(inout), dimension(imp,cmp,kmp)   :: ps31,ps32,pn31,pn32
+      ! added for MPI of rho for DRM. XS 2/4/2019
+      !-------------------------------------------------------------------------
       real, intent(inout), dimension(cmp,jmp,kmp)   :: rw31,rw32,re31,re32
       real, intent(inout), dimension(imp,cmp,kmp)   :: rs31,rs32,rn31,rn32
       real, intent(inout), dimension(cmp,jmp,kmp,numq) :: qw31,qw32,qe31,qe32
       real, intent(inout), dimension(imp,cmp,kmp,numq) :: qs31,qs32,qn31,qn32
       real, intent(inout), dimension(cmp,jmp,kmt)   :: tkw1,tkw2,tke1,tke2
       real, intent(inout), dimension(imp,cmp,kmt)   :: tks1,tks2,tkn1,tkn2
-      real, intent(inout), dimension(jmp,kmt,4)     :: kw1,kw2,ke1,ke2
-      real, intent(inout), dimension(imp,kmt,4)     :: ks1,ks2,kn1,kn2
+      !real, intent(inout), dimension(jmp,kmt,4)     :: kw1,kw2,ke1,ke2
+      !real, intent(inout), dimension(imp,kmt,4)     :: ks1,ks2,kn1,kn2
+      real, intent(inout), dimension(jmp,kmt,8)     :: kw1,kw2,ke1,ke2 !change form 4 to 8 for drm 
+      real, intent(inout), dimension(imp,kmt,8)     :: ks1,ks2,kn1,kn2! change form 4 to 8 for drm 
       real, intent(inout), dimension(cmp,jmp,kmp,npt) :: tw1,tw2,te1,te2
       real, intent(inout), dimension(imp,cmp,kmp,npt) :: ts1,ts2,tn1,tn2
       real, intent(inout) , dimension(ibdv:iedv,jbdv:jedv,kbdv:kedv,nudiag) :: udiag
@@ -308,8 +319,11 @@
 
       call bcp(rho)
 #ifdef MPI
-      call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
+      !call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
+      call comm_3s_start(rho, pw31, pw32, pe31, pe32, &
+                                ps31, ps32, pn31, pn32, reqs_s)
 #endif
+! changed to "3s" for DRM. XS 2/4/2019
 
 
 !-----------------------------------------------------------------
@@ -410,10 +424,16 @@
 #ifdef MPI
       call comm_3u_end(u3d,uw31,uw32,ue31,ue32,   &
                            us31,us32,un31,un32,reqs_u)
+      call getcorneru3(u3d,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                        s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))                     
       call comm_3v_end(v3d,vw31,vw32,ve31,ve32,   &
                            vs31,vs32,vn31,vn32,reqs_v)
+      call getcornerv3(v3d,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                        s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))                    
       call comm_3w_end(w3d,ww31,ww32,we31,we32,   &
                            ws31,ws32,wn31,wn32,reqs_w)
+      call getcornerw3(w3d,n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+                           ! corner values are need by DRM. XS 2/5/2019 
 #endif
 
 #ifdef MPI
@@ -605,6 +625,9 @@
 #ifdef MPI
       call comm_1s_end(pp3d,vw1,vw2,ve1,ve2,vs1,vs2,vn1,vn2,reqs_x)
       call comm_3s_end(th3d,rw31,rw32,re31,re32,rs31,rs32,rn31,rn32,reqs_y)
+      call getcorner3(th3d,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1),  &
+                           s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+                           ! corner values needed by XS 2/5/2019
 #endif
 
       !$omp parallel do default(shared)  &
@@ -628,6 +651,10 @@
                      ,qw31(1,1,1,n),qw32(1,1,1,n),qe31(1,1,1,n),qe32(1,1,1,n)     &
                      ,qs31(1,1,1,n),qs32(1,1,1,n),qn31(1,1,1,n),qn32(1,1,1,n)     &
                      ,reqs_q(1,n) )
+          call getcorner3(q3d(ib,jb,kb,n),n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1),  &
+                             s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bcs2(q3d(ib,jb,kb,n))
+                             ! corner values need by DRM.!XS
 #endif
           !$omp parallel do default(shared)  &
           !$omp private(i,j,k)
@@ -652,8 +679,13 @@
 #endif
 
 #ifdef MPI
-        call comm_1s_end(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
-        call getcorner(rho,nw1(1),nw2(1),ne1(1),ne2(1),sw1(1),sw2(1),se1(1),se2(1))
+        !call comm_1s_end(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
+        !call getcorner(rho,nw1(1),nw2(1),ne1(1),ne2(1),sw1(1),sw2(1),se1(1),se2(1))
+        call comm_3s_end(rho,pw31, pw32, pe31, pe32, &
+                            ps31, ps32, pn31, pn32, reqs_s)
+        call getcorner3(rho,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1),  &
+                             s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+        ! changed to "3" for DRM. XS 2/4/2019
         call bcs2(rho)
 #endif
 
@@ -671,8 +703,10 @@
         ! meh 1 !
       !$omp parallel do default(shared)  &
       !$omp private(i,j)
-        do j=0,nj+1
-        do i=0,ni+1
+        !do j=0,nj+1
+        !do i=0,ni+1
+        do j=-1,nj+2  ! the loop limits changed for DRM. XS 2/18/2019
+        do i=-1,ni+2       
           rr(i,j,1) = 1.0/rho(i,j,1)
           ! cm1r17, 2nd-order extrapolation:
           rf(i,j,1) = cgs1*rho(i,j,1)+cgs2*rho(i,j,2)+cgs3*rho(i,j,3)
