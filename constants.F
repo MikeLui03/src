@@ -62,6 +62,27 @@
 
       real, parameter :: grads_undef  =  -999999.9
 
+      !================
+      ! DRM constants
+      ! XS 10/25/2018
+      !----------------
+      ! explicit filter weights
+      real, parameter, dimension(3) :: fwt1d = [0.25, 0.50, 0.25]  ! 1-2-1 filter
+      real, parameter, dimension(2) :: fwttop = [0.25, 0.75]  ! for top points
+      real, parameter, dimension(2) :: fwtbot = [0.75, 0.25]   ! for bottom points
+      !----------------
+      ! test-filter weights
+      real, parameter, dimension(2) :: te_fwt1d = [0.50, 0.50] ! 1-0-1 filter
+      ! should be applied to every other points, i.e. x_i-1 and x_i+1
+      !----------------
+      ! 5-pt running average
+      real, parameter, dimension(5) :: ave5_fwt1d = [1., 1., 1., 1., 1.]/5.
+      ! 5-pt average is recommened for most cases, since it is faster
+
+      ! alpha is the ratio of test-grid spacing to explicit-grid spacing
+      real, parameter :: alpha43 = 2.0**(4./3.)
+      !================
+
   CONTAINS
 
     !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
