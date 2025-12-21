@@ -29,6 +29,13 @@
                         cd,ch,cq,tlh,f2d,psmth,prate,ustt,cm0,                                 &
                         dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,                          &
                         t11,t12,t13,t22,t23,t33,rho,prs,divx,                                  &
+                        !=======================================================================
+                        ! DRM variables. XS 1/2/2019
+                        t13wall,t23wall,                                                       &
+                        t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,                             &
+                        u1th_re,u2th_re,u3th_re,u1q_re,u2q_re,u3q_re,                          &
+                        kqh,kqv,knh,knv,kq4d,kqv4d,                                            &
+                        !=======================================================================
                         rru,ua ,dumu,ugr  ,rrv,va ,dumv,vgr  ,rrw,wa ,dumw,ppi ,tha ,phi2,     &
                         sadv,thten,nm,defv,defh,lenscl,dissten,epst,epsd1,epsd2,               &
                         thpten,qvpten,qcpten,qipten,upten,vpten,qnipten,qncpten,xkzh,xkzq,xkzm, &
@@ -117,6 +124,18 @@
       real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: c1,c2
       real, dimension(ib:ie,jb:je,kb:ke), intent(inout) :: dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9
       real, dimension(ib:ie,jb:je,kb:ke), intent(in) :: t11,t12,t13,t22,t23,t33
+      !=========================================================================
+      ! DRM variables. XS 1/2/2019
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re, &
+                                                     t22_re,t23_re,t33_re,t13wall,t23wall,&
+                                                     u1th_re,u2th_re,u3th_re
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: kqh,kqv,knh,knv
+                              ! these two arrays above are used for temperary storage
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) :: u1q_re,u2q_re,u3q_re
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) :: kq4d, kqv4d
+                              ! kq4d and kqv4d are needed only when each cloud species
+                              ! has its own eddy diffusivity (DWL-A)
+      !=========================================================================
       real, dimension(ib:ie,jb:je,kb:ke), intent(in) :: rho,prs
       real, dimension(ib:ie,jb:je,kb:ke), intent(inout) :: divx
       real, dimension(ib:ie+1,jb:je,kb:ke), intent(in) :: u0,ua
@@ -6377,6 +6396,33 @@
         call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
       ENDIF
 
+
+      !======================================================
+      ! DRM variables. XS 1/2/2019
+      IF ( sgsmodel.eq.7 .and. output_drm.eq.1) THEN
+        n_out = n_out + 1
+        name_output(n_out) = 're_t11'
+        desc_output(n_out) = 'reconstructed stress'
+        unit_output(n_out) = 'm^2/s^2'
+        grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        n_out = n_out + 1
+        name_output(n_out) = 're_t22'
+        desc_output(n_out) = 'reconstructed stress'
+        unit_output(n_out) = 'm^2/s^2'
+        grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        n_out = n_out + 1
+        name_output(n_out) = 're_t33'
+        desc_output(n_out) = 'reconstructed stress'
+        unit_output(n_out) = 'm^2/s^2'
+        grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        n_out = n_out + 1
+        name_output(n_out) = 're_t12'
+        desc_output(n_out) = 'reconstructed stress, originally at s12 pts'
+        unit_output(n_out) = 'm^2/s^2'
+        grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+      ENDIF
+      !======================================================
+
   !.............................................
 
 
@@ -6399,7 +6445,7 @@
         call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
       ENDIF
 
-
+  
 
   !.............................................
 
@@ -7226,6 +7272,33 @@
     ENDIF
 
   !.............................................
+  !========================================================
+    ! DRM variables. XS 1/2/2019
+    if (sgsmodel.eq.3 .and. output_drm.eq.1) then
+      n_out = n_out + 1
+      name_output(n_out) = 're_u1th'
+      desc_output(n_out) = 'reconstructed theta flux'
+      unit_output(n_out) = 'K m/s'
+      grid_output(n_out) = 'u'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+      if (imoist.eq.1) then
+        do n = 1, numq
+          text1 = 're_u1   '
+          text2 = 'reconstructed flux of         '
+          write(text1(6:8),391) qname(n)
+          write(text2(23:25),391) qname(n)
+391         format(a3)
+
+          n_out = n_out + 1
+          name_output(n_out) = text1
+          desc_output(n_out) = text2
+          unit_output(n_out) = qunit(n)//'m/s'
+          grid_output(n_out) = 'u'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          cmpr_output(n_out) = .true.
+        end do
+      endif
+    end if
+    !======================================================
 
     ! arbitrary output (out3d array)
 
@@ -7687,6 +7760,33 @@
     ENDIF
 
   !.............................................
+  !========================================================
+    ! DRM variables. XS 1/2/2019
+    if (sgsmodel.eq.3 .and. output_drm.eq.1) then
+      n_out = n_out + 1
+      name_output(n_out) = 're_u2th'
+      desc_output(n_out) = 'reconstructed theta flux'
+      unit_output(n_out) = 'K m/s'
+      grid_output(n_out) = 'v'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+      if (imoist.eq.1) then
+        do n = 1, numq
+          text1 = 're_u2   '
+          text2 = 'reconstructed flux of         '
+          write(text1(6:8),392) qname(n)
+          write(text2(23:25),392) qname(n)
+392       format(a3)
+
+          n_out = n_out + 1
+          name_output(n_out) = text1
+          desc_output(n_out) = text2
+          unit_output(n_out) = qunit(n)//'m/s'
+          grid_output(n_out) = 'v'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          cmpr_output(n_out) = .true.
+        end do
+      endif
+    end if
+    !======================================================
 
     ! arbitrary output (out3d array)
 
@@ -8603,6 +8703,120 @@
       ENDIF
 
   !.............................................
+    !========================================================
+      ! DRM variables. XS 1/2/2019
+      if (sgsmodel.eq.3 .and. output_drm.eq.1) then
+
+        n_out = n_out + 1
+        name_output(n_out) = 're_t13'
+        desc_output(n_out) = 'reconstructed stress, originally at s13 pts'
+        unit_output(n_out) = 'm^2/s^2'
+        grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+        n_out = n_out + 1
+        name_output(n_out) = 're_t23'
+        desc_output(n_out) = 'reconstructed stress, originally at s23 pts'
+        unit_output(n_out) = 'm^2/s^2'
+        grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+        ! n_out = n_out + 1
+        ! name_output(n_out) = 't13wall'
+        ! desc_output(n_out) = 'near-wall model stress, at s13 pts'
+        ! unit_output(n_out) = 'm^2/s^2'
+        ! grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !
+        ! n_out = n_out + 1
+        ! name_output(n_out) = 't23wall'
+        ! desc_output(n_out) = 'near-wall model stress, at s23 pts'
+        ! unit_output(n_out) = 'm^2/s^2'
+        ! grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+        n_out = n_out + 1
+        name_output(n_out) = 're_u3th'
+        desc_output(n_out) = 'reconstructed theta flux'
+        unit_output(n_out) = 'K m/s'
+        grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+        if (imoist.eq.1) then
+          do n = 1, numq
+            text1 = 're_u3   '
+            text2 = 'reconstructed flux of         '
+            write(text1(6:8),391) qname(n)
+            write(text2(23:25),391) qname(n)
+393         format(a3)
+
+            n_out = n_out + 1
+            name_output(n_out) = text1
+            desc_output(n_out) = text2
+            unit_output(n_out) = qunit(n)//'m/s'
+            grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            cmpr_output(n_out) = .true.
+          end do
+
+          if (dyn_scalar.eq.1 .and. dyn_all.eq.0) then
+            n_out = n_out + 1
+            name_output(n_out) = 'kqh'
+            desc_output(n_out) = 'horizontal eddy diffusivity for moisture'
+            unit_output(n_out) = 'm^2/s'
+            grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+            if (tconfig.eq.2) then
+              n_out = n_out + 1
+              name_output(n_out) = 'kqv'
+              desc_output(n_out) = 'vertical eddy diffusivity for moisture'
+              unit_output(n_out) = 'm^2/s'
+              grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            endif
+
+            n_out = n_out + 1
+            name_output(n_out) = 'knh'
+            desc_output(n_out) = 'horizontal eddy diffusivity for particle # concentration'
+            unit_output(n_out) = 'm^2/s'
+            grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+            if (tconfig.eq.2) then
+              n_out = n_out + 1
+              name_output(n_out) = 'knv'
+              desc_output(n_out) = 'vertical eddy diffusivity for particle # concentration'
+              unit_output(n_out) = 'm^2/s'
+              grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            endif
+          elseif (dyn_scalar.eq.1 .and. dyn_all.eq.1) then
+            do n = 1, numq
+              text1 = 'kh_     '
+              text2 = 'eddy diffusivity for          '
+              write(text1(4:6),394) qname(n)
+              write(text2(22:24),394) qname(n)
+394           format(a3)
+
+              n_out = n_out + 1
+              name_output(n_out) = text1
+              desc_output(n_out) = text2
+              unit_output(n_out) = 'm^2/s'
+              grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+              cmpr_output(n_out) = .true.
+            end do
+
+            if (tconfig.eq.2) then
+              do n = 1, numq
+                text1 = 'kv_     '
+                text2 = 'eddy diffusivity for          '
+                write(text1(4:6),395) qname(n)
+                write(text2(22:24),395) qname(n)
+395             format(a3)
+
+                n_out = n_out + 1
+                name_output(n_out) = text1
+                desc_output(n_out) = text2
+                unit_output(n_out) = 'm^2/s'
+                grid_output(n_out) = 'w'   ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+                cmpr_output(n_out) = .true.
+              end do
+            end if   ! tconfig
+          end if   ! dyn_scalar, dyn_all
+        end if   ! imoist
+      end if   ! sgsmodel, output_drm
+      !======================================================
 
     ! arbitrary output (out3d array)
 
