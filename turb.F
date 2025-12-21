@@ -20,6 +20,34 @@
                    dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,     &
                    divx,rho,rr,rf,prs,                               &
                    t11,t12,t13,t22,t23,t33,                          &
+                   !==================================================
+                   ! DRM variabls. XS 11/14/2018
+                   th8w,t13wall,t23wall,                             &
+                   u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,u1s,u2s,u3s,        &
+                   u1u1_filt,u1u2_filt,u1u3_filt,u2u2_filt,u2u3_filt,&
+                   u3u3_filt,u1s_filt,u2s_filt,u3s_filt,             &
+                   l11,l12,l13,l22,l23,l33,l21,l31,l32,              &
+                   h11,h12,h13,h22,h23,h33,h21,h31,h32,              &
+                   lh11,lh12,lh13,lh22,lh23,lh33,                    &
+                   t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,        &
+                   u1th_re,u2th_re,u3th_re,u1th,u2th,u3th,           &
+                   u1q_re,u2q_re,u3q_re,                             &
+                   u_re,v_re,w_re,u_re_filt,v_re_filt,w_re_filt,     &
+                   u_te_filt,v_te_filt,w_te_filt,                    &
+                   u_re_add,v_re_add,w_re_add,                       &
+                   th_total,q_total,                                 &
+                   kqh,kqv,knh,knv,kq4d,kqv4d,                       &
+                   m_numer_h,m_numer_v,m_denom_h,m_denom_v,          &
+                   th_numer_h,th_numer_v,th_denom_h,th_denom_v,      &
+                   q_numer_h,q_numer_v,q_denom_h,q_denom_v,          &
+                   m_numer_h_filt,m_numer_v_filt,                    &
+                   m_denom_h_filt,m_denom_v_filt,                    &
+                   th_numer_h_filt,th_numer_v_filt,                  &
+                   th_denom_h_filt,th_denom_v_filt,                  &
+                   q_numer_h_filt,q_numer_v_filt,                    &
+                   q_denom_h_filt,q_denom_v_filt,                    &
+                   c_b,prandtl_t,                                    &
+                   !==================================================
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,rru,ua ,ugr ,fsu  ,                            &
                    v0,rrv,va ,vgr ,fsv  ,                            &
@@ -58,6 +86,26 @@
                    uw31,uw32,ue31,ue32,us31,us32,un31,un32,          &
                    sw31,sw32,se31,se32,ss31,ss32,sn31,sn32,          &
                    kw1,kw2,ke1,ke2,ks1,ks2,kn1,kn2,reqk,             &
+                   !==================================================
+                   ! DRM MPI arrays. XS 11/14/2018
+                   filtw31,filtw32,filte31,filte32,                  &
+                   filts31,filts32,filtn31,filtn32,                  &
+                   filtuw31,filtuw32,filtue31,filtue32,              &
+                   filtus31,filtus32,filtun31,filtun32,              &
+                   filtvw31,filtvw32,filtve31,filtve32,              &
+                   filtvs31,filtvs32,filtvn31,filtvn32,              &
+                   filtww31,filtww32,filtwe31,filtwe32,              &
+                   filtws31,filtws32,filtwn31,filtwn32,              &
+                   nhw31,nhw32,nhe31,nhe32,                          &
+                   nhs31,nhs32,nhn31,nhn32,                          &
+                   nvw31,nvw32,nve31,nve32,                          &
+                   nvs31,nvs32,nvn31,nvn32,                          &
+                   dhw31,dhw32,dhe31,dhe32,                          &
+                   dhs31,dhs32,dhn31,dhn32,                          &
+                   dvw31,dvw32,dve31,dve32,                          &
+                   dvs31,dvs32,dvn31,dvn32,                          &
+                   n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,          &
+                   !==================================================
                    iamsat,out2d,out3d,rtime,update_sfc,dotbud,dotdwrite,restarted,  &
                    dowriteout,doazimwrite,dostat)
       ! end_sfc_and_turb
@@ -117,6 +165,54 @@
       real, intent(in),    dimension(ib:ie,jb:je) :: xland,f2d
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,divx,rho,rr,rf,prs
       real, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: t11,t12,t13,t22,t23,t33
+      !=========================================================================
+      ! DRM variables.   XS 11/19/2018
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: th8w
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1u1,u1u2,u1u3,  &
+                                      u2u2,u2u3,u3u3,u1s,u2s,u3s,                 &
+                                      u1u1_filt,u1u2_filt,u1u3_filt,u2u2_filt,u2u3_filt,&
+                                      u3u3_filt,u1s_filt,u2s_filt,u3s_filt,       &
+                                      l11,l12,l13,l22,l23,l33,l21,l31,l32,        &
+                                      h11,h12,h13,h22,h23,h33,h21,h31,h32,        &
+                                      lh11,lh12,lh13,lh22,lh23,lh33,              &
+                                      u1th,u2th,u3th
+
+      real, intent(out), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t13wall,t23wall,   &
+                                      t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,  &
+                                      u1th_re,u2th_re,u3th_re
+      real, intent(out), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm,numq) :: u1q_re,u2q_re,u3q_re
+
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: u_re,u_re_filt,&
+                                                              u_te_filt,u_re_add
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm+1,kbdrm:kedrm) :: v_re,v_re_filt,&
+                                                              v_te_filt,v_re_add
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: w_re,w_re_filt,&
+                                                              w_te_filt,w_re_add
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: th_total,q_total
+
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: kqh,kqv,knh,knv
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) :: kq4d,kqv4d
+
+      real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: c_b,prandtl_t, &
+                                    m_numer_h,m_numer_v,m_denom_h,m_denom_v,      &
+                                    th_numer_h,th_numer_v,th_denom_h,th_denom_v,  &
+                                    q_numer_h,q_numer_v,q_denom_h,q_denom_v,      &
+                                    m_numer_h_filt,m_numer_v_filt,                &
+                                    m_denom_h_filt,m_denom_v_filt,                &
+                                    th_numer_h_filt,th_numer_v_filt,              &
+                                    th_denom_h_filt,th_denom_v_filt,              &
+                                    q_numer_h_filt,q_numer_v_filt,                &
+                                    q_denom_h_filt,q_denom_v_filt
+      ! Clipping values to prevent denominators in Dynamic Wong-Lilly model
+      ! to beocme too close to zero. Because (1 - alpha^4/3) < 0, the
+      ! denominators are always negative.
+      real, parameter :: dmin_theta = -1.0e-16
+      real, parameter :: dmin_q = -1.0e-20
+      real, parameter :: dmin_n = -1.0e-6
+      real, parameter :: dmin_m = -1.0e-20
+      real, parameter :: dmin_t = -1.0e-8
+      integer :: nmass
+      !=========================================================================
       real, intent(inout), dimension(ibnba:ienba,jbnba:jenba,kbnba:kenba) :: m11,m12,m13,m22,m23,m33
       real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: u0
       real, intent(inout), dimension(ib:ie+1,jb:je,kb:ke) :: rru,ua,ugr,fsu
@@ -175,8 +271,35 @@
       real, intent(inout), dimension(imp+1,cmp,kmp) :: us31,us32,un31,un32
       real, intent(inout), dimension(cmp,jmp,kmp)   :: sw31,sw32,se31,se32
       real, intent(inout), dimension(imp,cmp,kmp)   :: ss31,ss32,sn31,sn32
-      real, intent(inout), dimension(jmp,kmt,4)     :: kw1,kw2,ke1,ke2
-      real, intent(inout), dimension(imp,kmt,4)     :: ks1,ks2,kn1,kn2
+      !real, intent(inout), dimension(jmp,kmt,4)     :: kw1,kw2,ke1,ke2
+      !real, intent(inout), dimension(imp,kmt,4)     :: ks1,ks2,kn1,kn2
+      real, intent(inout), dimension(jmp,kmt,8)     :: kw1,kw2,ke1,ke2 !change from 4 to 8 for DRM 
+      real, intent(inout), dimension(imp,kmt,8)     :: ks1,ks2,kn1,kn2 !change from 4 to 8 for DRM
+      !=========================================================================
+      ! MPI arrays for DRM. XS 11/19/2018
+      real, intent(inout), dimension(cmp,jmp,kmp) :: filtw31,filtw32,filte31,filte32
+      real, intent(inout), dimension(imp,cmp,kmp) :: filts31,filts32,filtn31,filtn32
+      real, intent(inout), dimension(cmp,jmp,kmp) :: filtuw31,filtuw32,filtue31,filtue32
+      real, intent(inout), dimension(imp+1,cmp,kmp) :: filtus31,filtus32,filtun31,filtun32
+      real, intent(inout), dimension(cmp,jmp+1,kmp) :: filtvw31,filtvw32,filtve31,filtve32
+      real, intent(inout), dimension(imp,cmp,kmp) :: filtvs31,filtvs32,filtvn31,filtvn32
+      real, intent(inout), dimension(cmp,jmp,kmp-1) :: filtww31,filtww32,filtwe31,filtwe32
+      real, intent(inout), dimension(imp,cmp,kmp-1) :: filtws31,filtws32,filtwn31,filtwn32
+
+      real, intent(inout), dimension(cmp,jmp,kmp-1) :: nhw31,nhw32,nhe31,nhe32
+      real, intent(inout), dimension(imp,cmp,kmp-1) :: nhs31,nhs32,nhn31,nhn32
+      real, intent(inout), dimension(cmp,jmp,kmp-1) :: nvw31,nvw32,nve31,nve32
+      real, intent(inout), dimension(imp,cmp,kmp-1) :: nvs31,nvs32,nvn31,nvn32
+
+      real, intent(inout), dimension(cmp,jmp,kmp-1) :: dhw31,dhw32,dhe31,dhe32
+      real, intent(inout), dimension(imp,cmp,kmp-1) :: dhs31,dhs32,dhn31,dhn32
+      real, intent(inout), dimension(cmp,jmp,kmp-1) :: dvw31,dvw32,dve31,dve32
+      real, intent(inout), dimension(imp,cmp,kmp-1) :: dvs31,dvs32,dvn31,dvn32
+
+      real, intent(inout), dimension(cmp,cmp,kmt+1) :: n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2
+
+      integer, dimension(8) :: reqs_pr  ! for MP of Prandtl number
+      !=========================================================================
       integer, intent(inout) :: reqk
       logical, intent(inout), dimension(ib:ie,jb:je,kb:ke) :: iamsat
       real, intent(inout), dimension(ib2d:ie2d,jb2d:je2d,nout2d) :: out2d
@@ -1424,6 +1547,418 @@
                          kw1,kw2,ke1,ke2,ks1,ks2,kn1,kn2,reqs_s,   &
                          nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
 
+      ELSEIF (sgsmodel.eq.7) THEN  ! call DRM subroutines. XS 12/6/2018
+        ! use total theta in the calculation
+        th_total = th0 + tha
+
+        if (reconstr.ge.0) then   ! if RSFS part is to be included
+          !=================
+          ! reconstruct RSFS momentum fluxes
+          call reconstruct(ua,va,wa,rho,rf,c1,c2,           &
+          t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,    &
+          u_re,v_re,w_re,u_re_filt,v_re_filt,w_re_filt, &
+          u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,                &
+          u1u1_filt,u1u2_filt,u1u3_filt,                &
+          u2u2_filt,u2u3_filt,u3u3_filt,                &  !----------- argument keywords --------------
+          l11,l12,l13,l22,l23,l33,                      &  !uf1uf1,uf1uf2,uf1uf3,uf2uf2,uf2uf3,uf3uf3, &
+          u_te_filt,v_te_filt,w_te_filt,lh33,           &  !u_temp,v_temp,w_temp,x_temp,
+          u_re_add,v_re_add,w_re_add,                   &
+          filtuw31,filtuw32,filtue31,filtue32,          &
+          filtus31,filtus32,filtun31,filtun32,          &
+          filtvw31,filtvw32,filtve31,filtve32,          &
+          filtvs31,filtvs32,filtvn31,filtvn32,          &
+          filtww31,filtww32,filtwe31,filtwe32,          &
+          filtws31,filtws32,filtwn31,filtwn32,          &
+          n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+          !=================
+          ! reconstruct RSFS theta fluxes
+          call reconstruct_s(th_total,rho,rf,c1,c2,     &  !----------- argument keywords --------------
+          u_re,u_re_filt,v_re,v_re_filt,w_re,w_re_filt, &  ! u_re,u_filt,v_re,v_filt,w_re,w_filt,
+          u1th_re,u2th_re,u3th_re,                      &  ! u1s_re,u2s_re,u3s_re,
+          u1th,u2th,u3th,                               &  ! u1s,u2s,u3s
+          lh11,lh22,                                    &  ! s_re,s_filt,
+          u1s_filt,u2s_filt,u3s_filt,                   &
+          l11,l22,l33,                                  &  ! uf1sf,uf2sf,uf3sf,
+          lh33,lh23,                                    &  ! s_temp,s_re_add
+          filtw31,filtw32,filte31,filte32,              &
+          filts31,filts32,filtn31,filtn32,              &
+          n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+
+          !======================
+          ! reconstruct moist variable fluxes (separately)
+          if (imoist.eq.1) then
+            do n = 1, numq
+              call reconstruct_s(qa(ib,jb,kb,n),rho,rf,c1,c2,   &
+              u_re,u_re_filt,v_re,v_re_filt,w_re,w_re_filt, &
+              u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),  &
+              u1s,u2s,u3s,                                  &
+              lh11,lh22,                                    & ! s_re,s_filt,
+              u1s_filt,u2s_filt,u3s_filt,                   &
+              l11,l22,l33,                                  & ! uf1sf,uf2sf,uf3sf,
+              lh33,lh23,                                    & ! s_temp,s_re_add,
+              filtw31,filtw32,filte31,filte32, &
+              filts31,filts32,filtn31,filtn32, &
+              n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+            end do
+          end if
+        end if
+
+        call dyn_wl(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf,th0,             &
+        thflux,qvflux,rth0s,rf,rho,c1,c2,                     &
+        nm,c_b,prandtl_t,defv,defh,zf,znt,ust,                &
+        m_numer_h,m_numer_v,m_denom_h,m_denom_v,              &
+        kmh,kmv,khh,khv,dmin_m,u_te_filt,v_te_filt,w_te_filt, & !     argument keywords
+        u_re_add,v_re_add,w_re_add,                           &
+        u_re,v_re,w_re,                                       & ! u_tt_filt, v_tt_filt, w_tt_filt,
+        t11,t12,t13,t22,t23,t33,                              &
+        t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,            &
+        ua,va,wa,                                             &
+        u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,                        &
+        lh11,lh12,lh13,lh22,lh23,lh33,                        &
+        l11,l12,l13,l22,l23,l33,                              &
+        h11,h12,h13,h22,h23,h33,                              &
+        u1u1_filt,u1u2_filt,u1u3_filt,                        & ! s11_filt, s12_filt, s13_filt,
+        u2u2_filt,u2u3_filt,u3u3_filt,                        & ! s22_filt, s23_filt, s33_filt,
+        m_numer_h_filt,m_denom_h_filt,m_numer_v_filt,m_denom_v_filt,&
+        u_re_filt,v_re_filt,w_re_filt,q_total,                & ! u_temp, v_temp, w_temp, x_temp,
+        n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,              &
+        nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                      &
+        kw1(1,1,1),kw2(1,1,1),ke1(1,1,1),ke2(1,1,1),          &
+        ks1(1,1,1),ks2(1,1,1),kn1(1,1,1),kn2(1,1,1),          &
+        kw1(1,1,2),kw2(1,1,2),ke1(1,1,2),ke2(1,1,2),          &
+        ks1(1,1,2),ks2(1,1,2),kn1(1,1,2),kn2(1,1,2),          &
+        filtuw31,filtuw32,filtue31,filtue32,                  &
+        filtus31,filtus32,filtun31,filtun32,                  &
+        filtvw31,filtvw32,filtve31,filtve32,                  &
+        filtvs31,filtvs32,filtvn31,filtvn32,                  &
+        filtww31,filtww32,filtwe31,filtwe32,                  &
+        filtws31,filtws32,filtwn31,filtwn32,                  &
+        nhw31,nhw32,nhe31,nhe32,                              &
+        nhs31,nhs32,nhn31,nhn32,                              &
+        nvw31,nvw32,nve31,nve32,                              &
+        nvs31,nvs32,nvn31,nvn32,                              &
+        dhw31,dhw32,dhe31,dhe32,                              &
+        dhs31,dhs32,dhn31,dhn32,                              &
+        dvw31,dvw32,dve31,dve32,                              &
+        dvs31,dvs32,dvn31,dvn32)
+
+        if (dyn_scalar.eq.0) then
+          ! use the Prandtl-number based eddy diffusivity
+          call bcw(prandtl_t,0)
+#ifdef MPI
+          call comm_1t_start(prandtl_t,    &
+          kw1(1,1,1),kw2(1,1,1),ke1(1,1,1),ke2(1,1,1),     &
+          ks1(1,1,1),ks2(1,1,1),kn1(1,1,1),kn2(1,1,1),     &
+          reqs_pr)
+          call comm_1t_end(prandtl_t, &
+          kw1(1,1,1),kw2(1,1,1),ke1(1,1,1),ke2(1,1,1),     &
+          ks1(1,1,1),ks2(1,1,1),kn1(1,1,1),kn2(1,1,1),     &
+          reqs_pr)
+          call getcornert(prandtl_t,nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
+          call bct2(prandtl_t)
+#endif
+          !$omp parallel do default(shared)   &
+          !$omp private(i,j,k)
+          do k=1,nk+1
+            do j=0,nj+1
+              do i=0,ni+1
+                khh(i,j,k)=kmh(i,j,k)/prandtl_t(i,j,k)
+                khv(i,j,k)=kmv(i,j,k)/prandtl_t(i,j,k)
+                kqh(i,j,k)=kmh(i,j,k)/prandtl_t(i,j,k)
+                kqv(i,j,k)=kmv(i,j,k)/prandtl_t(i,j,k)
+                knh(i,j,k)=kmh(i,j,k)/prandtl_t(i,j,k)
+                knv(i,j,k)=kmv(i,j,k)/prandtl_t(i,j,k)
+              enddo
+            enddo
+          end do
+        else   ! compute dynamic eddy diffusivities
+          ! diffusivity for potential temperature
+          call dyn_wl_scalar(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf,           &
+          th0,thflux,qvflux,rth0s,rf,rho,c1,c2,                            &
+          nm,c_b,defv,defh,vh,vf,uh,uf,zf,znt,ust,qsfc,tsk,psfc,           &
+          th_numer_h,th_numer_v,th_denom_h,th_denom_v,                     &
+          kmh,kmv,khh,khv,dmin_theta,.true.,.false.,                       &
+          rds,sigma,rdsf,sigmaf,mh,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+          u_re, v_re, w_re,            &  ! u_tt_filt, v_tt_filt, w_tt_filt,
+          u1th_re, u2th_re, u3th_re,   &
+          ua,va,wa,th_total,u_te_filt,v_te_filt,w_te_filt, &
+          u1th, u2th, u3th,                                &
+          u1s_filt,u2s_filt,u3s_filt,                      & ! ut1th, ut2th, ut3th,
+          lh11, lh22, lh33,                                &
+          l11, l22, l33,                                   &
+          h11, h22, h33,                                   &
+          u1u1_filt, u1u2_filt, u1u3_filt,                 & ! s11, s22, s33; gradients
+          u2u2_filt, u2u3_filt, u3u3_filt,                 & ! s11_filt, s22_filt, s33_filt,
+          th_numer_h_filt, th_denom_h_filt,                &
+          th_numer_v_filt, th_denom_v_filt,                &
+          th8w, w_re_filt,                                 & ! th8w,  w_temp
+          l13, u_re_add, v_re_add, w_re_add,               & ! th_re_add,u_re_add,...
+          q_total, l12, l23,                               & ! x_temp, th_te_filt, th_tt_filt
+          n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,      &
+          nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,              &
+          kw1(1,1,3),kw2(1,1,3),ke1(1,1,3),ke2(1,1,3),  &
+          ks1(1,1,3),ks2(1,1,3),kn1(1,1,3),kn2(1,1,3),  &
+          kw1(1,1,4),kw2(1,1,4),ke1(1,1,4),ke2(1,1,4),  &
+          ks1(1,1,4),ks2(1,1,4),kn1(1,1,4),kn2(1,1,4),  &
+          filtw31,filtw32,filte31,filte32, &
+          filts31,filts32,filtn31,filtn32, &
+          nhw31,nhw32,nhe31,nhe32,             &
+          nhs31,nhs32,nhn31,nhn32,             &
+          nvw31,nvw32,nve31,nve32,             &
+          nvs31,nvs32,nvn31,nvn32,             &
+          dhw31,dhw32,dhe31,dhe32,             &
+          dhs31,dhs32,dhn31,dhn32,             &
+          dvw31,dvw32,dve31,dve32,             &
+          dvs31,dvs32,dvn31,dvn32)
+          if (imoist.eq.1) then
+            if (dyn_all.eq.0) then  ! use total mixing ratios
+              ! for total water mass
+              q_total = 0.0
+              u1s = 0.0
+              u2s = 0.0
+              u3s = 0.0
+
+              if (nqs2.eq.1) then  ! all q variables are mass mixing ratios
+                nmass = numq
+              else   ! there may be number concentrations
+                nmass = nqs2
+              end if
+              !$omp parallel do default(shared)   &
+              !$omp private(i,j,k,n)
+              do n = 1, nmass
+                do k = 1, nk
+                  do j = jb, je
+                    do i = ib, ie
+                      q_total(i,j,k) = q_total(i,j,k) + qa(i,j,k,n)
+                      u1s(i,j,k) = u1s(i,j,k) + u1q_re(i,j,k,n)
+                      u2s(i,j,k) = u2s(i,j,k) + u2q_re(i,j,k,n)
+                      u3s(i,j,k) = u3s(i,j,k) + u3q_re(i,j,k,n)
+                    end do
+                  end do
+                end do
+              end do
+
+              call dyn_wl_scalar(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf,      &
+              th0,thflux,qvflux,rth0s,rf,rho,c1,c2,                       &
+              nm,c_b,defv,defh,vh,vf,uh,uf,zf,znt,ust,qsfc,tsk,psfc,      &
+              q_numer_h,q_numer_v,q_denom_h,q_denom_v,                    &
+              kmh,kmv,kqh,kqv,dmin_q,.false.,.true.,                      &
+              rds,sigma,rdsf,sigmaf,mh,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+              u_re, v_re, w_re,                                & ! u_tt_filt, v_tt_filt, w_tt_filt,
+              u1s, u2s, u3s,                                   &
+              ua,va,wa,q_total,u_te_filt,v_te_filt,w_te_filt,  &
+              u1th, u2th, u3th,                                &
+              u1s_filt,u2s_filt,u3s_filt,                      & ! ut1th, ut2th, ut3th,
+              lh11, lh22, lh33,                                &
+              l11, l22, l33,                                   &
+              h11, h22, h33,                                   &
+              u1u1_filt, u1u2_filt, u1u3_filt,                 & ! s11, s22, s33; gradients
+              u2u2_filt, u2u3_filt, u3u3_filt,                 & ! s11_filt, s22_filt, s33_filt,
+              q_numer_h_filt, q_denom_h_filt,                  &
+              q_numer_v_filt, q_denom_v_filt,                  &
+              th8w, w_re_filt,                                 & ! th8w,  w_temp
+              l13, u_re_add, v_re_add, w_re_add,               & ! th_re_add
+              h12, h13, h23,                                   & ! x_temp, th_te_filt, th_tt_filt
+              n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,         &
+              nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,              &
+              kw1(1,1,5),kw2(1,1,5),ke1(1,1,5),ke2(1,1,5),  &
+              ks1(1,1,5),ks2(1,1,5),kn1(1,1,5),kn2(1,1,5),  &
+              kw1(1,1,6),kw2(1,1,6),ke1(1,1,6),ke2(1,1,6),  &
+              ks1(1,1,6),ks2(1,1,6),kn1(1,1,6),kn2(1,1,6),  &
+              filtw31,filtw32,filte31,filte32, &
+              filts31,filts32,filtn31,filtn32, &
+              nhw31,nhw32,nhe31,nhe32,             &
+              nhs31,nhs32,nhn31,nhn32,             &
+              nvw31,nvw32,nve31,nve32,             &
+              nvs31,nvs32,nvn31,nvn32,             &
+              dhw31,dhw32,dhe31,dhe32,             &
+              dhs31,dhs32,dhn31,dhn32,             &
+              dvw31,dvw32,dve31,dve32,             &
+              dvs31,dvs32,dvn31,dvn32              &
+              )
+
+              ! for total number concentration
+              if (nnc1.ne.1) then   ! this microphysics scheme has particle # concentrations
+                q_total = 0.0
+                u1s = 0.0
+                u2s = 0.0
+                u3s = 0.0
+                !$omp parallel do default(shared)   &
+                !$omp private(i,j,k,n)
+                do n = nnc1, nnc2
+                  do k = 1, nk
+                    do j = jb, je
+                      do i = ib, ie
+                        q_total(i,j,k) = q_total(i,j,k) + qa(i,j,k,n)
+                        u1s(i,j,k) = u1s(i,j,k) + u1q_re(i,j,k,n)
+                        u2s(i,j,k) = u2s(i,j,k) + u2q_re(i,j,k,n)
+                        u3s(i,j,k) = u3s(i,j,k) + u3q_re(i,j,k,n)
+                      end do
+                    end do
+                  end do
+                end do
+                call dyn_wl_scalar(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf, &
+                th0,thflux,qvflux,rth0s,rf,rho,c1,c2,                    &
+                nm,c_b,defv,defh,vh,vf,uh,uf,zf,znt,ust,qsfc,tsk,psfc,   &
+                q_numer_h,q_numer_v,q_denom_h,q_denom_v,                 &
+                kmh,kmv,knh,knv,dmin_n,.false.,.false.,                  &
+                rds,sigma,rdsf,sigmaf,mh,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                u_re, v_re, w_re,                                     &      ! u_tt_filt, v_tt_filt, w_tt_filt,
+                u1s, u2s, u3s,                                        &
+                ua,va,wa,q_total,u_te_filt,v_te_filt,w_te_filt,       &
+                u1th, u2th, u3th,                                     &
+                u1s_filt,u2s_filt,u3s_filt,                           & ! ut1th, ut2th, ut3th,
+                lh11, lh22, lh33,                                     &
+                l11, l22, l33,                                        &
+                h11, h22, h33,                                        &
+                u1u1_filt, u1u2_filt, u1u3_filt,                      & ! s11, s22, s33; gradients
+                u2u2_filt, u2u3_filt, u3u3_filt,                      & ! s11_filt, s22_filt, s33_filt,
+                q_numer_h_filt, q_denom_h_filt,                       &
+                q_numer_v_filt, q_denom_v_filt,                       &
+                th8w, w_re_filt,                                      & ! th8w,  w_temp
+                l13, u_re_add, v_re_add, w_re_add,                    & ! th_re_add
+                lh12, lh13, lh23,                                     & ! x_temp, th_te_filt, th_tt_filt
+                n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,      &
+                nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,              &
+                kw1(1,1,7),kw2(1,1,7),ke1(1,1,7),ke2(1,1,7),  &
+                ks1(1,1,7),ks2(1,1,7),kn1(1,1,7),kn2(1,1,7),  &
+                kw1(1,1,8),kw2(1,1,8),ke1(1,1,8),ke2(1,1,8),  &
+                ks1(1,1,8),ks2(1,1,8),kn1(1,1,8),kn2(1,1,8),  &
+                filtw31,filtw32,filte31,filte32,     &
+                filts31,filts32,filtn31,filtn32,     &
+                nhw31,nhw32,nhe31,nhe32,             &
+                nhs31,nhs32,nhn31,nhn32,             &
+                nvw31,nvw32,nve31,nve32,             &
+                nvs31,nvs32,nvn31,nvn32,             &
+                dhw31,dhw32,dhe31,dhe32,             &
+                dhs31,dhs32,dhn31,dhn32,             &
+                dvw31,dvw32,dve31,dve32,             &
+                dvs31,dvs32,dvn31,dvn32)
+              end if
+            else  ! work on each scalar separately
+              if (nqs2.eq.1) then
+                nmass = numq
+              else
+                nmass = nqs2
+              end if
+              do n = 1, nmass
+                q_total = 0.0
+                u1s = 0.0
+                u2s = 0.0
+                u3s = 0.0
+                !$omp parallel do default(shared)   &
+                !$omp private(i,j,k)
+                do k = 1, nk
+                  do j = jb, je
+                    do i = ib, ie
+                      q_total(i,j,k) = qa(i,j,k,n)
+                      u1s(i,j,k) = u1q_re(i,j,k,n)
+                      u2s(i,j,k) = u2q_re(i,j,k,n)
+                      u3s(i,j,k) = u3q_re(i,j,k,n)
+                    end do
+                  end do
+                end do
+                call dyn_wl_scalar(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf, &
+                th0,thflux,qvflux,rth0s,rf,rho,c1,c2,                    &
+                nm,c_b,defv,defh,vh,vf,uh,uf,zf,znt,ust,qsfc,tsk,psfc,   &
+                q_numer_h,q_numer_v,q_denom_h,q_denom_v,                 &
+                kmh,kmv,knh,knv,dmin_q,.false.,.true.,                  &
+                rds,sigma,rdsf,sigmaf,mh,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                u_re, v_re, w_re,                                     &      ! u_tt_filt, v_tt_filt, w_tt_filt,
+                u1s, u2s, u3s,                                        &
+                ua,va,wa,q_total,u_te_filt,v_te_filt,w_te_filt,       &
+                u1th, u2th, u3th,                                     &
+                u1s_filt,u2s_filt,u3s_filt,                           & ! ut1th, ut2th, ut3th,
+                lh11, lh22, lh33,                                     &
+                l11, l22, l33,                                        &
+                h11, h22, h33,                                        &
+                u1u1_filt, u1u2_filt, u1u3_filt,                      & ! s11, s22, s33; gradients
+                u2u2_filt, u2u3_filt, u3u3_filt,                      & ! s11_filt, s22_filt, s33_filt,
+                q_numer_h_filt, q_denom_h_filt,                       &
+                q_numer_v_filt, q_denom_v_filt,                       &
+                th8w, w_re_filt,                                      & ! th8w,  w_temp
+                l13, u_re_add, v_re_add, w_re_add,                    & ! th_re_add
+                lh12, lh13, lh23,                                     & ! x_temp, th_te_filt, th_tt_filt
+                n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,      &
+                nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,              &
+                kw1(1,1,5),kw2(1,1,5),ke1(1,1,5),ke2(1,1,5),  &
+                ks1(1,1,5),ks2(1,1,5),kn1(1,1,5),kn2(1,1,5),  &
+                kw1(1,1,6),kw2(1,1,6),ke1(1,1,6),ke2(1,1,6),  &
+                ks1(1,1,6),ks2(1,1,6),kn1(1,1,6),kn2(1,1,6),  &
+                filtw31,filtw32,filte31,filte32,     &
+                filts31,filts32,filtn31,filtn32,     &
+                nhw31,nhw32,nhe31,nhe32,             &
+                nhs31,nhs32,nhn31,nhn32,             &
+                nvw31,nvw32,nve31,nve32,             &
+                nvs31,nvs32,nvn31,nvn32,             &
+                dhw31,dhw32,dhe31,dhe32,             &
+                dhs31,dhs32,dhn31,dhn32,             &
+                dvw31,dvw32,dve31,dve32,             &
+                dvs31,dvs32,dvn31,dvn32)
+              end do
+
+              if (nnc1.ne.1) then
+                do n = nnc1, numq    ! nnc2?
+                  ! for number concentrations etc.
+                  q_total = 0.0
+                  u1s = 0.0
+                  u2s = 0.0
+                  u3s = 0.0
+                  !$omp parallel do default(shared)   &
+                  !$omp private(i,j,k)
+                  do k = 1, nk
+                    do j = jb, je
+                      do i = ib, ie
+                        q_total(i,j,k) = qa(i,j,k,n)
+                        u1s(i,j,k) = u1q_re(i,j,k,n)
+                        u2s(i,j,k) = u2q_re(i,j,k,n)
+                        u3s(i,j,k) = u3q_re(i,j,k,n)
+                      end do
+                    end do
+                  end do
+                  call dyn_wl_scalar(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf, &
+                  th0,thflux,qvflux,rth0s,rf,rho,c1,c2,                    &
+                  nm,c_b,defv,defh,vh,vf,uh,uf,zf,znt,ust,qsfc,tsk,psfc,   &
+                  q_numer_h,q_numer_v,q_denom_h,q_denom_v,                 &
+                  kmh,kmv,knh,knv,dmin_n,.false.,.false.,                  &
+                  rds,sigma,rdsf,sigmaf,mh,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
+                  u_re, v_re, w_re,                                     &      ! u_tt_filt, v_tt_filt, w_tt_filt,
+                  u1s, u2s, u3s,                                        &
+                  ua,va,wa,q_total,u_te_filt,v_te_filt,w_te_filt,       &
+                  u1th, u2th, u3th,                                     &
+                  u1s_filt,u2s_filt,u3s_filt,                           & ! ut1th, ut2th, ut3th,
+                  lh11, lh22, lh33,                                     &
+                  l11, l22, l33,                                        &
+                  h11, h22, h33,                                        &
+                  u1u1_filt, u1u2_filt, u1u3_filt,                      & ! s11, s22, s33; gradients
+                  u2u2_filt, u2u3_filt, u3u3_filt,                      & ! s11_filt, s22_filt, s33_filt,
+                  q_numer_h_filt, q_denom_h_filt,                       &
+                  q_numer_v_filt, q_denom_v_filt,                       &
+                  th8w, w_re_filt,                                      & ! th8w,  w_temp
+                  l13, u_re_add, v_re_add, w_re_add,                    & ! th_re_add
+                  lh12, lh13, lh23,                                     & ! x_temp, th_te_filt, th_tt_filt
+                  n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,      &
+                  nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,              &
+                  kw1(1,1,7),kw2(1,1,7),ke1(1,1,7),ke2(1,1,7),  &
+                  ks1(1,1,7),ks2(1,1,7),kn1(1,1,7),kn2(1,1,7),  &
+                  kw1(1,1,8),kw2(1,1,8),ke1(1,1,8),ke2(1,1,8),  &
+                  ks1(1,1,8),ks2(1,1,8),kn1(1,1,8),kn2(1,1,8),  &
+                  filtw31,filtw32,filte31,filte32,     &
+                  filts31,filts32,filtn31,filtn32,     &
+                  nhw31,nhw32,nhe31,nhe32,             &
+                  nhs31,nhs32,nhn31,nhn32,             &
+                  nvw31,nvw32,nve31,nve32,             &
+                  nvs31,nvs32,nvn31,nvn32,             &
+                  dhw31,dhw32,dhe31,dhe32,             &
+                  dhs31,dhs32,dhn31,dhn32,             &
+                  dvw31,dvw32,dve31,dve32,             &
+                  dvs31,dvs32,dvn31,dvn32)
+                end do
+              end if
+            end if
+          end if
+        end if   ! dyn_scalar check
+
       ELSEIF( sgsmodel.eq.0 )THEN
 
         ! for LES modeling without a subgrid turbulence model:
@@ -1627,13 +2162,21 @@
         enddo
         enddo
         call     gettau(xf,rxf,arf1,arf2,ust,stau,u1,v1,s1,ustt,ut,vt,st,rf,mf,dum1,dum2,dum3,dum4,dum5,dum6, &
-                        dumw1,dumw2,t11,t12,t13,t22,t23,t33,ua,ugr,va,vgr,wa,avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv,bndy,kbdy)
+                        dumw1,dumw2,t11,t12,t13,t22,t23,t33,ua,ugr,va,vgr,wa,avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv,bndy,kbdy, &
+                        !=======================================================
+                        ! new arguments for the canopy model.   XS 12/27/2018
+                        zh,zf,l11,l22,t13wall,t23wall,rho)
+                        !=======================================================
 
       ELSE
 
         ! all other sgsmodels:
         call     gettau(xf,rxf,arf1,arf2,ust,stau,u1,v1,s1,ustt,ut,vt,st,rf,mf,dum1,dum2,dum3,dum4,dum5,dum6, &
-                        kmh,kmv,t11,t12,t13,t22,t23,t33,ua,ugr,va,vgr,wa,avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv,bndy,kbdy)
+                        kmh,kmv,t11,t12,t13,t22,t23,t33,ua,ugr,va,vgr,wa,avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv,bndy,kbdy, &
+                        !=======================================================
+                        ! new arguments for the canopy model.   XS 12/27/2018
+                        zh,zf,l11,l22,t13wall,t23wall,rho)
+                        !=======================================================
 
       ENDIF
 
@@ -4057,7 +4600,11 @@
 
       ! gettau
       subroutine gettau(xf,rxf,arf1,arf2,ust,stau,u1,v1,s1,ustt,ut,vt,st,rf,mf,dum1,dum2,dum3,dum4,dum5,dum6, &
-                        kmh,kmv,t11,t12,t13,t22,t23,t33,ua,ugr,va,vgr,wa,avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv,bndy,kbdy)
+                        kmh,kmv,t11,t12,t13,t22,t23,t33,ua,ugr,va,vgr,wa,avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv,bndy,kbdy, &
+                        !--------------------------------------------------
+                        zh,zf,wsp,az,t13wall,t23wall,rho)
+                        ! new arguments for the near-wall model
+                        ! XS 12/27/2018
       use input
       use constants
       use ib_module
@@ -4496,6 +5043,122 @@
         t13(1,1,k)=0.0
       enddo
     ENDIF
+! !--------------------------------------------------------------
+! ! Near-wall canopy model. XS 12/27/2018
+!
+!      c_c = 0.5
+!      h_c = 4.*dx   ! or set this to a constant value if dx is too large.
+!      rhc = 1.0/h_c
+!      az = 0.0
+!
+! !$omp parallel do default(shared)   &
+! !$omp private(i,j,k,az)
+!       do k=1,nk
+!          do j = 0, nj+1
+!             do i = 0, ni+1
+!                if (zh(i,j,k).le.h_c) then
+!                   az(i,j,k) = rho(i,j,k) * cos(0.5*pi*zh(i,j,k)*rhc)**2
+!                end if
+!             end do
+!          end do
+!       end do
+!
+! !        !---------- a second profile -----------
+! ! !$omp parallel do default(shared)   &
+! ! !$omp private(i,j,k,az)
+! !         do k=1,nk
+! !            do j = 0, nj+1
+! !               do i = 0, ni+1
+! !                  if (zh(i,j,k).le.h_c) then
+! !                     az(i,j,k) = rho(i,j,k) * (exp(-zh(i,j,k)*rhc/0.2))**2
+! !                  end if
+! !               end do
+! !            end do
+! !         end do
+! !         !-------------------------------------
+!
+!      do k = 1, nk
+!         do j = 1, nj
+!            do i = 1, ni+1
+!               if (zh(i,j,k).le.h_c) then
+!                  vsp = 0.25*( (va(i  ,j,k)+va(i  ,j+1,k))   &
+!                                     +(va(i-1,j,k)+va(i-1,j+1,k)) )
+!                  wsp(i,j,k) = sqrt( ua(i,j,k)**2 + vsp**2 )
+!               end if
+!            end do
+!         end do
+!      end do
+!
+!      t13wall = 0.0
+!      do j = 1, nj
+!         do i = 1, ni+1
+!            do k = 2, nk
+!               if (zh(i,j,k-1).le.h_c) then
+!                  kmax = k
+!                  t13wall(i,j,k) = t13wall(i,j,k-1) - 0.5*(az(i,j,k-1)+az(i-1,j,k-1))*wsp(i,j,k-1)*ua(i,j,k-1)*(zf(i,j,k)-zf(i,j,k-1))
+!               end if
+!            end do
+!            do k = 1, kmax
+!               t13wall(i,j,k) = t13wall(i,j,k) - t13wall(i,j,kmax)
+!            end do
+!            do k = kmax, 1, -1
+!               t13wall(i,j,k) = c_c * t13wall(i,j,k) / (t13wall(i,j,1)+1.0e-12) * t13(i,j,1)
+!            end do
+!            t13wall(i,j,1) = 0.0  !t13(i,j,1)
+!         end do
+!      end do
+!
+!      do k = 1, nk
+!         do j = 1, nj+1
+!            do i = 1, ni
+!               if (zh(i,j,k).le.h_c) then
+!                  usp = 0.25*( (ua(i,j  ,k)+ua(i+1,j  ,k))   &
+!                            +(ua(i,j-1,k)+ua(i+1,j-1,k)) )
+!                  wsp(i,j,k) = sqrt( va(i,j,k)**2 + usp**2 )
+!               end if
+!            end do
+!         end do
+!      end do
+!
+!      t23wall = 0.0
+!      do j = 1, nj+1
+!         do i = 1, ni
+!            do k = 2, nk
+!               if (zh(i,j,k-1).le.h_c) then
+!                  kmax = k
+!                  t23wall(i,j,k) = t23wall(i,j,k-1) - 0.5*(az(i,j,k-1)+az(i,j-1,k-1))*wsp(i,j,k-1)*va(i,j,k-1)*(zf(i,j,k)-zf(i,j,k-1))
+!               end if
+!            end do
+!            do k = 1, kmax
+!               t23wall(i,j,k) = t23wall(i,j,k) - t23wall(i,j,kmax)
+!            end do
+!            do k = kmax, 1, -1
+!               t23wall(i,j,k) = c_c * t23wall(i,j,k) / (t23wall(i,j,1)+1.0e-12) * t23(i,j,1)
+!            end do
+!            t23wall(i,j,1) = 0.0  !t23(i,j,1)
+!         end do
+!      end do
+!
+!      do k = 1, nk
+!         do j = 1, nj
+!            do i = 1, ni+1
+!               if (zh(i,j,k-1).le.h_c) then
+!                  t13(i,j,k) = t13(i,j,k) + t13wall(i,j,k)
+!               end if
+!            end do
+!         end do
+!      end do
+!
+!      do k = 1, nk
+!         do j = 1, nj+1
+!            do i = 1, ni
+!               if (zh(i,j,k-1).le.h_c) then
+!                  t23(i,j,k) = t23(i,j,k) + t23wall(i,j,k)
+!               end if
+!            end do
+!         end do
+!      end do
+
 
 !--------------------------------------------------------------
 !  finished
@@ -4773,9 +5436,13 @@
     DO k=1,nk
 
       temz = rdz*mh(1,1,k)
-
-      do j=0,nj+1
-      do i=0,ni+1 
+      ! XS: looping limits are extended here for filtering later in DRM
+      !     Maybe we can create a new MP subroutine for this later?
+      !     12/20/2018
+      !do j=0,nj+1
+      !do i=0,ni+1
+      do j=0,nj+2
+      do i=0,ni+2 
         s11(i,j,k)=rho(i,j,k)*(ua(i+1,j,k)-ua(i,j,k))*rdx*uh(i)
         s22(i,j,k)=rho(i,j,k)*(va(i,j+1,k)-va(i,j,k))*rdy*vh(j)
         s33(i,j,k)=rho(i,j,k)*(wa(i,j,k+1)-wa(i,j,k))*temz
@@ -4880,9 +5547,11 @@
     !$omp parallel do default(shared)   &
     !$omp private(i,j,k)
     DO k=2,nk
-
-      do j=1,nj+1
-      do i=1,ni+1 
+      ! XS: looping limits changed for DRM; 12/20/20181
+      !do j=1,nj+1
+      !do i=1,ni+1
+      do j=0,nj+2
+      do i=0,ni+2 
         s13(i,j,k)=0.5*( (wa(i,j,k)-wa(i-1,j,k))*rdx*uf(i)   &
                         +(ua(i,j,k)-ua(i,j,k-1))*rdz*0.5*(mf(i-1,j,k)+mf(i,j,k))  &
                        )*0.5*( rf(i-1,j,k)+rf(i,j,k) )
@@ -4977,9 +5646,76 @@
             endif
             !-----
 
+      !setting them as zero for filtering in DRM , XS
+            do j=0,nj+2
+                do i=0,ni+2
+                    s13(i,j,1)=0.0  ! 0.5*((ua(i,j,k) - 0.) * (2.*rdz) * 0.5*(mf(i-1,j,k)+mf(i,j,k))  &
+                                    ! ) * 0.5*(rf(i-1,j,k) + rf(i,j,k))
+                    s23(i,j,1)=0.0  ! 0.5*((va(i,j,k) - 0.) * (2.*rdz) * 0.5*(mf(i,j-1,k)+mf(i,j,k))  &
+                                    ! ) * 0.5*(rf(i,j-1,k) + rf(i,j,k))
+                enddo
+            enddo
+    
+        !----------------------------------------------------
+    DO k =1, nk
+    ! XS: not excatly sure if the following is needed. 12/24/2018
+    ! lateral boundary conditions:
+    if(wbc.eq.3.and.ibw.eq.1)then
+      ! free slip b.c.
+      do j=1,nj
+        s13(1,j,k) = s13(2,j,k)
+      enddo
+    elseif(wbc.eq.4.and.ibw.eq.1)then
+      ! no slip b.c.
+      do j=1,nj
+        s13(1,j,k) = 2.0*wa(1,j,k)*rdx*uf(1)
+      enddo
+    endif
+    if(ebc.eq.3.and.ibe.eq.1)then
+      ! free slip b.c.
+      do j=1,nj
+        s13(ni+1,j,k) = s13(ni,j,k)
+      enddo
+    elseif(ebc.eq.4.and.ibe.eq.1)then
+      ! no slip b.c.
+      do j=1,nj
+        s13(ni+1,j,k) = -2.0*wa(ni,j,k)*rdx*uf(ni+1)
+      enddo
+    endif
+    !-----
+
+    !-----
+    if(sbc.eq.3.and.ibs.eq.1)then
+      ! free slip b.c.
+      do i=1,ni
+        s23(i,1,k) = s23(i,2,k)
+      enddo
+    elseif(sbc.eq.4.and.ibs.eq.1)then
+      ! no slip b.c.
+      do i=1,ni
+        s23(i,1,k) = 2.0*wa(i,1,k)*rdy*vf(1)
+      enddo
+    endif
+    if(nbc.eq.3.and.ibn.eq.1)then
+      ! free slip b.c.
+      do i=1,ni
+        s23(i,nj+1,k) = s23(i,nj,k)
+      enddo
+    elseif(nbc.eq.4.and.ibn.eq.1)then
+      ! no slip b.c.
+      do i=1,ni
+        s23(i,nj+1,k) = -2.0*wa(i,nj,k)*rdy*vf(nj+1)
+      enddo
+    endif
+    !----------------------------------------------------
+
+    ENDDO  ! endif for k-loop
+
 !-------------------------------------------------------------------------------
 
   ELSE
+    ! XS: I did not change anything here, so DRM does not work for axisymmetric coordinates.
+    !     12/24/2018
     ! axisymmetric:
 
     !$omp parallel do default(shared)   &
@@ -5065,9 +5801,11 @@
     ! dum2 stores v at w-pts:
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k,r1,r2)
-    do j=0,nj+2
+    !do j=0,nj+2 ! XS: changed for DRM. 12/24/2018
+    do j=-1,nj+3
       ! lowest model level:
-      do i=0,ni+2
+      !do i=0,ni+2
+      do i=-1,ni+3
         dum1(i,j,1) = cgs1*ua(i,j,1)+cgs2*ua(i,j,2)+cgs3*ua(i,j,3)
         dum2(i,j,1) = cgs1*va(i,j,1)+cgs2*va(i,j,2)+cgs3*va(i,j,3)
       enddo
@@ -5108,8 +5846,11 @@
         s33(i,j,k)=s33(i,j,k)*rho(i,j,k)
       enddo
       enddo
-      do j=1,nj+1 
-      do i=1,ni+1
+      !do j=1,nj+1 
+      !do i=1,ni+1
+      ! XS: changed for DRM. 12/24/2018
+      do j=0,nj+2
+      do i=0,ni+2
         r1 = 0.25*( ( rho(i-1,j-1,k)*gz(i-1,j-1)   &
                      +rho(i  ,j  ,k)*gz(i  ,j  ) ) &
                    +( rho(i-1,j  ,k)*gz(i-1,j  )   &
@@ -5131,8 +5872,11 @@
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
     DO k=1,nk
-      do j=0,nj+1
-      do i=0,ni+1
+      !do j=0,nj+1
+      !do i=0,ni+1
+      ! XS; changed for DRM. 12/24/2018
+      do j=-1,nj+2
+      do i=-1,ni+2
         dum1(i,j,k)=0.5*(wa(i,j,k)+wa(i,j,k+1))
       enddo
       enddo
@@ -7537,6 +8281,4343 @@
       if(timestats.ge.1) time_turb=time_turb+mytime()
 
       end subroutine getepst
+
+!===============================================================================
+!===============================================================================
+!  DRM subroutines. XS 11/19/2018
+
+!-------------------------------------------------------------------------------
+!  Explicit  filters
+!     The following fiter subroutines assume at least 2 rows/columns of ghost points
+!     are updated in message passing procedures.
+
+      subroutine filter_u3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie+1,jb:je,kb:ke) :: arr_filt
+      real, dimension(ib:ie+1,jb:je,kb:ke) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = fwt1d(1)*arr(i-1,j,k) + fwt1d(2)*arr(i,j,k) + fwt1d(3)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = fwt1d(1)*arr_filt(i,j-1,k) + fwt1d(2)*arr_filt(i,j,k) + fwt1d(3)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = fwtbot(1)*arr_temp(i,j,k) + fwtbot(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i, j, k) = fwt1d(1)*arr_temp(i,j,k-1) + fwt1d(2)*arr_temp(i,j,k) + fwt1d(3)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = fwttop(1)*arr_temp(i,j,k-1) + fwttop(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine filter_u3d
+
+      subroutine filter_v3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je+1,kb:ke) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je+1,kb:ke) :: arr_filt
+      real, dimension(ib:ie,jb:je+1,kb:ke) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = fwt1d(1)*arr(i-1,j,k) + fwt1d(2)*arr(i,j,k) + fwt1d(3)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = fwt1d(1)*arr_filt(i,j-1,k) + fwt1d(2)*arr_filt(i,j,k) + fwt1d(3)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = fwtbot(1)*arr_temp(i,j,k) + fwtbot(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i, j, k) = fwt1d(1)*arr_temp(i,j,k-1) + fwt1d(2)*arr_temp(i,j,k) + fwt1d(3)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = fwttop(1)*arr_temp(i,j,k-1) + fwttop(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine filter_v3d
+
+      subroutine filter_w3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je,kb:ke+1) :: arr_filt
+      real, dimension(ib:ie,jb:je,kb:ke+1) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = fwt1d(1)*arr(i-1,j,k) + fwt1d(2)*arr(i,j,k) + fwt1d(3)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = fwt1d(1)*arr_filt(i,j-1,k) + fwt1d(2)*arr_filt(i,j,k) + fwt1d(3)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn  ! keep the horizontally filtered array for the bottom and top levels.
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = arr_temp(i,j,k)  ! fwtbot(1)*arr_temp(i,j,k) + fwtbot(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i, j, k) = fwt1d(1)*arr_temp(i,j,k-1) + fwt1d(2)*arr_temp(i,j,k) + fwt1d(3)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = arr_temp(i,j,k)  ! fwttop(1)*arr_temp(i,j,k-1) + fwttop(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine filter_w3d
+
+      subroutine filter_s3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je,kb:ke) :: arr_filt
+      real, dimension(ib:ie,jb:je,kb:ke) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = fwt1d(1)*arr(i-1,j,k) + fwt1d(2)*arr(i,j,k) + fwt1d(3)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = fwt1d(1)*arr_filt(i,j-1,k) + fwt1d(2)*arr_filt(i,j,k) + fwt1d(3)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = fwtbot(1)*arr_temp(i,j,k) + fwtbot(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i, j, k) = fwt1d(1)*arr_temp(i,j,k-1) + fwt1d(2)*arr_temp(i,j,k) + fwt1d(3)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = fwttop(1)*arr_temp(i,j,k-1) + fwttop(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine filter_s3d
+
+!-------------------------------------------------------------------------------
+!  Test filters
+!     The following fiter subroutines assume at least 2 rows/columns of ghost points
+!     are updated in message passing procedures.
+
+      subroutine te_filter_u3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie+1,jb:je,kb:ke) :: arr_filt
+      real, dimension(ib:ie+1,jb:je,kb:ke) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr(i-1,j,k) + te_fwt1d(2)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = te_fwt1d(1)*arr_filt(i,j-1,k) + te_fwt1d(2)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k) + te_fwt1d(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine te_filter_u3d
+
+      subroutine te_filter_v3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je+1,kb:ke) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je+1,kb:ke) :: arr_filt
+      real, dimension(ib:ie,jb:je+1,kb:ke) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr(i-1,j,k) + te_fwt1d(2)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = te_fwt1d(1)*arr_filt(i,j-1,k) + te_fwt1d(2)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k) + te_fwt1d(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine te_filter_v3d
+
+      subroutine te_filter_w3d(arr, ibgn, iend, jbgn, jend, kbgn, kend, arr_filt, arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je,kb:ke+1) :: arr_filt
+      real, dimension(ib:ie,jb:je,kb:ke+1) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr(i-1,j,k) + te_fwt1d(2)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = te_fwt1d(1)*arr_filt(i,j-1,k) + te_fwt1d(2)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn   ! keep the horizontally filtered array for the bottom and top levels.
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = arr_temp(i,j,k)  ! te_fwt1d(1)*arr_temp(i,j,k) + te_fwt1d(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = arr_temp(i,j,k)  ! te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine te_filter_w3d
+
+      subroutine te_filter_s3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je,kb:ke) :: arr_filt
+      real, dimension(ib:ie,jb:je,kb:ke) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters first
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-1, jend+1
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr(i-1,j,k) + te_fwt1d(2)*arr(i+1,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = te_fwt1d(1)*arr_filt(i,j-1,k) + te_fwt1d(2)*arr_filt(i,j+1,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k) + te_fwt1d(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = te_fwt1d(1)*arr_temp(i,j,k-1) + te_fwt1d(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine te_filter_s3d
+
+!-------------------------------------------------------------------------------
+!  Spatial averaging in DWL
+
+      subroutine ave_filter_w3d(arr,ibgn,iend,jbgn,jend,kbgn,kend,arr_filt,arr_temp)
+
+      use input
+      use constants
+
+      implicit none
+
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: arr
+      integer, intent(in) :: ibgn, iend, jbgn, jend, kbgn, kend
+      real, intent(out), dimension(ib:ie,jb:je,kb:ke+1) :: arr_filt
+      real, dimension(ib:ie,jb:je,kb:ke+1) :: arr_temp
+
+      ! local variables
+      integer :: i, j, k
+
+      ! apply horizontal filters only
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn-2, jend+2
+            do i = ibgn, iend
+               arr_filt(i,j,k) = ave5_fwt1d(1)*arr(i-2,j,k) + ave5_fwt1d(2)*arr(i-1,j,k) + ave5_fwt1d(3)*arr(i,j,k) + &
+                  ave5_fwt1d(4)*arr(i+1,j,k) + ave5_fwt1d(5)*arr(i+2,j,k)
+            end do
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn, kend
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_temp(i,j,k) = ave5_fwt1d(1)*arr_filt(i,j-2,k) + ave5_fwt1d(2)*arr_filt(i,j-1,k) + ave5_fwt1d(3)*arr_filt(i,j,k) + &
+                  ave5_fwt1d(4)*arr_filt(i,j+1,k) + ave5_fwt1d(5)*arr_filt(i,j+2,k)
+            end do
+         end do
+      end do
+
+      ! apply the vertical filter (1-2-1 filter for interior points)
+      k = kbgn
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = arr_temp(i,j,k)  ! fwtbot(1)*arr_temp(i,j,k) + fwtbot(2)*arr_temp(i,j,k+1)
+         end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = kbgn+1, kend-1
+         do j = jbgn, jend
+            do i = ibgn, iend
+               arr_filt(i, j, k) = fwt1d(1)*arr_temp(i,j,k-1) + fwt1d(2)*arr_temp(i,j,k) + fwt1d(3)*arr_temp(i,j,k+1)
+            end do
+         end do
+      end do
+
+      k = kend
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = jbgn, jend
+         do i = ibgn, iend
+            arr_filt(i,j,k) = arr_temp(i,j,k)  ! fwttop(1)*arr_temp(i,j,k-1) + fwttop(2)*arr_temp(i,j,k)
+         end do
+      end do
+
+      end subroutine ave_filter_w3d
+
+!-------------------------------------------------------------------------------
+! Reconstruction Procedures
+!
+!  Compute the reconstructed stress tensor tau_ij^re using the approximate
+!  deconvolution method (ADM). When reclevel = 0, this gives the
+!  scale-similarity term of Bardina et al. (1983).
+!
+! References: Chow, F. K., R. L. Street, M. Xue, and J. H. Ferziger, 2005.
+!                Explicit filtering and reconstruction turbulence modeling for
+!                large-eddy simulation of neutral boundary layer flow.
+!                J. Atmos. Sci., 62,2058–2077,https://doi.org/10.1175/JAS3456.1.
+!             Shi, X., H. L. Hagen, F. K. Chow, G. H. Bryan, and R. L. Street,
+!                2018. Large-eddy simulation of the stratocumulus-capped
+!                boundary layer with explicit filtering and reconstruction
+!                turbulence modeling. J. Atmos. Sci., 75, 611–637,
+!                https://doi.org/10.1175/JAS-D-17-0162.1.
+!
+! XS 12/03/2018
+!
+
+      subroutine reconstruct(u3d,v3d,w3d,rho,rf,c1,c2,      &
+          t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,        &
+          u_re,v_re,w_re,u_filt,v_filt,w_filt,              &
+          u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,                    &
+          u1u1_filt,u1u2_filt,u1u3_filt,                    &
+          u2u2_filt,u2u3_filt,u3u3_filt,                    &
+          uf1uf1,uf1uf2,uf1uf3,uf2uf2,uf2uf3,uf3uf3,        &
+          u_temp,v_temp,w_temp,x_temp,                      &
+          u_re_add,v_re_add,w_re_add,                       &
+          filtuw31,filtuw32,filtue31,filtue32,              &
+          filtus31,filtus32,filtun31,filtun32,              &
+          filtvw31,filtvw32,filtve31,filtve32,              &
+          filtvs31,filtvs32,filtvn31,filtvn32,              &
+          filtww31,filtww32,filtwe31,filtwe32,              &
+          filtws31,filtws32,filtwn31,filtwn32,              &
+          n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+
+      use input
+      use constants
+      use comm_module
+      use bc_module
+
+      implicit none
+
+
+
+      real, intent(in), dimension(ib :ie+1,jb:je,kb  :ke)   :: u3d
+      real, intent(in), dimension(ib :ie,jb  :je+1,kb:ke)   :: v3d
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke+1) :: w3d
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke)   :: rho, rf
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke)   :: c1,c2
+
+      real, intent(out), dimension(ib:ie,jb  :je,kb  :ke)   :: t11_re,t12_re,t13_re, &
+                                                          t22_re, t23_re, t33_re
+
+      real, intent(out), dimension(ib:ie+1,jb:je,kb  :ke)   :: u_re, u_filt
+      real, intent(out), dimension(ib:ie,jb  :je+1,kb:ke)   :: v_re, v_filt
+      real, intent(out), dimension(ib:ie,jb  :je,kb  :ke+1) :: w_re, w_filt
+                    ! u_filt, v_filt, w_filt in the reconstruction subroutine
+                    ! store u_re_filt, v_re_filt, w_re_filt, the velocities that
+                    ! are roncstructed and then filtered.
+
+      real, dimension(ib :ie+1,jb:je,kb  :ke)   :: u_temp, u_re_add
+      real, dimension(ib :ie,jb  :je+1,kb:ke)   :: v_temp, v_re_add
+      real, dimension(ib :ie,jb  :je,kb  :ke+1) :: w_temp, w_re_add
+      real, dimension(ib :ie,jb  :je,kb  :ke)   :: x_temp
+
+      ! the following are messaging-passing variables at the boundaries
+      real, intent(inout), dimension(cmp,jmp,kmp)   :: filtuw31,filtuw32,filtue31,filtue32
+      real, intent(inout), dimension(imp+1,cmp,kmp) :: filtus31,filtus32,filtun31,filtun32
+      real, intent(inout), dimension(cmp,jmp+1,kmp) :: filtvw31,filtvw32,filtve31,filtve32
+      real, intent(inout), dimension(imp,cmp,kmp)   :: filtvs31,filtvs32,filtvn31,filtvn32
+      real, intent(inout), dimension(cmp,jmp,kmp-1) :: filtww31,filtww32,filtwe31,filtwe32
+      real, intent(inout), dimension(imp,cmp,kmp-1) :: filtws31,filtws32,filtwn31,filtwn32
+      real, intent(inout), dimension(cmp,cmp,kmt+1) :: n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2
+
+      real, dimension(ib:ie,jb:je,kb:ke) :: u1u1,u1u2,u1u3,u2u2,u2u3,u3u3, &
+                                            u1u1_filt,u1u2_filt,u1u3_filt, &
+                                            u2u2_filt,u2u3_filt,u3u3_filt
+      real, dimension(ib:ie,jb:je,kb:ke) :: uf1uf1,uf1uf2,uf1uf3,uf2uf2,uf2uf3,uf3uf3
+      ! local variables
+      integer :: i, j, k, irec, icomm
+      real :: cc1, cc2
+
+#ifdef MPI
+      integer, dimension(8) :: reqs_u, reqs_v, reqs_w
+#endif
+
+      ! zero-level reconstruction
+      u_re = u3d
+      v_re = v3d
+      w_re = w3d
+
+      if (reconstr .gt. 0) then
+         ! nonzero-level reconstruction is needed
+         u_re_add = u3d
+         v_re_add = v3d
+         w_re_add = w3d
+         ! *_re_add are initiated as the grid variable, but to become the term
+         ! to add for next-level reconstruction, e.g. (I-G)*u, (I-G)*(I-G)*u, ...
+
+         irec = 0
+         icomm = 1  ! icomm is a counter to indicate if MP is needed and which
+                    ! ghost points are/to become outdated.
+         do while(irec.lt.reconstr)
+
+            call filter_u3d(u_re_add, ib+icomm, ie+1-icomm, jb+icomm, je-icomm, 1, nk, u_filt, u_temp)
+            call filter_v3d(v_re_add, ib+icomm, ie-icomm, jb+icomm, je+1-icomm, 1, nk, v_filt, v_temp)
+            call filter_w3d(w_re_add, ib+icomm, ie-icomm, jb+icomm, je-icomm, 1, nk, w_filt, w_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+            do k = 1, nk
+               do j = jb+icomm, je-icomm
+                  do i = ib+icomm, ie+1-icomm
+                     u_re_add(i,j,k) = u_re_add(i,j,k) - u_filt(i,j,k)
+                  end do
+               end do
+            end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+            do k = 1, nk
+               do j = jb+icomm, je+1-icomm
+                  do i = ib+icomm, ie-icomm
+                     v_re_add(i,j,k) = v_re_add(i,j,k) - v_filt(i,j,k)
+                  end do
+               end do
+            end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+            do k = 1, nk
+               do j = jb+icomm, je-icomm
+                  do i = ib+icomm, ie-icomm
+                     w_re_add(i,j,k) = w_re_add(i,j,k) - w_filt(i,j,k)
+                  end do
+               end do
+            end do
+
+            if ((icomm+1).gt.ngxy) then
+               call bcu(u_re_add)
+               call bcv(v_re_add)
+               call bcw(w_re_add,1)
+#ifdef MPI
+               call comm_3u_start(u_re_add,filtuw31,filtuw32,filtue31,filtue32,   &
+                    filtus31,filtus32,filtun31,filtun32,reqs_u)
+               call comm_3v_start(v_re_add,filtvw31,filtvw32,filtve31,filtve32,   &
+                    filtvs31,filtvs32,filtvn31,filtvn32,reqs_v)
+               call comm_3w_start(w_re_add,filtww31,filtww32,filtwe31,filtwe32,   &
+                    filtws31,filtws32,filtwn31,filtwn32,reqs_w)
+#endif
+            end if
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+            do k = 1, nk
+               do j = jb+icomm, je-icomm
+                  do i = ib+icomm, ie+1-icomm
+                     u_re(i,j,k) = u_re(i,j,k) + u_re_add(i,j,k)
+                  end do
+               end do
+            end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+            do k = 1, nk
+               do j = jb+icomm, je+1-icomm
+                  do i = ib+icomm, ie-icomm
+                     v_re(i,j,k) = v_re(i,j,k) + v_re_add(i,j,k)
+                  end do
+               end do
+            end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+            do k = 1, nk
+               do j = jb+icomm, je-icomm
+                  do i = ib+icomm, ie-icomm
+                     w_re(i,j,k) = w_re(i,j,k) + w_re_add(i,j,k)
+                  end do
+               end do
+            end do
+
+            if ((icomm+1).gt.ngxy) then
+#ifdef MPI
+               call comm_3u_end(u_re_add,filtuw31,filtuw32,filtue31,filtue32,   &
+                    filtus31,filtus32,filtun31,filtun32,reqs_u)
+               call getcorneru3(u_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                    s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+               call comm_3v_end(v_re_add,filtvw31,filtvw32,filtve31,filtve32,   &
+                    filtvs31,filtvs32,filtvn31,filtvn32,reqs_v)
+               call getcornerv3(v_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                    s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+               call comm_3w_end(w_re_add,filtww31,filtww32,filtwe31,filtwe32,   &
+                    filtws31,filtws32,filtwn31,filtwn32,reqs_w)
+               call getcornerw3(w_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                    s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+
+                call bcu2(u_re_add)
+                call bcv2(v_re_add)
+                call bcw2(w_re_add)
+
+#endif
+            end if
+
+            irec  = irec  + 1
+            icomm = icomm + 1
+            if ((icomm+1).gt.ngxy) icomm = 1
+         end do
+      end if
+      ! high-level reconstruction for velocities done.
+
+
+      if ((reconstr.gt.0) .and. (icomm.gt.ngxy .or. icomm.eq.1)) then
+
+         call bcu(u_re)
+         call bcv(v_re)
+         call bcw(w_re,1)
+
+#ifdef MPI
+         call comm_3u_start(u_re,filtuw31,filtuw32,filtue31,filtue32,   &
+              filtus31,filtus32,filtun31,filtun32,reqs_u)
+
+         call comm_3v_start(v_re,filtvw31,filtvw32,filtve31,filtve32,   &
+              filtvs31,filtvs32,filtvn31,filtvn32,reqs_v)
+
+         call comm_3w_start(w_re,filtww31,filtww32,filtwe31,filtwe32,   &
+              filtws31,filtws32,filtwn31,filtwn32,reqs_w)
+
+        call comm_3u_end(u_re,filtuw31,filtuw32,filtue31,filtue32,   &
+             filtus31,filtus32,filtun31,filtun32,reqs_u)
+        call getcorneru3(u_re,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+             s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+        call comm_3v_end(v_re,filtvw31,filtvw32,filtve31,filtve32,   &
+             filtvs31,filtvs32,filtvn31,filtvn32,reqs_v)
+        call getcornerv3(v_re,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+             s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+        call comm_3w_end(w_re,filtww31,filtww32,filtwe31,filtwe32,   &
+             filtws31,filtws32,filtwn31,filtwn32,reqs_w)
+        call getcornerw3(w_re,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+             s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+
+         call bcu2(u_re)
+         call bcv2(v_re)
+         call bcw2(w_re)
+#endif
+      end if
+
+
+      !===== filter u_re, v_re, w_re =====
+      call filter_u3d(u_re, 1, ni+1, 1, nj, 1, nk, u_filt, u_temp)
+      call filter_v3d(v_re, 1, ni, 1, nj+1, 1, nk, v_filt, v_temp)
+      call filter_w3d(w_re, 1, ni, 1, nj, 1, nk+1, w_filt, w_temp)
+
+
+
+! maybe we only need perform MP for 1 row/column of ghost points? XS 12/4/2018
+      call bcu(u_filt)
+      call bcv(v_filt)
+      call bcw(w_filt,1)
+#ifdef MPI
+
+      call comm_3u_start(u_filt,filtuw31,filtuw32,filtue31,filtue32,   &
+              filtus31,filtus32,filtun31,filtun32,reqs_u)
+
+      call comm_3v_start(v_filt,filtvw31,filtvw32,filtve31,filtve32,   &
+              filtvs31,filtvs32,filtvn31,filtvn32,reqs_v)
+
+      call comm_3w_start(w_filt,filtww31,filtww32,filtwe31,filtwe32,   &
+              filtws31,filtws32,filtwn31,filtwn32,reqs_w)
+
+#endif
+
+      !===== calculate t11_re, t22_re, t33_re ======
+      ! calculate uiui and uiui_filt first
+      ! horizontal and vertical stretchings are not considered here
+      ! it is not difficult to include, but since the filter has already
+      ! neglected stretching, including stretching factors here likely has
+      ! very limited effect.
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+         do j = -1, nj+2
+            do i = -1, ni+2
+               u1u1(i,j,k) = (0.5 * (u_re(i,j,k) + u_re(i+1,j,k)))**2
+               u2u2(i,j,k) = (0.5 * (v_re(i,j,k) + v_re(i,j+1,k)))**2
+               u3u3(i,j,k) = (0.5 * (w_re(i,j,k) + w_re(i,j,k+1)))**2
+            end do
+         end do
+      end do
+
+      call filter_s3d(u1u1, 0, ni+1, 0, nj+1, 1, nk, u1u1_filt, x_temp)
+      call filter_s3d(u2u2, 0, ni+1, 0, nj+1, 1, nk, u2u2_filt, x_temp)
+      call filter_s3d(u3u3, 0, ni+1, 0, nj+1, 1, nk, u3u3_filt, x_temp)
+
+
+#ifdef MPI
+      call comm_3u_end(u_filt,filtuw31,filtuw32,filtue31,filtue32,   &
+                         filtus31,filtus32,filtun31,filtun32,reqs_u)
+      call getcorneru3(u_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                              s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+      call comm_3v_end(v_filt,filtvw31,filtvw32,filtve31,filtve32,   &
+                         filtvs31,filtvs32,filtvn31,filtvn32,reqs_v)
+      call getcornerv3(v_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                              s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+      call comm_3w_end(w_filt,filtww31,filtww32,filtwe31,filtwe32,   &
+                         filtws31,filtws32,filtwn31,filtwn32,reqs_w)
+      call getcornerw3(w_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                  s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+      call bcu2(u_filt)
+      call bcv2(v_filt)
+      call bcw2(w_filt)
+#endif
+
+
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+         do j = 0, nj+1
+            do i = 0, ni+1
+               uf1uf1(i,j,k) = (0.5 * (u_filt(i,j,k) + u_filt(i+1,j,k)))**2
+               uf2uf2(i,j,k) = (0.5 * (v_filt(i,j,k) + v_filt(i,j+1,k)))**2
+               uf3uf3(i,j,k) = (0.5 * (w_filt(i,j,k) + w_filt(i,j,k+1)))**2
+            end do
+         end do
+      end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 0, nj+1
+             do i = 0, ni+1
+                t11_re(i,j,k) = -rho(i,j,k) * (u1u1_filt(i,j,k) - uf1uf1(i,j,k))
+                t22_re(i,j,k) = -rho(i,j,k) * (u2u2_filt(i,j,k) - uf2uf2(i,j,k))
+                t33_re(i,j,k) = -rho(i,j,k) * (u3u3_filt(i,j,k) - uf3uf3(i,j,k))
+             end do
+          end do
+       end do
+       ! The minus sign is added here to be consistent with CM1's definitation
+       ! of tau_ij
+
+      !===== calculate t12_re =====
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+         do j = -1, nj+3
+            do i = -1, ni+3
+               u1u2(i,j,k) = 0.25 * (u_re(i,j,k) + u_re(i,j-1,k)) * (v_re(i,j,k) + v_re(i-1,j,k))
+            end do
+         end do
+      end do
+      ! Indices here means at least 3 ghost points are required.
+      ! If there are only 2 ghost points, MP subroutines need to be called.
+
+      call filter_s3d(u1u2, 0, ni+2, 0, nj+2, 1, nk, u1u2_filt, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+         do j = 0, nj+2
+            do i = 0, ni+2
+               uf1uf2(i,j,k) = 0.25 * (u_filt(i,j,k) + u_filt(i,j-1,k)) * (v_filt(i,j,k) + v_filt(i-1,j,k))
+            end do
+         end do
+      end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 0, nj+2
+             do i = 0, ni+2
+                t12_re(i,j,k) = -0.25*sum(rho(i-1:i,j-1:j,k)) * (u1u2_filt(i,j,k) - uf1uf2(i,j,k))
+             end do
+          end do
+       end do
+
+      !-----
+      ! lateral boundary conditions:
+      if((wbc.eq.3 .or. wbc.eq.4) .and. ibw.eq.1)then
+         ! rigid walls
+         do k = 1, nk
+            do j=1,nj+1
+               t12_re(1,j,k) = 0.0
+            enddo
+         enddo
+      endif
+      if((ebc.eq.3 .or. ebc.eq.4) .and.ibe.eq.1)then
+         ! rigid walls
+         do k = 1, nk
+            do j=1,nj+1
+               t12_re(ni+1,j,k) = 0.0
+            enddo
+         enddo
+      endif
+      !-----
+      !-----
+      if((sbc.eq.3 .or. sbc.eq.4) .and. ibs.eq.1)then
+         ! rigid walls
+         do k = 1, nk
+            do i=1,ni+1
+               t12_re(i,1,k) = 0.0
+            enddo
+         enddo
+      endif
+      if((nbc.eq.3 .or. nbc.eq.4) .and. ibn.eq.1)then
+         ! rigid walls
+         do k=1,nk
+            do i=1,ni+1
+               t12_re(i,nj+1,k) = 0.0
+            enddo
+         enddo
+      endif
+      !-----
+
+      !===== calculate t13_re =====
+      ! vertical streching is considered
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+         do j = -1, nj+2
+            do i = -1, ni+3
+               cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+               cc1 = 1.0 - cc2
+               u1u3(i,j,k) = (u_re(i,j,k)*cc2 + u_re(i,j,k-1)*cc1) * 0.5*(w_re(i,j,k) + w_re(i-1,j,k))
+            end do
+         end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = -1, nj+2
+         do i = -1, ni+3
+            u1u3(i,j,1) = 0.
+            u1u3(i,j,nk+1) = 0.0
+         end do
+      end do
+      ! no reconstructed momentum flux at bottom/top level.
+
+      call filter_s3d(u1u3, 0, ni+2, 0, nj+1, 1, nk+1, u1u3_filt, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+         do j = 0, nj+1
+            do i = 0, ni+2
+               cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+               cc1 = 1.0 - cc2
+               uf1uf3(i,j,k) = (u_filt(i,j,k)*cc2 + u_filt(i,j,k-1)*cc1) * 0.5*(w_filt(i,j,k) + w_filt(i-1,j,k))
+            end do
+         end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = 0, nj+1
+         do i = 0, ni+2
+            uf1uf3(i,j,1) = 0.
+            uf1uf3(i,j,nk+1) = 0.0
+         end do
+      end do
+      ! no reconstructed momentum flux at bottom/top level.
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+        do j = 0, nj+1
+           do i = 0, ni+2
+              cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+              cc1 = 1.0 - cc2
+              t13_re(i,j,k) = -0.5*(rf(i,j,k)+rf(i-1,j,k)) * (u1u3_filt(i,j,k) - uf1uf3(i,j,k))
+           end do
+        end do
+      end do
+
+      !-----
+      ! lateral boundary conditions:
+      if((wbc.eq.3 .or. wbc.eq.4) .and. ibw.eq.1)then
+         ! rigid walls
+         do k = 2, nk
+            do j=1,nj
+               t13_re(1,j,k) = 0.0
+            enddo
+         enddo
+      endif
+      if((ebc.eq.3 .or. ebc.eq.4) .and. ibe.eq.1)then
+        ! rigid walls
+         do k=2,nk
+            do j=1,nj
+               t13_re(ni+1,j,k) = 0.0
+            enddo
+         enddo
+      endif
+      !-----
+
+      !===== calculate t23_re =====
+      ! vertical streching is considered
+ !$omp parallel do default(shared)   &
+ !$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+         do j = -1, nj+3
+            do i = -1, ni+2
+               cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+               cc1 = 1.0 - cc2
+               u2u3(i,j,k) = (v_re(i,j,k)*cc2 + v_re(i,j,k-1)*cc1) * 0.5*(w_re(i,j,k) + w_re(i,j-1,k))
+            end do
+         end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = -1, nj+3
+         do i = -1, ni+2
+            u2u3(i,j,1) = 0.0
+            u2u3(i,j,nk+1) = 0.0
+         end do
+      end do
+      call filter_s3d(u2u3, 0, ni+1, 0, nj+2, 1, nk+1, u2u3_filt, x_temp)
+
+ !$omp parallel do default(shared)   &
+ !$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+         do j = 0, nj+2
+            do i = 0, ni+1
+               cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+               cc1 = 1.0 - cc2
+               uf2uf3(i,j,k) = (v_filt(i,j,k)*cc2 + v_filt(i,j,k-1)*cc1) * 0.5*(w_filt(i,j,k) + w_filt(i,j-1,k))
+            end do
+         end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = 0, nj+2
+         do i = 0, ni+1
+            uf2uf3(i,j,1) = 0.0
+            uf2uf3(i,j,nk+1) = 0.0  !uf2uf3(i,j,nk)
+         end do
+      end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+        do j = 0, nj+2
+           do i = 0, ni+1
+              cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+              cc1 = 1.0 - cc2
+              t23_re(i,j,k) = -0.5*(rf(i,j,k)+rf(i,j-1,k)) * (u2u3_filt(i,j,k) - uf2uf3(i,j,k))
+           end do
+        end do
+      end do
+
+      !-----
+      if((sbc.eq.3 .or. sbc.eq.4) .and. ibs.eq.1)then
+         ! rigid walls
+         do k=2,nk
+            do i=1,ni
+               t23_re(i,1,k) = 0.0
+            enddo
+         enddo
+      endif
+      if((nbc.eq.3 .or. nbc.eq.4) .and. ibn.eq.1)then
+         ! rigid walls
+         do k=2,nk
+            do i=1,ni
+               t23_re(i,nj+1,k) = 0.0
+            enddo
+         enddo
+      endif
+      !-----
+
+      !-------------------------------------------------------------------------------
+      !  open boundary conditions:
+      if (wbc.eq.2 .or. ebc.eq.2 .or. sbc.eq.2 .or. nbc.eq.2) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+         do k=1,nk
+            !-----
+            if (wbc.eq.2 .and. ibw.eq.1) then
+               do j=0,nj+1
+                  t11_re(0,j,k) = t11_re(1,j,k)
+               enddo
+            endif
+            if (ebc.eq.2 .and. ibe.eq.1) then
+               do j=0,nj+1
+                  t11_re(ni+1,j,k) = t11_re(ni,j,k)
+               enddo
+            endif
+            !-----
+            !-----
+            if( sbc.eq.2 .and. ibs.eq.1 )then
+               do i=0,ni+1
+                  t22_re(i,0,k) = t22_re(i,1,k)
+               enddo
+            endif
+            if( nbc.eq.2 .and. ibn.eq.1 )then
+               do i=0,ni+1
+                  t22_re(i,nj+1,k) = t22_re(i,nj,k)
+               enddo
+            endif
+            !-----
+            !-----
+            if( wbc.eq.2 .and. ibw.eq.1 )then
+               do j=1,nj+1
+                  t12_re(1,j,k) = t12_re(2,j,k)
+               enddo
+            endif
+            if( ebc.eq.2 .and. ibe.eq.1 )then
+               do j=1,nj+1
+                  t12_re(ni+1,j,k) = t12_re(ni,j,k)
+               enddo
+            endif
+            !-----
+            if( sbc.eq.2 .and. ibs.eq.1 )then
+               do i=1,ni+1
+                  t12_re(i,1,k) = t12_re(i,2,k)
+               enddo
+            endif
+            if( nbc.eq.2 .and. ibn.eq.1 )then
+               do i=1,ni+1
+                  t12_re(i,nj+1,k) = t12_re(i,nj,k)
+               enddo
+            endif
+            !-----
+            ! corner points:
+            !-----
+            if( sbc.eq.2 .and. ibs.eq.1 .and. &
+                 wbc.eq.2 .and. ibw.eq.1 )then
+               t12_re(1,1,k) = t12_re(2,2,k)
+            endif
+            if( sbc.eq.2 .and. ibs.eq.1 .and. &
+                 ebc.eq.2 .and. ibe.eq.1 )then
+               t12_re(ni+1,1,k) = t12_re(ni,2,k)
+            endif
+            if( nbc.eq.2 .and. ibn.eq.1 .and. &
+                 wbc.eq.2 .and. ibw.eq.1 )then
+               t12_re(1,nj+1,k) = t12_re(2,nj,k)
+            endif
+            if( nbc.eq.2 .and. ibn.eq.1 .and. &
+                 ebc.eq.2 .and. ibe.eq.1 )then
+               t12_re(ni+1,nj+1,k) = t12_re(ni,nj,k)
+            endif
+            !-----
+         enddo
+      endif
+
+!---------------------------------------------------------------
+      ! bottom/top levels of t13 and t23 should be calculated with
+      ! a surface layer model or set to zero-flux/zero-gradient
+      ! condition for free/no slip b.c..
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = 0, nj+1
+         do i = 0, ni+2
+            t13_re(i,j,nk+1) = 0.0
+            t13_re(i,j,1) = 0.0
+         end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = 0, nj+2
+         do i = 0, ni+1
+            t23_re(i,j,nk+1) = 0.0
+            t23_re(i,j,1) = 0.0
+         end do
+      end do
+
+    end subroutine reconstruct
+
+    ! Reconstruction for scalar fluxes. XS 12/5/2018
+    subroutine reconstruct_s(s3d,rho,rf,c1,c2,     &
+        u_re,u_filt,v_re,v_filt,w_re,w_filt,       &
+        u1s_re,u2s_re,u3s_re,                      &
+        u1s,u2s,u3s,                               &
+        s_re,s_filt,                               &
+        u1s_filt,u2s_filt,u3s_filt,                &
+        uf1sf,uf2sf,uf3sf,                         &
+        s_temp,s_re_add,                           &
+        filtw31,filtw32,filte31,filte32,           &
+        filts31,filts32,filtn31,filtn32,           &
+        n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+
+
+      use input
+      use constants
+      use comm_module
+      use bc_module
+
+      implicit none
+
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke)   :: s3d
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke)   :: rho, rf
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke)   :: c1,c2
+      real, intent(in), dimension(ib :ie+1,jb:je,kb  :ke)   :: u_re, u_filt
+      real, intent(in), dimension(ib :ie,jb  :je+1,kb:ke)   :: v_re, v_filt
+      real, intent(in), dimension(ib :ie,jb  :je,kb  :ke+1) :: w_re, w_filt
+      real, intent(out), dimension(ib:ie,jb  :je,kb  :ke)   :: u1s_re,u2s_re,u3s_re
+      ! the following is needed for message-passing in high-order reconstruction
+      real, intent(inout), dimension(cmp,jmp,kmp) :: filtw31,filtw32,filte31,filte32
+      real, intent(inout), dimension(imp,cmp,kmp) :: filts31,filts32,filtn31,filtn32
+
+      real, dimension(ib:ie,jb:je,kb:ke) :: s_re, s_filt, s_temp, s_re_add
+      real, dimension(ib:ie,jb:je,kb:ke) :: u1s, u2s, u3s, &
+                                            u1s_filt, u2s_filt, u3s_filt
+
+      real, dimension(ib:ie,jb:je,kb:ke) :: uf1sf, uf2sf, uf3sf
+      real, intent(inout), dimension(cmp,cmp,kmt+1) :: n3w1,n3w2,n3e1,n3e2, &
+                                                       s3w1,s3w2,s3e1,s3e2
+
+      ! local variables
+      integer :: i, j, k, irec, icomm
+      real :: cc1, cc2
+
+#ifdef MPI
+      integer, dimension(8) :: reqs_s
+#endif
+
+      ! zero-level reconstruction
+      s_re = s3d
+
+      if (reconstr .gt. 0) then
+        ! higher-level reconstruction
+        s_re_add = s3d
+        irec  = 0
+        icomm = 1
+        do while(irec.lt.reconstr)
+
+          call filter_s3d(s_re_add,ib+icomm,ie-icomm,jb+icomm,je-icomm,1,nk,s_filt,s_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 1, nk
+            do j = jb+icomm, je-icomm
+              do i = ib+icomm, ie-icomm
+                s_re_add(i,j,k) = s_re_add(i,j,k) - s_filt(i,j,k)
+              end do
+            end do
+          end do
+
+          if ((icomm+1).gt.ngxy) then
+            call bcs(s_re_add)
+#ifdef MPI
+            call comm_3s_start(s_re_add,filtw31,filtw32,filte31,filte32,   &
+                               filts31,filts32,filtn31,filtn32,reqs_s)
+#endif
+          end if
+
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 1, nk
+            do j = jb, je
+              do i = ib, ie
+                s_re(i,j,k) = max(s_re(i,j,k) + s_re_add(i,j,k), 0.0)
+                ! Ensure the reconstructed scalar is positive definite
+                ! This also means that we need to use total potential temperature
+                ! in lieu of its perturbation in reconstruction.
+              end do
+            end do
+          end do
+
+          if ((icomm+1).gt.ngxy) then
+#ifdef MPI
+            call comm_3s_end(s_re_add,filtw31,filtw32,filte31,filte32,   &
+                             filts31,filts32,filtn31,filtn32,reqs_s)
+            call getcorner3(s_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                            s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+            call bcs2(s_re_add)
+#endif
+          end if
+
+          irec = irec + 1
+          icomm = icomm + 1
+          if ((icomm+1).gt.ngxy) icomm = 1
+        end do
+      end if
+
+
+      if ((reconstr.gt.0).and.(icomm.gt.ngxy .or. icomm.eq.1)) then
+        call bcs(s_re)
+#ifdef MPI
+        call comm_3s_start(s_re,filtw31,filtw32,filte31,filte32,   &
+        filts31,filts32,filtn31,filtn32,reqs_s)
+        call comm_3s_end(s_re,filtw31,filtw32,filte31,filte32,   &
+        filts31,filts32,filtn31,filtn32,reqs_s)
+        call getcorner3(s_re,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+        s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+        call bcs2(s_re)
+#endif
+      end if
+
+      !===== filter s_re =====
+      call filter_s3d(s_re, 1, ni, 1, nj, 1, nk, s_filt, s_temp)
+
+      call bcs(s_filt)
+#ifdef MPI
+      call comm_3s_start(s_filt,filtw31,filtw32,filte31,filte32,   &
+                         filts31,filts32,filtn31,filtn32,reqs_s)
+#endif
+
+      !===== calculate u1s_re, u2s_re ======
+      ! calculate ui*s and (ui*s)_filt first
+      ! horizontal stretching is not considered here
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = -1, nj+2
+          do i = -1, ni+3
+            u1s(i,j,k) = 0.5 * (s_re(i,j,k) + s_re(i-1,j,k)) * u_re(i,j,k)  ! at u points
+          end do
+        end do
+      end do
+
+      call filter_s3d(u1s, 0, ni+2, 0, nj+1, 1, nk, u1s_filt, s_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = -1, nj+3
+          do i = -1, ni+2
+            u2s(i,j,k) = 0.5 * (s_re(i,j,k) + s_re(i,j-1,k)) * v_re(i,j,k)  ! at v points
+          end do
+        end do
+      end do
+
+      call filter_s3d(u2s, 0, ni+1, 0, nj+2, 1, nk, u2s_filt, s_temp)
+
+#ifdef MPI
+      call comm_3s_end(s_filt,filtw31,filtw32,filte31,filte32,   &
+                       filts31,filts32,filtn31,filtn32,reqs_s)
+      call getcorner3(s_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                      s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+      call bcs2(s_filt)
+#endif
+
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 0, nj+1
+          do i = 0, ni+2
+            uf1sf(i,j,k) = 0.5 * (s_filt(i,j,k) + s_filt(i-1,j,k)) * u_filt(i,j,k)  ! at u points
+          end do
+        end do
+      end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 0, nj+2
+          do i = 0, ni+1
+            uf2sf(i,j,k) = 0.5 * (s_filt(i,j,k) + s_filt(i,j-1,k)) * v_filt(i,j,k)  ! at v points
+          end do
+        end do
+      end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 0, nj+1
+          do i = 0, ni+2
+            u1s_re(i,j,k) = 0.5 * (rho(i,j,k) + rho(i-1,j,k)) * &
+                            (u1s_filt(i,j,k) - uf1sf(i,j,k))
+          end do
+        end do
+      end do
+
+      !-----
+      ! lateral boundary conditions:
+      if((wbc.eq.3 .or. wbc.eq.4) .and. ibw.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do j=1, nj
+            u1s_re(1,j,k) = 0.0
+          enddo
+        enddo
+      else if (wbc.eq.2 .and. ibw.eq.1) then
+        ! open b.c.
+        do k = 1, nk
+          do j=1, nj
+            u1s_re(1,j,k) = u1s_re(2,j,k)
+          enddo
+        enddo
+      endif
+      if((ebc.eq.3 .or. ebc.eq.4) .and.ibe.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do j=1, nj
+            u1s_re(ni+1,j,k) = 0.0
+          enddo
+        enddo
+      else if (ebc.eq.2 .and. ibe.eq.1) then
+        ! open b.c.
+        do k = 1, nk
+          do j = 1, nj
+            u1s_re(ni+1,j,k) = u1s_re(ni, j, k)
+          end do
+        end do
+      endif
+      !-----
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 0, nj+2
+          do i = 0, ni+1
+            u2s_re(i,j,k) = 0.5 * (rho(i,j,k) + rho(i,j-1,k)) * &
+                            (u2s_filt(i,j,k) - uf2sf(i,j,k))
+          end do
+        end do
+      end do
+
+      !-----
+      ! lateral boundary conditions:
+      if((nbc.eq.3 .or. nbc.eq.4) .and. ibn.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do i=1, ni
+            u2s_re(i,nj+1,k) = 0.0
+          enddo
+        enddo
+      else if (nbc.eq.2 .and. ibn.eq.1) then
+        ! open b.c.
+        do k = 1, nk
+          do i = 1, ni
+            u2s_re(i,nj+1,k) = u2s_re(i,nj,k)
+          end do
+        end do
+      endif
+      if((sbc.eq.3 .or. sbc.eq.4) .and.ibs.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do i=1, ni
+            u2s_re(i, 1, k) = 0.0
+          enddo
+        enddo
+      else if (sbc.eq.2 .and. ibs.eq.1) then
+        ! open b.c.
+        do k = 1, nk
+          do i = 1, ni
+            u2s_re(i,1,k) = u2s_re(i,2,k)
+          end do
+        end do
+      endif
+      !-----
+
+      ! z_direction
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+        do j = -1, nj+2
+          do i = -1, ni+2
+            cc2 = c2(i,j,k)
+            cc1 = 1.0 - cc2
+            u3s(i,j,k) = (cc2*s_re(i,j,k) + cc1*s_re(i,j,k-1)) * w_re(i,j,k)  ! at w points
+          end do
+        end do
+      end do
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = -1, nj+2
+        do i = -1, ni+2
+          u3s(i,j,1) = 0.0
+          u3s(i,j,nk+1) = 0.0 ! u3s(i,j,nk)
+        end do
+      end do
+      ! grid-scale w is always 0 zt bottom and top of the model
+      ! should not "leak" scalars in most situations. So they
+      ! are set to 0 here. Note that u3s_re's top/bottom
+      ! value will be set to 0 again later. Values here help with
+      ! filtering
+      call filter_s3d(u3s, 0, ni+1, 0, nj+1, 1, nk+1, u3s_filt, s_temp)
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+        do j = 0, nj+1
+          do i = 0, ni+1
+            cc2 = c2(i,j,k)
+            cc1 = 1.0 - cc2
+            uf3sf(i,j,k) = (cc2*s_filt(i,j,k) + cc1*s_filt(i,j,k-1))*w_filt(i,j,k)  ! at w points
+          end do
+        end do
+      end do
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j)
+      do j = 0, nj+1
+        do i = 0, ni+1
+          uf3sf(i,j,1) = 0.0
+          uf3sf(i,j,nk+1) = 0.0 ! uf3sf(i,j,nk)
+        end do
+      end do
+      ! grid-scale w is always 0 zt bottom and top of the model
+      ! should not "leak" scalars in most conditions. So they
+      ! are set to 0 here. Note that u3s_re's top/bottom
+      ! value will be set to 0 again later. Values here help with
+      ! filtering
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+      do k = 2, nk
+        do j = 0, nj+1
+          do i = 0, ni+1
+            cc2 = c2(i,j,k)
+            cc1 = 1.0 - cc2
+            u3s_re(i,j,k) = rf(i,j,k) * (u3s_filt(i,j,k) - uf3sf(i,j,k))
+          end do
+        end do
+      end do
+
+      !---------------------------------------------------------
+      ! bottom levels of fluxes should be calculated with
+      ! a surface layer model or set to zero-flux/zero-gradient
+      ! condition for free/no slip b.c..
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = 0, nj+1
+        do i = 0, ni+1
+          u3s_re(i,j,1) = 0.0
+        end do
+      end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do j = 0, nj+1
+        do i = 0, ni+1
+          u3s_re(i,j,nk+1) = 0.0
+        end do
+      end do
+
+
+    end subroutine reconstruct_s
+
+
+!-------------------------------------------------------------------------------
+! Dynamic Wang-Lilly Model
+!
+!  Calculate the turbulent transfer mixing coefficients, km, kh, ...
+!  using Wong-Lilly's modified dynamic subgrid-scale formulation.
+!
+! References: Wong, V. C., and D. K. Lilly, 1994. A comparison of two dynamic
+!               subgrid closure methods for turbulent thermal-convection.
+!               Phys. Fluids, 6, 1016–1023, http://dx.doi.org/10.1063/1.868335.
+!             Chow, F. K., R. L. Street, M. Xue, and J. H. Ferziger, 2005.
+!                Explicit filtering and reconstruction turbulence modeling for
+!                large-eddy simulation of neutral boundary layer flow.
+!                J. Atmos. Sci., 62,2058–2077,https://doi.org/10.1175/JAS3456.1.
+!             Shi, X., H. L. Hagen, F. K. Chow, G. H. Bryan, and R. L. Street,
+!                2018. Large-eddy simulation of the stratocumulus-capped
+!                boundary layer with explicit filtering and reconstruction
+!                turbulence modeling. J. Atmos. Sci., 75, 611–637,
+!                https://doi.org/10.1175/JAS-D-17-0162.1.
+!
+! XS 12/06/2018
+
+    subroutine dyn_wl(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf,th0,           &
+                      thflux,qvflux,rth0s,rf,rho,c1,c2,                   &
+                      nm,c_b,prandtl_t,defv,defh,zf,znt,ust,              &
+                      numer_h,numer_v,denom_h,denom_v,                    &
+                      kmh,kmv,khh,khv,dmin,u_te_filt,v_te_filt,w_te_filt, &
+                      u_re_add,v_re_add,w_re_add,                         &
+                      u_tt_filt,v_tt_filt,w_tt_filt,                      &
+                      s11,s12,s13,s22,s23,s33,                            &
+                      t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,          &
+                      ua,va,wa,                                           &
+                      u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,                      &
+                      lh11,lh12,lh13,lh22,lh23,lh33,                      &
+                      l11,l12,l13,l22,l23,l33,                            &
+                      h11,h12,h13,h22,h23,h33,                            &
+                      s11_filt,s12_filt,s13_filt,                         &
+                      s22_filt,s23_filt,s33_filt,                         &
+                      numer_h_filt,denom_h_filt,numer_v_filt,denom_v_filt,&
+                      u_temp,v_temp,w_temp,x_temp,                        &
+                      n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,            &
+                      nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                    &
+                      khcw1,khcw2,khce1,khce2,khcs1,khcs2,khcn1,khcn2,    &
+                      kvcw1,kvcw2,kvce1,kvce2,kvcs1,kvcs2,kvcn1,kvcn2,    &
+                      tuw31,tuw32,tue31,tue32,                            &
+                      tus31,tus32,tun31,tun32,                            &
+                      tvw31,tvw32,tve31,tve32,                            &
+                      tvs31,tvs32,tvn31,tvn32,                            &
+                      tww31,tww32,twe31,twe32,                            &
+                      tws31,tws32,twn31,twn32,                            &
+                      nhw31,nhw32,nhe31,nhe32,                            &
+                      nhs31,nhs32,nhn31,nhn32,                            &
+                      nvw31,nvw32,nve31,nve32,                            &
+                      nvs31,nvs32,nvn31,nvn32,                            &
+                      dhw31,dhw32,dhe31,dhe32,                            &
+                      dhs31,dhs32,dhn31,dhn32,                            &
+                      dvw31,dvw32,dve31,dve32,                            &
+                      dvs31,dvs32,dvn31,dvn32)
+
+    use input
+    use constants
+    use comm_module
+    use bc_module
+
+    implicit none
+
+    integer, intent(in) :: nstep
+    real,    intent(in) :: dt
+    logical, intent(in) :: dosfcflx
+    real, dimension(ib:ie) :: ruh
+    real, dimension(jb:je) :: rvh
+    real, dimension(ib:ie,jb:je,kb:ke) :: rmh
+    real, dimension(ib:ie,jb:je,kb:ke+1) :: mf,rmf
+    real, dimension(ib:ie,jb:je,kb:ke) :: th0
+    real, dimension(ib:ie,jb:je) :: thflux,qvflux,rth0s
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: rf,rho
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: nm,defv,defh
+    real, intent(inout), dimension(ib:ie,jb:je,kb:ke+1) :: c_b,prandtl_t
+    real, intent(in), dimension(ib:ie,jb:je) :: znt,ust
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: zf
+    real, dimension(ibc:iec,jbc:jec,kbc:kec) :: kmh,kmv,khh,khv
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: s11,s12,s13,s22,s23,s33
+                                ! Sij has been multiplied by rho in "calcdef"
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: t11_re,t12_re,t13_re,t22_re,t23_re,t33_re
+                                ! reconstructed momentum fluxes have a factor of -rho
+    real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: ua
+    real, intent(in), dimension(ib:ie,jb:je+1,kb:ke) :: va
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: wa
+
+    real, intent(inout), dimension(kmt) :: nw1,nw2,ne1,ne2,sw1,sw2,se1,se2
+    real, intent(inout), dimension(jmp,kmt) :: khcw1,khcw2,khce1,khce2
+    real, intent(inout), dimension(imp,kmt) :: khcs1,khcs2,khcn1,khcn2
+    real, intent(inout), dimension(jmp,kmt) :: kvcw1,kvcw2,kvce1,kvce2
+    real, intent(inout), dimension(imp,kmt) :: kvcs1,kvcs2,kvcn1,kvcn2
+
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: c1,c2
+
+    real, intent(out), dimension(ib:ie+1,jb:je,kb:ke) :: u_te_filt, u_re_add
+    real, intent(out), dimension(ib:ie,jb:je+1,kb:ke) :: v_te_filt, v_re_add
+    real, intent(out), dimension(ib:ie,jb:je,kb:ke+1) :: w_te_filt, w_re_add
+
+    real, dimension(ib:ie+1,jb:je,kb:ke) :: u_temp, u_tt_filt
+    real, dimension(ib:ie,jb:je+1,kb:ke) :: v_temp, v_tt_filt
+    real, dimension(ib:ie,jb:je,kb:ke+1) :: w_temp, w_tt_filt
+    real, dimension(ib:ie,jb:je,kb:ke) :: x_temp
+
+    real, intent(in) ::  dmin
+
+    real, dimension(ibc:iec,jbc:jec,kbc:kec) :: numer_h,denom_h,numer_v,denom_v
+
+    real, dimension(cmp,jmp,kmp-1) :: nhw31,nhw32,nhe31,nhe32
+    real, dimension(imp,cmp,kmp-1) :: nhs31,nhs32,nhn31,nhn32
+    real, dimension(cmp,jmp,kmp-1) :: nvw31,nvw32,nve31,nve32
+    real, dimension(imp,cmp,kmp-1) :: nvs31,nvs32,nvn31,nvn32
+
+    real, dimension(cmp,jmp,kmp-1) :: dhw31,dhw32,dhe31,dhe32
+    real, dimension(imp,cmp,kmp-1) :: dhs31,dhs32,dhn31,dhn32
+    real, dimension(cmp,jmp,kmp-1) :: dvw31,dvw32,dve31,dve32
+    real, dimension(imp,cmp,kmp-1) :: dvs31,dvs32,dvn31,dvn32
+
+    real, dimension(cmp,jmp,kmp)   :: tuw31,tuw32,tue31,tue32
+    real, dimension(imp+1,cmp,kmp) :: tus31,tus32,tun31,tun32
+    real, dimension(cmp,jmp+1,kmp) :: tvw31,tvw32,tve31,tve32
+    real, dimension(imp,cmp,kmp)   :: tvs31,tvs32,tvn31,tvn32
+    real, dimension(cmp,jmp,kmp-1) :: tww31,tww32,twe31,twe32
+    real, dimension(imp,cmp,kmp-1) :: tws31,tws32,twn31,twn32
+
+    real, intent(inout), dimension(cmp,cmp,nk+1) :: n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2
+
+    real, dimension(ib:ie,jb:je,kb:ke) :: lh11, lh12, lh13, lh22, lh23, lh33
+                                      ! Lij - Hij, density is multiplied to it
+
+    real, dimension(ib:ie,jb:je,kb:ke) :: l11, l12, l13, l22, l23, l33, &  ! only first term of Lij initially
+                                          h11, h12, h13, h22, h23, h33     ! only first term of Hij initially
+                                          ! second terms are put in later
+    real, dimension(ib:ie,jb:je,kb:ke)  ::  u1u1, u1u2, u1u3, u2u2, u2u3, u3u3
+    real, dimension(ib:ie,jb:je,kb:ke) :: s11_filt, s12_filt, s13_filt,  &
+                                          s22_filt, s23_filt, s33_filt
+    real, dimension(ibc:iec,jbc:jec,kbc:kec) :: numer_h_filt, denom_h_filt,  &
+                                                numer_v_filt, denom_v_filt
+
+    ! local variables
+    integer :: i,j,k, ave_times, irec, icomm
+    real :: cc1, cc2, tem1, tem2, tem3, richardson
+
+#ifdef MPI
+    integer, dimension(8) :: reqs_tu,reqs_tv,reqs_tw,reqs_nh,reqs_dh,reqs_nv,reqs_dv,reqs_th
+    integer reqs_khc(8)
+    integer reqs_kvc(8)
+#endif
+    real, parameter :: kclip = 0.0
+!      real, parameter :: prandtl = 1.0/3.00
+!      real, parameter :: prinv   = 1.0/prandtl
+    real :: prandtl
+    real :: prinv
+    real, parameter :: S2min   = 1.0e-10  ! clipping value for S^2
+
+    if (tconfig.eq.1) then
+       prandtl = 1.0/3.0
+       prinv = 1.0/prandtl
+    else
+       prandtl = 1.0
+       prinv = 1.0/prandtl
+    end if
+    ! this prandtl number is actually the critical Richardson number in our
+    ! deep convection paper.
+
+    tem1 = 0.125*dx*dx/dt
+    tem2 = 0.125*dy*dy/dt
+    tem3 = 0.125*dz*dz/dt
+
+    if (dyn_correct.eq.1) then  ! apply the buoyancy/stability correction factor
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 2, nk
+          do j = 1, nj
+             do i = 1, ni
+                if (tconfig.eq.1) then
+                   richardson = nm(i,j,k) / max((defv(i,j,k)+defh(i,j,k)), S2min)
+                else
+                   richardson = nm(i,j,k) / max(defv(i,j,k), S2min)
+                end if
+                if (richardson.ge.prandtl) then
+                   c_b(i,j,k) = 0.0
+                else
+                   c_b(i,j,k) = min(sqrt(1.0 - richardson/prandtl), 1.0)
+                end if
+             end do
+          end do
+       end do
+    else
+       c_b = 1.0
+    end if
+
+    if (dyn_scalar.eq.0) then  ! use the Prandtl number to get diffusivities
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1 , nj
+             do i = 1, ni
+                if (nm(i,j,k).le.0.0) then
+                   prandtl_t(i,j,k) = 0.7
+                else
+                   if (tconfig.eq.1) then
+                      richardson = nm(i,j,k) / max((defv(i,j,k)+defh(i,j,k)), S2min)
+                   else
+                      richardson = nm(i,j,k) / max(defv(i,j,k), S2min)
+                   end if
+                   prandtl_t(i,j,k) = 0.7 * exp(-richardson*4.285714) + richardson*4.0
+                end if
+             end do
+          end do
+       end do
+    end if
+
+! test-filter u, v, w, needed for all Lij and Hij
+    call te_filter_u3d(ua, 1, ni+1, 1, nj, 1, nk, u_te_filt, u_temp)
+    call te_filter_v3d(va, 1, ni, 1, nj+1, 1, nk, v_te_filt, v_temp)
+    call te_filter_w3d(wa, 1, ni, 1, nj, 1, nk+1, w_te_filt, w_temp)
+
+
+    call bcu(u_te_filt)
+    call bcv(v_te_filt)
+    call bcw(w_te_filt,1)
+#ifdef MPI
+
+    call comm_3u_start(u_te_filt,tuw31,tuw32,tue31,tue32,   &
+                       tus31,tus32,tun31,tun32,reqs_tu)
+
+    call comm_3v_start(v_te_filt,tvw31,tvw32,tve31,tve32,   &
+                       tvs31,tvs32,tvn31,tvn32,reqs_tv)
+
+    call comm_3w_start(w_te_filt,tww31,tww32,twe31,twe32,   &
+                       tws31,tws32,twn31,twn32,reqs_tw)
+
+#endif
+
+! test-filter sij; this assumes that ghost points of sij contain correct info.
+    call te_filter_s3d(s11, 1, ni, 1, nj, 1, nk, s11_filt, x_temp)
+    call te_filter_s3d(s22, 1, ni, 1, nj, 1, nk, s22_filt, x_temp)
+    call te_filter_s3d(s33, 1, ni, 1, nj, 1, nk, s33_filt, x_temp)
+    call te_filter_s3d(s12, 1, ni+1, 1, nj+1, 1, nk, s12_filt, x_temp)
+    call te_filter_s3d(s13, 1, ni+1, 1, nj, 1, nk, s13_filt, x_temp)
+    call te_filter_s3d(s23, 1, ni, 1, nj+1, 1, nk, s23_filt, x_temp)
+
+! #ifdef MPI
+!        call comm_3w_start(c_b,tww31,tww32,twe31,twe32,   &
+!             tws31,tws32,twn31,twn32,reqs_th)
+!        call comm_3w_end(c_b,tww31,tww32,twe31,twe32,   &
+!             tws31,tws32,twn31,twn32,reqs_th)
+!        call getcorner3(c_b,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+!             s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+! #endif
+
+!----------------------------------------------------------
+!    build Lij - Hij
+
+! work on lh11, lh22, lh33 first
+
+    ! if zero-level reconstruction was used, no need to do this calculation again.
+    if (reconstr .ne. 0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = -1, nj+2
+             do i = -1, ni+2
+                u1u1(i,j,k) = (0.5 * (ua(i,j,k) + ua(i+1,j,k)))**2
+                u2u2(i,j,k) = (0.5 * (va(i,j,k) + va(i,j+1,k)))**2
+                u3u3(i,j,k) = (0.5 * (wa(i,j,k) + wa(i,j,k+1)))**2
+             end do
+          end do
+       end do
+    end if
+
+    call te_filter_s3d(u1u1, 0, ni+1, 0, nj+1, 1, nk, l11, x_temp)
+    call te_filter_s3d(u2u2, 0, ni+1, 0, nj+1, 1, nk, l22, x_temp)
+    call te_filter_s3d(u3u3, 0, ni+1, 0, nj+1, 1, nk, l33, x_temp)
+
+    if (reconstr .ne. 0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = -1, nj+3
+             do i = -1, ni+3
+                u1u2(i,j,k) = 0.25*(ua(i,j,k)+ua(i,j-1,k))*(va(i,j,k)+va(i-1,j,k))
+             end do
+          end do
+       end do
+    end if
+
+    call te_filter_s3d(u1u2, 0, ni+2, 0, nj+2, 1, nk, l12, x_temp)
+
+! now work on l13
+    if (reconstr .ne. 0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+       do k = 2, nk
+          do j = -1, nj+2
+             do i = -1, ni+3
+                cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+                cc1 = 1.0 - cc2
+                u1u3(i,j,k) = (ua(i,j,k)*cc2+ua(i,j,k-1)*cc1)*0.5*(wa(i,j,k)+wa(i-1,j,k))
+             end do
+          end do
+       end do
+    end if
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do j = -1, nj+2
+       do i = -1, ni+3
+          u1u3(i,j,1) = 0.
+          u1u3(i,j,nk+1) = 0.
+       end do
+    end do
+    ! set to 0 because w is 0 at surface, though not correct over terrain.
+
+    call te_filter_s3d(u1u3, 0, ni+2, 0, nj+1, 1, nk+1, l13, x_temp)
+
+! now work on l23
+    if (reconstr .ne. 0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+       do k = 2, nk
+          do j = -1, nj+3
+             do i = -1, ni+2
+                cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+                cc1 = 1.0 - cc2
+                u2u3(i,j,k) = (va(i,j,k)*cc2+va(i,j,k-1)*cc1)*0.5*(wa(i,j,k)+wa(i,j-1,k))
+             end do
+          end do
+       end do
+    end if
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do j = -1, nj+3
+       do i = -1, ni+2
+          u2u3(i,j,1) = 0.0
+          u2u3(i,j,nk+1) = 0.0
+       end do
+    end do
+    ! set to 0 because w is 0 at surface, though not correct over terrain.
+
+    call te_filter_s3d(u2u3, 0, ni+1, 0, nj+2, 1, nk+1, l23, x_temp)
+
+
+#ifdef MPI
+    call comm_3u_end(u_te_filt,tuw31,tuw32,tue31,tue32,   &
+                         tus31,tus32,tun31,tun32,reqs_tu)
+    call getcorneru3(u_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+    call comm_3v_end(v_te_filt,tvw31,tvw32,tve31,tve32,   &
+                         tvs31,tvs32,tvn31,tvn32,reqs_tv)
+    call getcornerv3(v_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+    call comm_3w_end(w_te_filt,tww31,tww32,twe31,twe32,   &
+                         tws31,tws32,twn31,twn32,reqs_tw)
+    call getcornerw3(w_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+     call bcu2(u_te_filt)
+     call bcv2(v_te_filt)
+     call bcw2(w_te_filt)
+
+#endif
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk
+       do j = 0, nj+1
+          do i = 0, ni+1
+             u1u1(i,j,k) = (0.5 * (u_te_filt(i,j,k) + u_te_filt(i+1,j,k)))**2
+             u2u2(i,j,k) = (0.5 * (v_te_filt(i,j,k) + v_te_filt(i,j+1,k)))**2
+             u3u3(i,j,k) = (0.5 * (w_te_filt(i,j,k) + w_te_filt(i,j,k+1)))**2
+          end do
+       end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk
+       do j = 0, nj+2
+          do i = 0, ni+2
+             u1u2(i,j,k) = 0.25*(u_te_filt(i,j,k)+u_te_filt(i,j-1,k))*(v_te_filt(i,j,k)+v_te_filt(i-1,j,k))
+          end do
+       end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+    do k = 2, nk
+       do j = 0, nj+1
+          do i = 0, ni+2
+             cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+             cc1 = 1.0 - cc2
+             u1u3(i,j,k) = (u_te_filt(i,j,k)*cc2 + u_te_filt(i,j,k-1)*cc1)   &
+                             * 0.5*(w_te_filt(i,j,k) + w_te_filt(i-1,j,k))
+          end do
+       end do
+    end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do j = 0, nj+1
+        do i = 0, ni+2
+            u1u3(i,j,1) = 0.
+            u1u3(i,j,nk+1) = 0.
+        end do
+    end do
+
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+    do k = 2, nk
+       do j = 0, nj+2
+          do i = 0, ni+1
+             cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+             cc1 = 1.0 - cc2
+             u2u3(i,j,k) = (v_te_filt(i,j,k)*cc2 + v_te_filt(i,j,k-1)*cc1) *  &
+                              0.5 * (w_te_filt(i,j,k) + w_te_filt(i,j-1,k))
+          end do
+       end do
+    end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do j = 0, nj+2
+        do i = 0, ni+1
+            u2u3(i,j,1) = 0.0
+            u2u3(i,j,nk+1) = 0.0
+        end do
+    end do
+
+    if (reconstr.ge.0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni
+                l11(i,j,k) = l11(i,j,k) - u1u1(i,j,k)
+                l22(i,j,k) = l22(i,j,k) - u2u2(i,j,k)
+                l33(i,j,k) = l33(i,j,k) - u3u3(i,j,k)
+             end do
+          end do
+       end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni+1
+                l12(i,j,k) = l12(i,j,k) - u1u2(i,j,k)
+             end do
+          end do
+       end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1, nj
+             do i = 1, ni+1
+                l13(i,j,k) = l13(i,j,k) - u1u3(i,j,k)
+             end do
+          end do
+       end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1, nj+1
+             do i = 1, ni
+                l23(i,j,k) = l23(i,j,k) - u2u3(i,j,k)
+             end do
+          end do
+       end do
+
+       ! work on hij
+       if (reconstr.ge.1) then
+          ! higher-level reconstruction
+          u_re_add = u_te_filt
+          v_re_add = v_te_filt
+          w_re_add = w_te_filt
+          irec = 0
+          icomm = 1
+
+          do while(irec.lt.reconstr)
+             if (icomm.gt.ngxy) then
+               call bcu(u_re_add)
+               call bcv(v_re_add)
+               call bcw(w_re_add,1)
+#ifdef MPI
+
+                call comm_3u_start(u_re_add,tuw31,tuw32,tue31,tue32,   &
+                     tus31,tus32,tun31,tun32,reqs_tu)
+
+                call comm_3v_start(v_re_add,tvw31,tvw32,tve31,tve32,   &
+                     tvs31,tvs32,tvn31,tvn32,reqs_tv)
+
+                call comm_3w_start(w_re_add,tww31,tww32,twe31,twe32,   &
+                     tws31,tws32,twn31,twn32,reqs_tw)
+
+                call comm_3u_end(u_re_add,tuw31,tuw32,tue31,tue32,   &
+                     tus31,tus32,tun31,tun32,reqs_tu)
+                call getcorneru3(u_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                     s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+                call comm_3v_end(v_re_add,tvw31,tvw32,tve31,tve32,   &
+                     tvs31,tvs32,tvn31,tvn32,reqs_tv)
+                call getcornerv3(v_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                     s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+                call comm_3w_end(w_re_add,tww31,tww32,twe31,twe32,   &
+                     tws31,tws32,twn31,twn32,reqs_tw)
+                call getcornerw3(w_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                     s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+                call bcu2(u_re_add)
+                call bcv2(v_re_add)
+                call bcw2(w_re_add)
+
+#endif
+                icomm = 1
+             end if
+
+             call te_filter_u3d(u_re_add, ib+icomm, ie+1-icomm, jb+icomm, je-icomm, 1, nk, u_tt_filt, u_temp)
+             call te_filter_v3d(v_re_add, ib+icomm, ie-icomm, jb+icomm, je+1-icomm, 1, nk, v_tt_filt, v_temp)
+             call te_filter_w3d(w_re_add, ib+icomm, ie-icomm, jb+icomm, je-icomm, 1, nk, w_tt_filt, w_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+             do k = 1, nk
+                do j = jb+icomm, je-icomm
+                   do i = ib+icomm, ie+1-icomm
+                      u_re_add(i,j,k) = u_re_add(i,j,k) - u_tt_filt(i,j,k)
+                   end do
+                end do
+             end do
+!$omp parallel do default(shared)   &
+             !$omp private(i,j,k)
+             do k = 1, nk
+                do j = jb+icomm, je+1-icomm
+                   do i = ib+icomm, ie-icomm
+                      v_re_add(i,j,k) = v_re_add(i,j,k) - v_tt_filt(i,j,k)
+                   end do
+                end do
+             end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+             do k = 1, nk
+                do j = jb+icomm, je-icomm
+                   do i = ib+icomm, ie-icomm
+                      w_re_add(i,j,k) = w_re_add(i,j,k) - w_tt_filt(i,j,k)
+                   end do
+                end do
+             end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+             do k = 1, nk
+                do j = jb+icomm, je-icomm
+                   do i = ib+icomm, ie-icomm+1
+                      u_te_filt(i,j,k) = u_te_filt(i,j,k) + u_re_add(i,j,k)
+                   end do
+                end do
+             end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+             do k = 1, nk
+                do j = jb+icomm, je+1-icomm
+                   do i = ib+icomm, ie-icomm
+                      v_te_filt(i,j,k) = v_te_filt(i,j,k) + v_re_add(i,j,k)
+                   end do
+                end do
+             end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+             do k = 1, nk
+                do j = jb+icomm, je-icomm
+                   do i = ib+icomm, ie-icomm
+                      w_te_filt(i,j,k) = w_te_filt(i,j,k) + w_re_add(i,j,k)
+                   end do
+                end do
+             end do
+
+             irec = irec + 1
+             icomm = icomm + 1
+          end do
+       end if
+
+
+          call bcu(u_te_filt)
+          call bcv(v_te_filt)
+          call bcw(w_te_filt,1)
+
+#ifdef MPI
+       if (reconstr .gt. 0) then
+
+          call comm_3u_start(u_te_filt,tuw31,tuw32,tue31,tue32,   &
+               tus31,tus32,tun31,tun32,reqs_tu)
+
+          call comm_3v_start(v_te_filt,tvw31,tvw32,tve31,tve32,   &
+               tvs31,tvs32,tvn31,tvn32,reqs_tv)
+
+          call comm_3w_start(w_te_filt,tww31,tww32,twe31,twe32,   &
+               tws31,tws32,twn31,twn32,reqs_tw)
+
+          call comm_3u_end(u_te_filt,tuw31,tuw32,tue31,tue32,   &
+               tus31,tus32,tun31,tun32,reqs_tu)
+          call getcorneru3(u_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call comm_3v_end(v_te_filt,tvw31,tvw32,tve31,tve32,   &
+               tvs31,tvs32,tvn31,tvn32,reqs_tv)
+          call getcornerv3(v_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call comm_3w_end(w_te_filt,tww31,tww32,twe31,twe32,   &
+               tws31,tws32,twn31,twn32,reqs_tw)
+          call getcornerw3(w_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+
+          call bcu2(u_te_filt)
+          call bcv2(v_te_filt)
+          call bcw2(w_te_filt)
+
+       end if
+#endif
+
+       if (reconstr.ge.1) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 1, nk
+             do j = 0, nj+1
+                do i = 0, ni+1
+                   u1u1(i,j,k) = (0.5 * (u_te_filt(i,j,k) + u_te_filt(i+1,j,k)))**2
+                   u2u2(i,j,k) = (0.5 * (v_te_filt(i,j,k) + v_te_filt(i,j+1,k)))**2
+                   u3u3(i,j,k) = (0.5 * (w_te_filt(i,j,k) + w_te_filt(i,j,k+1)))**2
+                end do
+             end do
+          end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 1, nk
+             do j = 0, nj+2
+                do i = 0, ni+2
+                   u1u2(i,j,k) = 0.25 * (u_te_filt(i,j,k) + u_te_filt(i,j-1,k)) * (v_te_filt(i,j,k) + v_te_filt(i-1,j,k))
+                end do
+             end do
+          end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+          do k = 2, nk
+             do j = 0, nj+1
+                do i = 0, ni+2
+                   cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+                   cc1 = 1.0 - cc2
+                   u1u3(i,j,k) = (u_te_filt(i,j,k)*cc2 + u_te_filt(i,j,k-1)*cc1)   &
+                        * 0.5*(w_te_filt(i,j,k) + w_te_filt(i-1,j,k))
+                end do
+             end do
+          end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+          do k = 2, nk
+             do j = 0, nj+2
+                do i = 0, ni+1
+                   cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+                   cc1 = 1.0 - cc2
+                   u2u3(i,j,k) = (v_te_filt(i,j,k)*cc2 + v_te_filt(i,j,k-1)*cc1) *  &
+                        0.5 * (w_te_filt(i,j,k) + w_te_filt(i,j-1,k))
+                end do
+             end do
+          end do
+
+       end if  ! reconstr > 0
+
+       ! test filter
+       call te_filter_s3d(u1u1, 1, ni, 1, nj, 1, nk, h11, x_temp)
+       call te_filter_s3d(u2u2, 1, ni, 1, nj, 1, nk, h22, x_temp)
+       call te_filter_s3d(u3u3, 1, ni, 1, nj, 1, nk, h33, x_temp)
+
+       call te_filter_u3d(u_te_filt, 0, ni+2, 0, nj+1, 1, nk, u_tt_filt, u_temp)
+       call te_filter_v3d(v_te_filt, 0, ni+1, 0, nj+2, 1, nk, v_tt_filt, v_temp)
+       call te_filter_w3d(w_te_filt, 0, ni+1, 0, nj+1, 1, nk+1, w_tt_filt, w_temp)
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni
+                u1u1(i,j,k) = (0.5 * (u_tt_filt(i,j,k) + u_tt_filt(i+1,j,k)))**2
+                u2u2(i,j,k) = (0.5 * (v_tt_filt(i,j,k) + v_tt_filt(i,j+1,k)))**2
+                u3u3(i,j,k) = (0.5 * (w_tt_filt(i,j,k) + w_tt_filt(i,j,k+1)))**2
+             end do
+          end do
+       end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni
+                h11(i,j,k) = h11(i,j,k) - u1u1(i,j,k)
+                h22(i,j,k) = h22(i,j,k) - u2u2(i,j,k)
+                h33(i,j,k) = h33(i,j,k) - u3u3(i,j,k)
+             end do
+          end do
+       end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni
+                l11(i,j,k) = l11(i,j,k) - h11(i,j,k)
+                l22(i,j,k) = l22(i,j,k) - h22(i,j,k)
+                l33(i,j,k) = l33(i,j,k) - h33(i,j,k)
+             end do
+          end do
+       end do
+
+       ! store te_filter(tau_re) into hij
+       call te_filter_s3d(t11_re, 1, ni, 1, nj, 1, nk, h11, x_temp)
+       call te_filter_s3d(t22_re, 1, ni, 1, nj, 1, nk, h22, x_temp)
+       call te_filter_s3d(t33_re, 1, ni, 1, nj, 1, nk, h33, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni
+                lh11(i,j,k) = rho(i,j,k) * l11(i,j,k) - h11(i,j,k)
+                lh22(i,j,k) = rho(i,j,k) * l22(i,j,k) - h22(i,j,k)
+                lh33(i,j,k) = rho(i,j,k) * l33(i,j,k) - h33(i,j,k)
+                ! rho is multiplied here and below to cancel the density multiplied
+                ! in tij_re and sij
+             end do
+          end do
+       end do
+
+       ! work on h12
+       call te_filter_s3d(u1u2, 1, ni+1, 1, nj+1, 1, nk, h12, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni+1
+                u1u2(i,j,k) = 0.25*(u_tt_filt(i,j,k)+u_tt_filt(i,j-1,k))*(v_tt_filt(i,j,k)+v_tt_filt(i-1,j,k))
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni+1
+                h12(i,j,k) = h12(i,j,k) - u1u2(i,j,k)
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni+1
+                l12(i,j,k) = l12(i,j,k) - h12(i,j,k)
+             end do
+          end do
+       end do
+
+       ! put te_filter(tau_re) into hij
+       call te_filter_s3d(t12_re, 1, ni+1, 1, nj+1, 1, nk, h12, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni+1
+                lh12(i,j,k) = 0.25*(rho(i,j,k) + rho(i-1,j,k) + rho(i,j-1,k) + rho(i-1,j-1,k)) * &
+                            l12(i,j,k) - h12(i,j,k)
+             end do
+          end do
+       end do
+
+       ! work on h13
+       call te_filter_s3d(u1u3, 1, ni+1, 1, nj, 1, nk+1, h13, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+       do k = 2, nk
+          do j = 1, nj
+             do i = 1, ni+1
+                cc2 = 0.5 * (c2(i,j,k) + c2(i-1,j,k))
+                cc1 = 1.0 - cc2
+                u1u3(i,j,k) = (u_tt_filt(i,j,k)*cc2 + u_tt_filt(i,j,k-1)*cc1)   &
+                             * 0.5*(w_tt_filt(i,j,k) + w_tt_filt(i-1,j,k))
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 2, nk
+          do j = 1, nj
+             do i = 1, ni+1
+                h13(i,j,k) = h13(i,j,k) - u1u3(i,j,k)
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni+1
+                l13(i,j,k) = l13(i,j,k) - h13(i,j,k)
+             end do
+          end do
+       end do
+
+       ! store te_filter(tau_re) into hij
+       call te_filter_s3d(t13_re, 1, ni+1, 1, nj, 1, nk+1, h13, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1, nj
+             do i = 1, ni+1
+                lh13(i,j,k) = 0.5*(rf(i,j,k)+rf(i-1,j,k)) * l13(i,j,k) - h13(i,j,k)
+             end do
+          end do
+       end do
+
+
+       ! work on h23
+       call te_filter_s3d(u2u3, 1, ni, 1, nj+1, 1, nk+1, h23, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,cc1,cc2)
+       do k = 2, nk
+          do j = 1, nj+1
+             do i = 1, ni
+                cc2 = 0.5 * (c2(i,j,k) + c2(i,j-1,k))
+                cc1 = 1.0 - cc2
+                u2u3(i,j,k) = (v_tt_filt(i,j,k)*cc2 + v_tt_filt(i,j,k-1)*cc1) *  &
+                     0.5 * (w_tt_filt(i,j,k) + w_tt_filt(i,j-1,k))
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 2, nk
+          do j = 1, nj+1
+             do i = 1, ni
+                h23(i,j,k) = h23(i,j,k) - u2u3(i,j,k)
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni
+                l23(i,j,k) = l23(i,j,k) - h23(i,j,k)
+             end do
+          end do
+       end do
+
+       ! put te_filter(tau_re) into hij
+       call te_filter_s3d(t23_re, 1, ni, 1, nj+1, 1, nk+1, h23, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1, nj+1
+             do i = 1, ni
+                lh23(i,j,k) = 0.5*(rf(i,j,k)+rf(i-1,j,k)) * l23(i,j,k) - h23(i,j,k)
+             end do
+          end do
+       end do
+
+    else  ! no reconstruction
+    !--------------------------------
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj
+             do i = 1, ni
+                lh11(i,j,k) = rho(i,j,k) * (l11(i,j,k) - u1u1(i,j,k))
+                lh22(i,j,k) = rho(i,j,k) * (l22(i,j,k) - u2u2(i,j,k))
+                lh33(i,j,k) = rho(i,j,k) * (l33(i,j,k) - u3u3(i,j,k))
+                ! rho is multiplied here and below to cancel the density multiplied
+                ! in tij_re and sij
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk
+          do j = 1, nj+1
+             do i = 1, ni+1
+                lh12(i,j,k) = 0.25*(rho(i,j,k) + rho(i-1,j,k) + rho(i,j-1,k) + rho(i-1,j-1,k)) * &
+                            (l12(i,j,k) - u1u2(i,j,k))
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1, nj
+             do i = 1, ni+1
+                lh13(i,j,k) = 0.5*(rf(i,j,k)+rf(i-1,j,k)) * (l13(i,j,k) - u1u3(i,j,k))
+             end do
+          end do
+       end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 1, nk+1
+          do j = 1, nj+1
+             do i = 1, ni
+                lh23(i,j,k) = 0.5 * (rf(i,j,k)+rf(i,j-1,k)) &
+                     * (l23(i,j,k) - u2u3(i,j,k))
+             end do
+          end do
+       end do
+
+    end if
+
+    !-----
+    ! lateral boundary conditions:
+    if((wbc.eq.3 .or. wbc.eq.4) .and. ibw.eq.1)then
+       ! rigid walls
+       do k = 1, nk
+          do j=1,nj+1
+             lh12(1,j,k) = 0.0
+          enddo
+       enddo
+    endif
+    if((ebc.eq.3 .or. ebc.eq.4) .and.ibe.eq.1)then
+       ! rigid walls
+       do k = 1, nk
+          do j=1,nj+1
+             lh12(ni+1,j,k) = 0.0
+          enddo
+       enddo
+    endif
+    !-----
+    !-----
+    if((sbc.eq.3 .or. sbc.eq.4) .and. ibs.eq.1)then
+       ! rigid walls
+       do k = 1, nk
+          do i=1,ni+1
+             lh12(i,1,k) = 0.0
+          enddo
+       enddo
+    endif
+    if((nbc.eq.3 .or. nbc.eq.4) .and. ibn.eq.1)then
+       ! rigid walls
+       do k=1,nk
+          do i=1,ni+1
+             lh12(i,nj+1,k) = 0.0
+          enddo
+       enddo
+    endif
+    !-----
+
+    !-----
+    ! lateral boundary conditions:
+    if((wbc.eq.3 .or. wbc.eq.4) .and. ibw.eq.1)then
+       ! rigid walls
+       do k = 2, nk
+          do j=1,nj
+             lh13(1,j,k) = 0.0
+          enddo
+       enddo
+    endif
+    if((ebc.eq.3 .or. ebc.eq.4) .and. ibe.eq.1)then
+      ! rigid walls
+       do k=2,nk
+          do j=1,nj
+             lh13(ni+1,j,k) = 0.0
+          enddo
+       enddo
+    endif
+    !-----
+
+    !-----
+    if((sbc.eq.3 .or. sbc.eq.4) .and. ibs.eq.1)then
+       ! rigid walls
+       do k=2,nk
+          do i=1,ni
+             lh23(i,1,k) = 0.0
+          enddo
+       enddo
+    endif
+    if((nbc.eq.3 .or. nbc.eq.4) .and. ibn.eq.1)then
+       ! rigid walls
+       do k=2,nk
+          do i=1,ni
+             lh23(i,nj+1,k) = 0.0
+          enddo
+       enddo
+    endif
+    !-----
+
+    !-------------------------------------------------------------------------------
+    !  open boundary conditions:
+
+    if (wbc.eq.2 .or. ebc.eq.2 .or. sbc.eq.2 .or. nbc.eq.2) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k=1,nk
+          !-----
+          if (wbc.eq.2 .and. ibw.eq.1) then
+             do j=0,nj+1
+                lh11(0,j,k) = lh11(1,j,k)
+             enddo
+          endif
+          if (ebc.eq.2 .and. ibe.eq.1) then
+             do j=0,nj+1
+                lh11(ni+1,j,k) = lh11(ni,j,k)
+             enddo
+          endif
+          !-----
+          !-----
+          if( sbc.eq.2 .and. ibs.eq.1 )then
+             do i=0,ni+1
+                lh22(i,0,k) = lh22(i,1,k)
+             enddo
+          endif
+          if( nbc.eq.2 .and. ibn.eq.1 )then
+             do i=0,ni+1
+                lh22(i,nj+1,k) = lh22(i,nj,k)
+             enddo
+          endif
+          !-----
+          !-----
+          if( wbc.eq.2 .and. ibw.eq.1 )then
+             do j=1,nj+1
+                lh12(1,j,k) = lh12(2,j,k)
+             enddo
+          endif
+          if( ebc.eq.2 .and. ibe.eq.1 )then
+             do j=1,nj+1
+                lh12(ni+1,j,k) = lh12(ni,j,k)
+             enddo
+          endif
+          !-----
+          if( sbc.eq.2 .and. ibs.eq.1 )then
+             do i=1,ni+1
+                lh12(i,1,k) = lh12(i,2,k)
+             enddo
+          endif
+          if( nbc.eq.2 .and. ibn.eq.1 )then
+             do i=1,ni+1
+                lh12(i,nj+1,k) = lh12(i,nj,k)
+             enddo
+          endif
+          !-----
+          ! corner points:
+          !-----
+          if( sbc.eq.2 .and. ibs.eq.1 .and. &
+               wbc.eq.2 .and. ibw.eq.1 )then
+             lh12(1,1,k) = lh12(2,2,k)
+          endif
+          if( sbc.eq.2 .and. ibs.eq.1 .and. &
+               ebc.eq.2 .and. ibe.eq.1 )then
+             lh12(ni+1,1,k) = lh12(ni,2,k)
+          endif
+          if( nbc.eq.2 .and. ibn.eq.1 .and. &
+               wbc.eq.2 .and. ibw.eq.1 )then
+             lh12(1,nj+1,k) = lh12(2,nj,k)
+          endif
+          if( nbc.eq.2 .and. ibn.eq.1 .and. &
+               ebc.eq.2 .and. ibe.eq.1 )then
+             lh12(ni+1,nj+1,k) = lh12(ni,nj,k)
+          endif
+          !-----
+       enddo
+    endif
+
+!    calculation of (Lij - Hij) is done
+!----------------------------------------------------------
+
+! calculate numerators and denominators
+
+! mutilply (Lij - Hij) by S_ij first
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk
+        do j = 1, nj
+            do i = 1, ni
+                lh11(i,j,k) = lh11(i,j,k) * s11_filt(i,j,k)
+                lh22(i,j,k) = lh22(i,j,k) * s22_filt(i,j,k)
+                lh33(i,j,k) = lh33(i,j,k) * s33_filt(i,j,k)
+            end do
+        end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk
+        do j = 1, nj+1
+            do i = 1, ni+1
+                lh12(i,j,k) = lh12(i,j,k) * s12_filt(i,j,k)
+            end do
+        end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk+1
+        do j = 1, nj
+            do i = 1, ni+1
+                lh13(i,j,k) = lh13(i,j,k) * s13_filt(i,j,k)
+            end do
+        end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk+1
+        do j = 1, nj+1
+            do i = 1, ni
+                lh23(i,j,k) = lh23(i,j,k) * s23_filt(i,j,k)
+            end do
+        end do
+    end do
+! multiplication done
+
+! square S_ij
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk
+        do j = 1, nj
+            do i = 1, ni
+                s11_filt(i,j,k) = s11_filt(i,j,k) * s11_filt(i,j,k)
+                s22_filt(i,j,k) = s22_filt(i,j,k) * s22_filt(i,j,k)
+                s33_filt(i,j,k) = s33_filt(i,j,k) * s33_filt(i,j,k)
+            end do
+        end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk
+        do j = 1, nj+1
+            do i = 1, ni+1
+                s12_filt(i,j,k) = s12_filt(i,j,k) * s12_filt(i,j,k)
+            end do
+        end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk+1
+        do j = 1, nj
+            do i = 1, ni+1
+                s13_filt(i,j,k) = s13_filt(i,j,k) * s13_filt(i,j,k)
+            end do
+        end do
+    end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 1, nk+1
+        do j = 1, nj+1
+            do i = 1, ni
+                s23_filt(i,j,k) = s23_filt(i,j,k) * s23_filt(i,j,k)
+            end do
+        end do
+    end do
+! squaring done
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 2, nk
+        do j = 1, nj
+            do i = 1, ni
+                cc2 = c2(i,j,k)
+                cc1 = 1.0 - cc2
+                numer_h(i,j,k) = 0.25 * (cc2 * (lh12(i,j,k) + lh12(i+1,j,k) + lh12(i,j+1,k) + lh12(i+1,j+1,k)) +  &
+                                 cc1 * (lh12(i,j,k-1) + lh12(i+1,j,k-1) + lh12(i,j+1,k-1) + lh12(i+1,j+1,k-1))) + &
+                                 (cc2 * (lh11(i,j,k) + lh22(i,j,k) + lh33(i,j,k)) + cc1 * (lh11(i,j,k-1) + lh22(i,j,k-1) + lh33(i,j,k-1)))
+                numer_v(i,j,k) = 0.5 * (lh13(i,j,k) + lh13(i+1,j,k)) + 0.5 * (lh23(i,j,k) + lh23(i,j+1,k))
+            end do
+        end do
+    end do
+
+    if (tconfig.eq.1) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+         do k = 2, nk
+             do j = 1, nj
+                 do i = 1, ni
+                     numer_h(i,j,k) = numer_h(i,j,k) + numer_v(i,j,k)
+                 end do
+             end do
+         end do
+    end if
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k = 2, nk
+        do j = 1, nj
+           do i = 1, ni
+              cc2 = c2(i,j,k)
+              cc1 = 1.0 - cc2
+              denom_h(i,j,k) = (1. - alpha43) * &
+                               (0.25 * (cc2 * (s12_filt(i,j,k) + s12_filt(i+1,j,k) + s12_filt(i,j+1,k) + s12_filt(i+1,j+1,k)) +  &
+                               cc1 * (s12_filt(i,j,k-1) + s12_filt(i+1,j,k-1) + s12_filt(i,j+1,k-1) + s12_filt(i+1,j+1,k-1))) + &
+                               (cc2 * (s11_filt(i,j,k) + s22_filt(i,j,k) + s33_filt(i,j,k)) + cc1 * (s11_filt(i,j,k-1) + s22_filt(i,j,k-1) + s33_filt(i,j,k-1))))
+              denom_v(i,j,k) = (1. - alpha43) * &
+                               (0.5 * (s13_filt(i,j,k) + s13_filt(i+1,j,k)) + 0.5 * (s23_filt(i,j,k) + s23_filt(i,j+1,k)))
+           end do
+        end do
+    end do
+
+    if (tconfig.eq.1) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+       do k = 2, nk
+          do j = 1, nj
+             do i = 1, ni
+                denom_h(i,j,k) = denom_h(i,j,k) + denom_v(i,j,k)
+             end do
+          end do
+       end do
+    end if
+
+    ave_times = 1  ! # of spatial averaging to perform
+
+    do i = 1, ave_times
+        call bcw(numer_h,1)
+        call bcw(numer_v,1)
+        call bcw(denom_h,0)
+        call bcw(denom_v,0)
+
+#ifdef MPI
+       if (tconfig.eq.1) then
+
+          call comm_3w_start(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+                              nhs31,nhs32,nhn31,nhn32,reqs_nh)
+       else if (tconfig.eq.2) then
+
+          call comm_3w_start(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+                              nhs31,nhs32,nhn31,nhn32,reqs_nh)
+
+          call comm_3w_start(numer_v,nvw31,nvw32,nve31,nve32,   &
+                    nvs31,nvs32,nvn31,nvn32,reqs_nv)
+       end if
+
+       if (tconfig.eq.1) then
+          call comm_3w_end(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+                              nhs31,nhs32,nhn31,nhn32,reqs_nh)
+          call getcornerw3(numer_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                         s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(numer_h)
+       else if (tconfig.eq.2) then
+          call comm_3w_end(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+               nhs31,nhs32,nhn31,nhn32,reqs_nh)
+
+          call getcornerw3(numer_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(numer_h)
+          call comm_3w_end(numer_v,nvw31,nvw32,nve31,nve32,   &
+               nvs31,nvs32,nvn31,nvn32,reqs_nv)
+          call getcornerw3(numer_v,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(numer_v)
+       end if
+
+
+       if (tconfig.eq.1) then
+
+          call comm_3w_start(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+               dhs31,dhs32,dhn31,dhn32,reqs_dh)
+       else if (tconfig.eq.2) then
+
+          call comm_3w_start(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+               dhs31,dhs32,dhn31,dhn32,reqs_dh)
+
+          call comm_3w_start(denom_v,dvw31,dvw32,dve31,dve32,   &
+               dvs31,dvs32,dvn31,dvn32,reqs_dv)
+       end if
+
+       if (tconfig.eq.1) then
+          call comm_3w_end(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+               dhs31,dhs32,dhn31,dhn32,reqs_dh)
+          call getcornerw3(denom_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+
+          call bcw2(denom_h)
+       else if (tconfig.eq.2) then
+          call comm_3w_end(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+               dhs31,dhs32,dhn31,dhn32,reqs_dh)
+          call getcornerw3(denom_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call comm_3w_end(denom_v,dvw31,dvw32,dve31,dve32,   &
+               dvs31,dvs32,dvn31,dvn32,reqs_dv)
+          call getcornerw3(denom_v,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+               s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+
+          call bct2(denom_h)
+          call bct2(denom_v)
+       end if
+#endif
+
+       call ave_filter_w3d(numer_h, 1, ni, 1, nj, 2, nk, numer_h_filt, w_temp)
+       if (tconfig.eq.2) then
+          call ave_filter_w3d(numer_v, 1, ni, 1, nj, 2, nk, numer_v_filt, w_temp)
+       end if
+       call ave_filter_w3d(denom_h, 1, ni, 1, nj, 2, nk, denom_h_filt, w_temp)
+       if (tconfig.eq.2) then
+           call ave_filter_w3d(denom_v, 1, ni, 1, nj, 2, nk, denom_v_filt, w_temp)
+       end if
+
+    end do
+
+    if (dyn_correct .eq. 1) then
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            if (denom_h_filt(i,j,k).lt.dmin) then
+              kmh(i,j,k) = 0.5 * c_b(i,j,k) * (numer_h_filt(i,j,k) / denom_h_filt(i,j,k))
+            else
+              kmh(i,j,k) = 0.5 * c_b(i,j,k) * (numer_h_filt(i,j,k) / dmin)
+            end if
+            if (kmh(i,j,k).lt.kclip) then
+              kmh(i,j,k) = kclip
+            end if
+            !  limit for numerical stability:
+            kmh(i,j,k) = min( kmh(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j), tem3*rmf(i,j,k)*rmf(i,j,k) )
+          end do
+        end do
+      end do
+    else
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            if (denom_h_filt(i,j,k).lt.dmin) then
+              kmh(i,j,k) = 0.5 * (numer_h_filt(i,j,k) / denom_h_filt(i,j,k))
+            else
+              kmh(i,j,k) = 0.5 * (numer_h_filt(i,j,k) / dmin)
+            end if
+            if (kmh(i,j,k).lt.kclip) then
+              kmh(i,j,k) = kclip
+            end if
+            !  limit for numerical stability:
+            kmh(i,j,k) = min( kmh(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j),  tem3*rmf(i,j,k)*rmf(i,j,k) )
+          end do
+        end do
+      end do
+    end if
+
+    if (tconfig.eq.1) then
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            kmv(i,j,k) = kmh(i,j,k)
+          end do
+        end do
+      end do
+    else if (tconfig.eq.2) then
+      if (dyn_correct .eq. 1) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              if (denom_v_filt(i,j,k).lt.dmin) then
+                kmv(i,j,k) = 0.5 * c_b(i,j,k) * (numer_v_filt(i,j,k) / denom_v_filt(i,j,k))
+              else
+                kmv(i,j,k) = 0.5 * c_b(i,j,k) * (numer_v_filt(i,j,k) / dmin)
+              end if
+              if (kmv(i,j,k).lt.kclip) then
+                kmv(i,j,k) = kclip
+              end if
+              !  limit for numerical stability:
+              kmv(i,j,k) = min( kmv(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j),  tem3*rmf(i,j,k)*rmf(i,j,k) )
+            end do
+          end do
+        end do
+      else
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              if (denom_v_filt(i,j,k).lt.dmin) then
+                kmv(i,j,k) = 0.5 * (numer_v_filt(i,j,k) / denom_v_filt(i,j,k))
+              else
+                kmv(i,j,k) = 0.5 * (numer_v_filt(i,j,k) / dmin)
+              end if
+              if (kmv(i,j,k).lt.kclip) then
+                kmv(i,j,k) = kclip
+              end if
+              !  limit for numerical stability:
+              kmv(i,j,k) = min( kmv(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j),  tem3*rmf(i,j,k)*rmf(i,j,k) )
+            end do
+          end do
+        end do
+      end if
+    end if
+
+!--------------------------------------------------------------
+
+    ! if(timestats.ge.1) time_turb=time_turb+mytime()
+
+    call bcw(kmh,1)
+    call bcw(kmv,1)
+#ifdef MPI
+    call comm_1t_start(kmh,khcw1,khcw2,khce1,khce2,   &
+                           khcs1,khcs2,khcn1,khcn2,reqs_khc)
+
+    call comm_1t_start(kmv,kvcw1,kvcw2,kvce1,kvce2,   &
+                           kvcs1,kvcs2,kvcn1,kvcn2,reqs_kvc)
+
+    call comm_1t_end(kmh,khcw1,khcw2,khce1,khce2,   &
+                         khcs1,khcs2,khcn1,khcn2,reqs_khc)
+    call getcornert(kmh,nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
+
+    call comm_1t_end(kmv,kvcw1,kvcw2,kvce1,kvce2,   &
+                         kvcs1,kvcs2,kvcn1,kvcn2,reqs_kvc)
+    call getcornert(kmv,nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
+    call bct2(kmh)
+    call bct2(kmv)
+#endif
+
+!--------------------------------------------------------------
+!  cm1r18: surface
+
+    if (bbc.eq.3) then
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j)
+      do j=1,nj
+      do i=1,ni
+        kmv(i,j,1) = karman*znt(i,j)*ust(i,j)
+      enddo
+      enddo
+
+      call bc2d(kmv(ibc,jbc,1))
+#ifdef MPI
+      call comm_1s2d_start(kmv(ibc,jbc,1),khcw1(1,1),khcw2(1,1),khce1(1,1),khce2(1,1),   &
+                                          khcs1(1,1),khcs2(1,1),khcn1(1,1),khcn2(1,1),reqs_khc)
+      call comm_1s2d_end(kmv(ibc,jbc,1),khcw1(1,1),khcw2(1,1),khce1(1,1),khce2(1,1),   &
+                                        khcs1(1,1),khcs2(1,1),khcn1(1,1),khcn2(1,1),reqs_khc)
+      call comm_2d_corner(kmv(ibc,jbc,1))
+      call bcs2_2d(kmv(ibc,jbc,1))
+#endif
+
+   end if
+
+    IF( tconfig.eq.1 )THEN
+!$omp parallel do default(shared)   &
+!$omp private(i,j)
+      do j=0,nj+1
+      do i=0,ni+1
+        kmh(i,j,1) = kmv(i,j,1)
+      enddo
+      enddo
+    ENDIF
+
+
+    if (reconstr.ge.1) then
+       ! test-filter u, v, w, needed for dyn_wl_scalar
+       call te_filter_u3d(ua, ib+1, ie, jb+1, je-1, 1, nk, u_re_add, u_temp)
+       call te_filter_v3d(va, ib+1, ie-1, jb+1, je, 1, nk, v_re_add, v_temp)
+       call te_filter_w3d(wa, ib+1, ie-1, jb+1, je-1, 1, nk+1, w_re_add, w_temp)
+    end if
+
+!--------------------------------------------------------------
+
+    ! if(timestats.ge.1) time_turb=time_turb+mytime()
+
+    return
+    end subroutine dyn_wl
+
+    subroutine dyn_wl_scalar(nstep,dt,dosfcflx,ruh,rvh,rmh,mf,rmf,      &
+      th0,thflux,qvflux,rth0s,rf,rho,c1,c2,                             &
+      nm,c_b,defv,defh,vh,vf,uh,uf,zf,znt,ust,qsfc,tsk,psfc,            &
+      numer_h,numer_v,denom_h,denom_v,                                  &
+      kmh,kmv,khh,khv,dmin,itheta,imixratio,                            &
+      rds,sigma,rdsf,sigmaf,mh,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv,  &
+      u_tt_filt,v_tt_filt,w_tt_filt,                                    &
+      u1th_re,u2th_re,u3th_re,                                          &
+      ua,va,wa,tha,u_te_filt,v_te_filt,w_te_filt,                       &
+      u1th, u2th, u3th,                                                 &
+      ut1th, ut2th, ut3th,                                              &
+      lh11, lh22, lh33,                                                 &
+      l11, l22, l33,                                                    &
+      h11, h22, h33,                                                    &
+      s11, s22, s33,                                                    &
+      s11_filt, s22_filt, s33_filt,                                     &
+      numer_h_filt, denom_h_filt,                                       &
+      numer_v_filt, denom_v_filt,                                       &
+      th8w, w_temp,                                                     &
+      th_re_add, u_re_add, v_re_add, w_re_add,                          &
+      x_temp, th_te_filt, th_tt_filt,                                   &
+      n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,                          &
+      nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                                  &
+      khcw1,khcw2,khce1,khce2,khcs1,khcs2,khcn1,khcn2,                  &
+      kvcw1,kvcw2,kvce1,kvce2,kvcs1,kvcs2,kvcn1,kvcn2,                  &
+      thw31,thw32,the31,the32,                                          &
+      ths31,ths32,thn31,thn32,                                          &
+      nhw31,nhw32,nhe31,nhe32,                                          &
+      nhs31,nhs32,nhn31,nhn32,                                          &
+      nvw31,nvw32,nve31,nve32,                                          &
+      nvs31,nvs32,nvn31,nvn32,                                          &
+      dhw31,dhw32,dhe31,dhe32,                                          &
+      dhs31,dhs32,dhn31,dhn32,                                          &
+      dvw31,dvw32,dve31,dve32,                                          &
+      dvs31,dvs32,dvn31,dvn32)
+
+      use input
+      use constants
+      use comm_module
+      use bc_module
+
+      implicit none
+
+      integer, intent(in)    :: nstep
+      real,    intent(in)    :: dt
+      logical, intent(in)    :: dosfcflx
+      real, dimension(ib:ie) :: ruh
+      real, dimension(jb:je) :: rvh
+
+      real, intent(in), dimension(jb:je)   :: vh
+      real, intent(in), dimension(jb:je+1) :: vf
+      real, intent(in), dimension(ib:ie)   :: uh
+      real, intent(in), dimension(ib:ie+1) :: uf
+
+      real, intent(in), dimension(kb:ke)   :: rds,sigma
+      real, intent(in), dimension(kb:ke+1) :: rdsf,sigmaf
+      real, dimension(ib:ie,jb:je,kb:ke)   :: mh
+      real, intent(in), dimension(itb:ite,jtb:jte) :: gz,rgz,gzu,rgzu,gzv,rgzv
+      real, intent(in), dimension(itb:ite,jtb:jte,ktb:kte) :: gx,gxu,gy,gyv
+
+      real, dimension(ib:ie,jb:je,kb:ke)   :: rmh
+      real, dimension(ib:ie,jb:je,kb:ke+1) :: mf,rmf
+      real, dimension(ib:ie,jb:je,kb:ke)   :: th0
+      real, dimension(ib:ie,jb:je) :: thflux,qvflux,rth0s
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke)   :: rf, rho
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: nm,defv,defh,c_b
+      real, intent(in), dimension(ib:ie,jb:je) :: znt,ust
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: zf
+      real, intent(out), dimension(ibc:iec,jbc:jec,kbc:kec) :: khh,khv
+      real, intent(in), dimension(ibc:iec,jbc:jec,kbc:kec)  :: kmh,kmv
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: u1th_re,u2th_re,u3th_re
+      real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: ua
+      real, intent(in), dimension(ib:ie,jb:je+1,kb:ke) :: va
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: wa
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke)   :: tha
+
+      real, intent(inout), dimension(ib:ie,jb:je)      :: tsk, psfc
+      real, intent(inout), dimension(ibl:iel,jbl:jel)  :: qsfc
+
+      real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: u_te_filt,u_tt_filt,u_re_add
+      real, intent(in), dimension(ib:ie,jb:je+1,kb:ke) :: v_te_filt,v_tt_filt,v_re_add
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: w_te_filt,w_tt_filt,w_re_add
+
+      real, intent(inout), dimension(kmt)     :: nw1,nw2,ne1,ne2,sw1,sw2,se1,se2
+      real, intent(inout), dimension(jmp,kmt) :: khcw1,khcw2,khce1,khce2
+      real, intent(inout), dimension(imp,kmt) :: khcs1,khcs2,khcn1,khcn2
+      real, intent(inout), dimension(jmp,kmt) :: kvcw1,kvcw2,kvce1,kvce2
+      real, intent(inout), dimension(imp,kmt) :: kvcs1,kvcs2,kvcn1,kvcn2
+      real, intent(inout), dimension(cmp,cmp,nk+1) :: n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2
+
+      real, dimension(cmp,jmp,kmp)   :: thw31,thw32,the31,the32
+      real, dimension(imp,cmp,kmp)   :: ths31,ths32,thn31,thn32
+
+      real, dimension(cmp,jmp,kmp-1) :: nhw31,nhw32,nhe31,nhe32
+      real, dimension(imp,cmp,kmp-1) :: nhs31,nhs32,nhn31,nhn32
+      real, dimension(cmp,jmp,kmp-1) :: nvw31,nvw32,nve31,nve32
+      real, dimension(imp,cmp,kmp-1) :: nvs31,nvs32,nvn31,nvn32
+
+      real, dimension(cmp,jmp,kmp-1) :: dhw31,dhw32,dhe31,dhe32
+      real, dimension(imp,cmp,kmp-1) :: dhs31,dhs32,dhn31,dhn32
+      real, dimension(cmp,jmp,kmp-1) :: dvw31,dvw32,dve31,dve32
+      real, dimension(imp,cmp,kmp-1) :: dvs31,dvs32,dvn31,dvn32
+
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: c1,c2
+
+      real, intent(in) :: dmin
+      logical :: itheta, imixratio   ! denote whether we are computing for theta
+                                     ! or mixing ratios
+      ! temporary arrays
+      real, dimension(ib:ie,jb:je,kb:ke) :: th_te_filt,th_tt_filt,x_temp,th_re_add
+      real, dimension(ib:ie,jb:je,kb:ke+1) :: th8w, & ! theata at w point
+                                              w_temp
+
+      real, dimension(ib:ie,jb:je,kb:ke) :: lh11, lh22, lh33
+      real, dimension(ib:ie,jb:je,kb:ke) :: l11, l22, l33, &  ! only first term of Lij first
+                                            h11, h22, h33     ! only first term of Hij first
+                                                              ! add other terms later
+      real, dimension(ib:ie,jb:je,kb:ke)  ::  u1th, u2th, u3th, &
+                                              ut1th, ut2th, ut3th
+
+      real, dimension(ib:ie,jb:je,kb:ke) :: s11, s22, s33,  &   ! scalar gradients
+                                            s11_filt, s22_filt, s33_filt
+      real, dimension(ibc:iec,jbc:jec,kbc:kec) :: numer_h,denom_h,numer_v,denom_v, &
+                              numer_h_filt, denom_h_filt, numer_v_filt, denom_v_filt
+
+      ! local variables
+      integer, dimension(8) :: reqs_th, reqs_nh, reqs_dh, reqs_nv, reqs_dv
+
+      integer :: i, j, k, irec, icomm, ave_times
+      real :: cc1, cc2, tem1, tem2, tem3, thsfc
+
+#ifdef MPI
+      integer reqs_khc(8)
+      integer reqs_kvc(8)
+#endif
+      real, parameter :: kclip = 0.0  ! -1.5e-5
+      real :: prandtl
+      real :: prinv
+
+      if (tconfig.eq.1) then
+        prandtl = 1.0/3.0
+        prinv = 1.0/prandtl
+      else
+        prandtl = 1.0
+        prinv = 1.0/prandtl
+      end if
+
+      tem1 = 0.125*dx*dx/dt
+      tem2 = 0.125*dy*dy/dt
+      tem3 = 0.125*dz*dz/dt
+
+      ! test-filter theta/scalar
+      call te_filter_s3d(tha, 1, ni, 1, nj, 1, nk, th_te_filt, x_temp)
+
+      call bcs(th_te_filt)
+#ifdef MPI
+
+      call comm_3s_start(th_te_filt,thw31,thw32,the31,the32,   &
+                         ths31,ths32,thn31,thn32,reqs_th)
+#endif
+
+      !==========================================================
+      ! calculate theta gradients, denoted by s11, s22, s33 below
+      !
+      if (.not.terrain_flag) then
+
+        if (axisymm.eq.0) then
+          ! Cartesian without terrain:
+
+          !$omp parallel do default(shared)   &
+          !$omp private(i,j,k)
+          do k=1,nk
+
+            !  x-direction
+            do j=0,nj+1
+              do i=0,ni+2
+                s11(i,j,k)= 0.5 * (rho(i,j,k)+rho(i-1,j,k)) * (tha(i,j,k) - tha(i-1,j,k)) * rdx * uf(i)
+                ! at u point
+              enddo
+            enddo
+
+            if( wbc.eq.2 .and. ibw.eq.1 )then
+              do j=1,nj
+                s11(1,j,k) = s11(2,j,k)
+              enddo
+            endif
+            if( ebc.eq.2 .and. ibe.eq.1 )then
+              do j=1,nj
+                s11(ni+1,j,k) = s11(ni,j,k)
+              enddo
+            endif
+
+            if( wbc.ge.3 .and. ibw.eq.1 )then
+              do j=1,nj
+                s11(1,j,k) = 0.0
+              enddo
+            endif
+            if( ebc.ge.3 .and. ibe.eq.1 )then
+              do j=1,nj
+                s11(ni+1,j,k) = 0.0
+              enddo
+            endif
+
+            !  y-direction
+            do j=0,nj+2
+              do i=0,ni+1
+                s22(i,j,k)= 0.5 * (rho(i,j,k)+rho(i,j-1,k)) * (tha(i,j,k)-tha(i,j-1,k)) * rdy * vf(j)
+              enddo
+            enddo
+
+            if( sbc.eq.2 .and. ibs.eq.1 )then
+              do i=1,ni
+                s22(i,1,k) = s22(i,2,k)
+              enddo
+            endif
+            if( nbc.eq.2 .and. ibn.eq.1 )then
+              do i=1,ni
+                s22(i,nj+1,k) = s22(i,nj,k)
+              enddo
+            endif
+            if( sbc.ge.3 .and. ibs.eq.1 )then
+              do i=1,ni
+                s22(i,1,k) = 0.0
+              enddo
+            endif
+            if( nbc.ge.3 .and. ibn.eq.1 )then
+              do i=1,ni
+                s22(i,nj+1,k) = 0.0
+              enddo
+            endif
+          enddo
+
+        else
+          ! axisymmetric:
+          ! add code in the future, if needed.  :)   XS 12/10/2018
+        endif   ! endif for axisymm check
+
+        !---------------------------------------------------------------
+
+      else
+        ! Cartesian with terrain:
+
+        ! use turbz as a temporary array for s at w-pts:
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k,r1,r2)
+        do j=-1,nj+2
+
+          ! lowest model level:
+          do i=-1,ni+2
+            th8w(i,j,1) = cgs1*tha(i,j,1)+cgs2*tha(i,j,2)+cgs3*tha(i,j,3)
+          enddo
+
+          ! upper-most model level:
+          do i=-1,ni+2
+            th8w(i,j,nk+1) = cgt1*tha(i,j,nk)+cgt2*tha(i,j,nk-1)+cgt3*tha(i,j,nk-2)
+          enddo
+
+          ! interior:
+          do k=2,nk
+            cc2 = c2(i,j,k)
+            cc1 = 1.0-cc2
+            do i=-1,ni+2
+              th8w(i,j,k) = cc1*tha(i,j,k-1)+cc2*tha(i,j,k)
+            enddo
+          enddo
+
+        enddo
+
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k=1,nk
+
+          ! x-direction
+          do j=0,nj+1
+            do i=0,ni+2
+              s11(i,j,k)= 0.5*(gz(i,j)*rho(i,j,k) + gz(i-1,j)*rho(i-1,j,k)) * &
+              ((tha(i,j,k)*rgz(i,j)-tha(i-1,j,k)*rgz(i-1,j)) * rdx*uf(i) + &
+              0.5*(gxu(i,j,k+1)*(th8w(i,j,k+1)+th8w(i-1,j,k+1)) - &
+              gxu(i,j,k  )*(th8w(i,j,k  )+th8w(i-1,j,k  ))) * rdsf(k) * rgzu(i,j))
+            enddo
+          enddo
+
+          if( wbc.ge.3 .and. ibw.eq.1 )then
+            do j=1,nj
+              s11(1,j,k) = 0.0
+            enddo
+          endif
+          if( ebc.ge.3 .and. ibe.eq.1 )then
+            do j=1,nj
+              s11(ni+1,j,k) = 0.0
+            enddo
+          endif
+
+
+          ! y-flux
+          do j=0,nj+2
+            do i=0,ni+1
+              s22(i,j,k)= 0.5*(gz(i,j)*rho(i,j,k) + gz(i,j-1)*rho(i,j-1,k)) * &
+              ((tha(i,j,k)*rgz(i,j)-tha(i,j-1,k)*rgz(i,j-1)) *rdy*vf(j) + &
+              0.5*(gyv(i,j,k+1)*(th8w(i,j,k+1)+th8w(i,j-1,k+1)) - &
+              gyv(i,j,k  )*(th8w(i,j,k  )+th8w(i,j-1,k  ))) * rdsf(k) * rgzv(i,j))
+            enddo
+          enddo
+
+          if( sbc.ge.3 .and. ibs.eq.1 )then
+            do i=1,ni
+              s22(i,1,k) = 0.0
+            enddo
+          endif
+          if( nbc.ge.3 .and. ibn.eq.1 )then
+            do i=1,ni
+              s22(i,nj+1,k) = 0.0
+            enddo
+          endif
+
+        enddo
+
+
+      endif  ! endif for terrain check
+
+      !  z-direction
+      k = 1
+      if (itheta) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j)
+        do j = 0, nj+1
+          do i = 0, ni+1
+            thsfc = cgs1*tha(i,j,1)+cgs2*tha(i,j,2)+cgs3*tha(i,j,3)
+            s33(i,j,k) = rf(i,j,k)*(tha(i,j,k)-thsfc) * (2.*rdz) * mh(i,j,k)
+          end do
+        end do
+      else if (imixratio) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j)
+        do j = 0, nj+1
+          do i = 0, ni+1
+            thsfc =  cgs1*tha(i,j,1)+cgs2*tha(i,j,2)+cgs3*tha(i,j,3)
+            s33(i,j,k) = rf(i,j,k)*(tha(i,j,k)-thsfc) * (2.*rdz) * mh(i,j,k)
+          end do
+        end do
+      else
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j)
+        do j = 0, nj+1
+          do i = 0, ni+1
+            s33(i,j,k) = rf(i,j,k)*(tha(i,j,k)-0.0) * (2.*rdz) * mh(i,j,k)
+          end do
+        end do
+      end if
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k = 2, nk
+        do j = 0, nj+1
+          do i = 0, ni+1
+            s33(i,j,k) = rf(i,j,k)*(tha(i,j,k)-tha(i,j,k-1)) * rdz * mh(i,j,k)
+          end do
+        end do
+      end do
+
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do j = 0, nj+1
+        do i = 0, ni+1
+          s33(i,j,nk+1) = s33(i,j,nk)
+        end do
+      end do
+      ! calculation of theta-gradient done
+
+      !==========================================================
+      ! test-filter sij
+      call te_filter_s3d(s11, 1, ni+1, 1, nj, 1, nk, s11_filt, x_temp)
+      call te_filter_s3d(s22, 1, ni, 1, nj+1, 1, nk, s22_filt, x_temp)
+      call te_filter_s3d(s33, 1, ni, 1, nj, 1, nk+1, s33_filt, x_temp)
+      !----------------------------------------------------------
+      !    build Lij - Hij
+      if ((reconstr.ne.0) .or. (.not.itheta)) then  ! the following terms are
+                                                    ! already computed if this is
+                                                    ! theta and reconstr.eq.0
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = -1, nj+2
+            do i = -1, ni+3
+              u1th(i,j,k) = ua(i,j,k) * (tha(i-1,j,k) + tha(i,j,k)) * 0.5
+            end do
+          end do
+        end do
+
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 1, nk
+          do j = -1, nj+3
+            do i = -1, ni+2
+              u2th(i,j,k) = va(i,j,k) * (tha(i,j,k) + tha(i,j-1,k)) * 0.5
+            end do
+          end do
+        end do
+
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 2, nk
+          do j = -1, nj+2
+            do i = -1, ni+2
+              cc2 = c2(i,j,k)
+              cc1 = 1.0-cc2
+              u3th(i,j,k) = wa(i,j,k) * (cc2*tha(i,j,k) + cc1*tha(i,j,k-1))
+            end do
+          end do
+        end do
+
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j)
+        do j = -1, nj+2
+          do i = -1, ni+2
+            u3th(i,j,1) = 0.0
+            u3th(i,j,nk+1) = 0.0
+          end do
+        end do
+      end if
+
+      call te_filter_s3d(u1th, 0, ni+2, 0, nj+1, 1, nk, l11, x_temp)
+      call te_filter_s3d(u2th, 0, ni+1, 0, nj+2, 1, nk, l22, x_temp)
+      call te_filter_s3d(u3th, 0, ni+1, 0, nj+1, 1, nk+1, l33, x_temp)
+
+#ifdef MPI
+      call comm_3s_end(th_te_filt,thw31,thw32,the31,the32,   &
+                       ths31,ths32,thn31,thn32,reqs_th)
+      call getcorner3(th_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+                      s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+
+      call bcs2(th_te_filt)
+#endif
+
+      if (reconstr.eq.0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 0, nj+1
+            do i = 0, ni+2
+              ut1th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i-1,j,k)) * u_te_filt(i,j,k)
+            end do
+          end do
+        end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 0, nj+2
+            do i = 0, ni+1
+              ut2th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i,j-1,k)) * v_te_filt(i,j,k)
+            end do
+          end do
+        end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 0, nj+1
+            do i = 0, ni+1
+              ut3th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i,j,k-1)) * w_te_filt(i,j,k)
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j)
+        do j = 0, nj+1
+          do i = 0, ni+1
+            ut3th(i,j,1) = 0.0
+            ut3th(i,j,nk+1) = 0.0
+          end do
+        end do
+      else if (reconstr.ge.1) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 0, nj+1
+            do i = 0, ni+2
+              ut1th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i-1,j,k)) * u_re_add(i,j,k)
+            end do
+          end do
+        end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 0, nj+2
+            do i = 0, ni+1
+              ut2th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i,j-1,k)) * v_re_add(i,j,k)
+            end do
+          end do
+        end do
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 2, nk
+          do j = 0, nj+1
+            do i = 0, ni+1
+              ut3th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i,j,k-1)) * w_re_add(i,j,k)
+            end do
+          end do
+        end do
+
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j)
+        do j = 0, nj+1
+          do i = 0, ni+1
+            ut3th(i,j,1) = 0.0
+            ut3th(i,j,nk+1) = 0.0
+          end do
+        end do
+
+      end if
+
+      if (reconstr.ge.0) then
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj
+            do i = 1, ni+1
+              l11(i,j,k) = l11(i,j,k) - ut1th(i,j,k)
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj+1
+            do i = 1, ni
+              l22(i,j,k) = l22(i,j,k) - ut2th(i,j,k)
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              l33(i,j,k) = l33(i,j,k) - ut3th(i,j,k)
+            end do
+          end do
+        end do
+
+        if (reconstr.ge.1) then
+          !    higher-level reconstruction
+          th_re_add = th_te_filt
+          irec = 0
+          icomm = 1
+          do while(irec.lt.reconstr)
+            if (icomm.gt.ngxy) then
+
+              call bcs(th_re_add)
+#ifdef MPI
+              call comm_3s_start(th_re_add,thw31,thw32,the31,the32,   &
+              ths31,ths32,thn31,thn32,reqs_th)
+              call comm_3s_end(th_re_add,thw31,thw32,the31,the32,   &
+              ths31,ths32,thn31,thn32,reqs_th)
+              call getcorner3(th_re_add,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+              s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+              call bcs2(th_re_add)
+#endif
+              icomm = 1
+            end if
+
+            call te_filter_s3d(th_re_add, ib+icomm, ie-icomm, jb+icomm, je-icomm, 1, nk, th_tt_filt, x_temp)
+
+            !$omp parallel do default(shared)   &
+            !$omp private(i,j,k)
+            do k = 1, nk
+              do j = jb+icomm, je-icomm
+                do i = ib+icomm, ie-icomm
+                  th_re_add(i,j,k) = th_re_add(i,j,k) - th_tt_filt(i,j,k)
+                end do
+              end do
+            end do
+            !$omp parallel do default(shared)   &
+            !$omp private(i,j,k)
+            do k = 1, nk
+              do j = jb, je
+                do i = ib, ie
+                  th_te_filt(i,j,k) = max(th_te_filt(i,j,k) + th_re_add(i,j,k), 0.0)
+                  ! this is to ensure positiveness of mixing ratios
+                end do
+              end do
+            end do
+            irec = irec + 1
+            icomm = icomm + 1
+          end do
+        end if
+
+#ifdef MPI
+          call bcs(th_te_filt)
+        if (reconstr .gt. 0) then
+
+          call comm_3s_start(th_te_filt,thw31,thw32,the31,the32,   &
+          ths31,ths32,thn31,thn32,reqs_th)
+          call comm_3s_end(th_te_filt,thw31,thw32,the31,the32,   &
+          ths31,ths32,thn31,thn32,reqs_th)
+          call getcorner3(th_te_filt,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bcs2(th_te_filt)
+        end if
+#endif
+        if (reconstr.gt. 0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 1, nk
+            do j = 0, nj+1
+              do i = 0, ni+2
+                ut1th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i-1,j,k)) * u_te_filt(i,j,k)
+              end do
+            end do
+          end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 1, nk
+            do j = 0, nj+2
+              do i = 0, ni+1
+                ut2th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i,j-1,k)) * v_te_filt(i,j,k)
+              end do
+            end do
+          end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+          do k = 2, nk
+            do j = 0, nj+1
+              do i = 0, ni+1
+                ut3th(i,j,k) = 0.5 * (th_te_filt(i,j,k) + th_te_filt(i,j,k-1)) * w_te_filt(i,j,k)
+              end do
+            end do
+          end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j)
+          do j = 0, nj+1
+            do i = 0, ni+1
+              ut3th(i,j,1) = 0.0
+              ut3th(i,j,nk+1) = 0.0
+            end do
+          end do
+
+        end if
+
+        ! test filter
+        call te_filter_s3d(ut1th, 1, ni+1, 1, nj, 1, nk, h11, x_temp)
+        call te_filter_s3d(ut2th, 1, ni, 1, nj+1, 1, nk, h22, x_temp)
+        call te_filter_s3d(ut3th, 1, ni, 1, nj, 1, nk+1, h33, x_temp)
+
+        call te_filter_s3d(th_te_filt, 0, ni+1, 0, nj+1, 1, nk, th_tt_filt, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj
+            do i = 1, ni+1
+              ut1th(i,j,k) = 0.5 * (th_tt_filt(i,j,k) + th_tt_filt(i-1,j,k)) * u_tt_filt(i,j,k)
+            end do
+          end do
+        end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj+1
+            do i = 1, ni
+              ut2th(i,j,k) = 0.5 * (th_tt_filt(i,j,k) + th_tt_filt(i,j-1,k)) * v_tt_filt(i,j,k)
+            end do
+          end do
+        end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              ut3th(i,j,k) = 0.5 * (th_tt_filt(i,j,k) + th_tt_filt(i,j,k-1)) * w_tt_filt(i,j,k)
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj
+            do i = 1, ni+1
+              lh11(i,j,k) = 0.5 * (rho(i,j,k)+rho(i-1,j,k)) * (l11(i,j,k) - (h11(i,j,k) -  ut1th(i,j,k)))
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj+1
+            do i = 1, ni
+              lh22(i,j,k) = 0.5 * (rho(i,j,k)+rho(i,j-1,k)) * (l22(i,j,k) - (h22(i,j,k) - ut2th(i,j,k)))
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              lh33(i,j,k) =  rf(i,j,k) * (l33(i,j,k) - (h33(i,j,k) - ut3th(i,j,k)))
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+! put te_filter(tau_re) into hij
+        call te_filter_s3d(u1th_re, 1, ni+1, 1, nj, 1, nk, h11, x_temp)
+        call te_filter_s3d(u2th_re, 1, ni, 1, nj+1, 1, nk, h22, x_temp)
+        call te_filter_s3d(u3th_re, 1, ni, 1, nj, 1, nk+1, h33, x_temp)
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj
+            do i = 1, ni+1
+              lh11(i,j,k) = lh11(i,j,k) + h11(i,j,k)
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj+1
+            do i = 1, ni
+              lh22(i,j,k) = lh22(i,j,k) + h22(i,j,k)
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              lh33(i,j,k) = lh33(i,j,k) + h33(i,j,k)
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+      else  ! no reconstruction
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj
+            do i = 1, ni+1
+              lh11(i,j,k) = 0.5 * (rho(i,j,k)+rho(i-1,j,k)) * (l11(i,j,k) - ut1th(i,j,k))
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 1, nk
+          do j = 1, nj+1
+            do i = 1, ni
+              lh22(i,j,k) = 0.5 * (rho(i,j,k)+rho(i,j-1,k)) * (l22(i,j,k) - ut2th(i,j,k))
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              lh33(i,j,k) =  rf(i,j,k) * (l33(i,j,k) - ut3th(i,j,k))
+              ! rho is multiplied here and below to cancel the density multiplied
+              ! in tij_re and sij
+            end do
+          end do
+        end do
+
+
+      end if
+
+      !----
+      if((wbc.eq.3 .or. wbc.eq.4) .and.ibw.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do j= 1, nj
+            lh11(1,j,k) = 0.0
+          enddo
+        enddo
+      endif
+      !-----
+      if((ebc.eq.3 .or. ebc.eq.4) .and.ibe.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do j= 1, nj
+            lh11(ni+1,j,k) = 0.0
+          enddo
+        enddo
+      endif
+      !-----
+      !-----
+      if((sbc.eq.3 .or. sbc.eq.4) .and. ibs.eq.1)then
+        ! rigid walls
+        do k = 1, nk
+          do i=1,ni
+            lh22(i,1,k) = 0.0
+          enddo
+        enddo
+      endif
+      if((nbc.eq.3 .or. nbc.eq.4) .and. ibn.eq.1)then
+        ! rigid walls
+        do k=1,nk
+          do i=1,ni
+            lh22(i,nj+1,k) = 0.0
+          enddo
+        enddo
+      endif
+      !-----
+
+      !-------------------------------------------------------------------------------
+      !  open boundary conditions:
+
+      if (wbc.eq.2 .or. ebc.eq.2 .or. sbc.eq.2 .or. nbc.eq.2) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k=1,nk
+          !-----
+          if (wbc.eq.2 .and. ibw.eq.1) then
+            do j=1,nj
+              lh11(0,j,k) = lh11(1,j,k)
+            enddo
+          endif
+          if (ebc.eq.2 .and. ibe.eq.1) then
+            do j=1,nj
+              lh11(ni+2,j,k) = lh11(ni+1,j,k)
+            enddo
+          endif
+          !-----
+          !-----
+          if( sbc.eq.2 .and. ibs.eq.1 )then
+            do i=1,ni
+              lh22(i,0,k) = lh22(i,1,k)
+            enddo
+          endif
+          if( nbc.eq.2 .and. ibn.eq.1 )then
+            do i=1,ni
+              lh22(i,nj+2,k) = lh22(i,nj+1,k)
+            enddo
+          endif
+          !-----
+        enddo
+      endif
+
+      !    calculation of (Lij - Hij) is done
+      !----------------------------------------------------------
+
+      ! calculate numerators and denominators
+
+      ! mutilply (Lij - Hij) by S_ij first
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 1, nj
+          do i = 1, ni+1
+            lh11(i,j,k) = lh11(i,j,k) * s11_filt(i,j,k)
+          end do
+        end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 1, nj+1
+          do i = 1, ni
+            lh22(i,j,k) = lh22(i,j,k) * s22_filt(i,j,k)
+          end do
+        end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            lh33(i,j,k) = lh33(i,j,k) * s33_filt(i,j,k)
+          end do
+        end do
+      end do
+
+      ! square S_ij
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 1, nj
+          do i = 1, ni+1
+            s11_filt(i,j,k) = s11_filt(i,j,k) * s11_filt(i,j,k)
+          end do
+        end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 1, nk
+        do j = 1, nj+1
+          do i = 1, ni
+            s22_filt(i,j,k) = s22_filt(i,j,k) * s22_filt(i,j,k)
+          end do
+        end do
+      end do
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            s33_filt(i,j,k) = s33_filt(i,j,k) * s33_filt(i,j,k)
+          end do
+        end do
+      end do
+      ! squaring done
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            cc2 = c2(i,j,k)
+            cc1 = 1.0 - cc2
+            numer_h(i,j,k) = 0.5 * (cc2 * (lh11(i,j,k) + lh11(i+1,j,k)) + cc1 * (lh11(i,j,k-1) + lh11(i+1,j,k-1))) + &
+            0.5 * (cc2 * (lh22(i,j,k) + lh22(i,j+1,k)) + cc1 * (lh22(i,j,k-1) + lh22(i,j+1,k-1)))
+            numer_v(i,j,k) = lh33(i,j,k)
+          end do
+        end do
+      end do
+
+      if (tconfig.eq.1) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              numer_h(i,j,k) = numer_h(i,j,k) + numer_v(i,j,k)
+            end do
+          end do
+        end do
+      end if
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k = 2, nk
+        do j = 1, nj
+          do i = 1, ni
+            cc2 = c2(i,j,k)
+            cc1 = 1.0 - cc2
+            denom_h(i,j,k) = (1. - alpha43) * &
+            (0.5 * (cc2 * (s11_filt(i,j,k) + s11_filt(i+1,j,k)) + cc1 * (s11_filt(i,j,k-1) + s11_filt(i+1,j,k-1))) + &
+            0.5 * (cc2 * (s22_filt(i,j,k) + s22_filt(i,j+1,k)) + cc1 * (s22_filt(i,j,k-1) + s22_filt(i,j+1,k-1))))
+            denom_v(i,j,k) = (1. - alpha43) * s33_filt(i,j,k)
+          end do
+        end do
+      end do
+
+      if (tconfig.eq.1) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              denom_h(i,j,k) = denom_h(i,j,k) + denom_v(i,j,k)
+            end do
+          end do
+        end do
+      end if
+
+
+
+      ave_times = 1
+
+      do i = 1, ave_times
+          call bcw(numer_h,1)
+          call bcw(numer_v,1)
+          call bcw(denom_h,0)
+          call bcw(denom_v,0)
+
+#ifdef MPI
+        if (tconfig.eq.1) then
+
+          call comm_3w_start(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+          nhs31,nhs32,nhn31,nhn32,reqs_nh)
+        else if (tconfig.eq.2) then
+
+          call comm_3w_start(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+          nhs31,nhs32,nhn31,nhn32,reqs_nh)
+
+          call comm_3w_start(numer_v,nvw31,nvw32,nve31,nve32,   &
+          nvs31,nvs32,nvn31,nvn32,reqs_nv)
+        end if
+
+        if (tconfig.eq.1) then
+          call comm_3w_end(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+          nhs31,nhs32,nhn31,nhn32,reqs_nh)
+          call getcornerw3(numer_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(numer_h)
+        else if (tconfig.eq.2) then
+          call comm_3w_end(numer_h,nhw31,nhw32,nhe31,nhe32,   &
+          nhs31,nhs32,nhn31,nhn32,reqs_nh)
+          call getcornerw3(numer_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call comm_3w_end(numer_v,nvw31,nvw32,nve31,nve32,   &
+          nvs31,nvs32,nvn31,nvn32,reqs_nv)
+          call getcornerw3(numer_v,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(numer_h)
+          call bct2(numer_v)
+        end if
+
+        if (tconfig.eq.1) then
+
+          call comm_3w_start(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+          dhs31,dhs32,dhn31,dhn32,reqs_dh)
+        else if (tconfig.eq.2) then
+
+          call comm_3w_start(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+          dhs31,dhs32,dhn31,dhn32,reqs_dh)
+
+          call comm_3w_start(denom_v,dvw31,dvw32,dve31,dve32,   &
+          dvs31,dvs32,dvn31,dvn32,reqs_dv)
+        end if
+
+        if (tconfig.eq.1) then
+          call comm_3w_end(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+          dhs31,dhs32,dhn31,dhn32,reqs_dh)
+          call getcornerw3(denom_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(denom_h)
+        else if (tconfig.eq.2) then
+          call comm_3w_end(denom_h,dhw31,dhw32,dhe31,dhe32,   &
+          dhs31,dhs32,dhn31,dhn32,reqs_dh)
+          call getcornerw3(denom_h,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call comm_3w_end(denom_v,dvw31,dvw32,dve31,dve32,   &
+          dvs31,dvs32,dvn31,dvn32,reqs_dv)
+          call getcornerw3(denom_v,n3w1(1,1,1),n3w2(1,1,1),n3e1(1,1,1),n3e2(1,1,1), &
+          s3w1(1,1,1),s3w2(1,1,1),s3e1(1,1,1),s3e2(1,1,1))
+          call bct2(denom_h)
+          call bct2(denom_v)
+        end if
+#endif
+
+        call ave_filter_w3d(numer_h, 1, ni, 1, nj, 2, nk, numer_h_filt, w_temp)
+        if (tconfig.eq.2) then
+          call ave_filter_w3d(numer_v, 1, ni, 1, nj, 2, nk, numer_v_filt, w_temp)
+        end if
+
+        call ave_filter_w3d(denom_h, 1, ni, 1, nj, 2, nk, denom_h_filt, w_temp)
+
+        if (tconfig.eq.2) then
+          call ave_filter_w3d(denom_v, 1, ni, 1, nj, 2, nk, denom_v_filt, w_temp)
+        end if
+      end do
+
+      if (dyn_correct.eq.1) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              if (denom_h_filt(i,j,k).lt.dmin) then
+                khh(i,j,k) = c_b(i,j,k) * numer_h_filt(i,j,k) / denom_h_filt(i,j,k)
+              else
+                khh(i,j,k) = c_b(i,j,k) * numer_h_filt(i,j,k) / dmin
+              end if
+              if (khh(i,j,k).lt.kclip) then
+                khh(i,j,k) = kclip
+              end if
+              !  limit for numerical stability:
+              khh(i,j,k) = min( khh(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j), tem3*rmf(i,j,k)*rmf(i,j,k) )
+            end do
+          end do
+        end do
+
+      else
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              if (denom_h_filt(i,j,k).lt.dmin) then
+                khh(i,j,k) = numer_h_filt(i,j,k) / denom_h_filt(i,j,k)
+              else
+                khh(i,j,k) = numer_h_filt(i,j,k) / dmin
+              end if
+              if (khh(i,j,k).lt.kclip) then
+                khh(i,j,k) = kclip
+              end if
+              !  limit for numerical stability:
+              khh(i,j,k) = min( khh(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j), tem3*rmf(i,j,k)*rmf(i,j,k) )
+            end do
+          end do
+        end do
+      end if
+
+      if (tconfig.eq.1) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k = 2, nk
+          do j = 1, nj
+            do i = 1, ni
+              khv(i,j,k) = khh(i,j,k)
+            end do
+          end do
+        end do
+      else if (tconfig.eq.2) then
+        if (dyn_correct.eq.1) then
+          !$omp parallel do default(shared)   &
+          !$omp private(i,j,k)
+          do k = 2, nk
+            do j = 1, nj
+              do i = 1, ni
+                if (denom_v_filt(i,j,k).lt.dmin) then
+                  khv(i,j,k) =  c_b(i,j,k) * numer_v_filt(i,j,k) / denom_v_filt(i,j,k)
+                else
+                  khv(i,j,k) =  c_b(i,j,k) * numer_v_filt(i,j,k) / dmin
+                end if
+                if (khv(i,j,k).lt.kclip) then
+                  khv(i,j,k) = kclip
+                end if
+                !  limit for numerical stability:
+                khv(i,j,k) = min( khv(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j), tem3*rmf(i,j,k)*rmf(i,j,k) )
+              end do
+            end do
+          end do
+        else
+          !$omp parallel do default(shared)   &
+          !$omp private(i,j,k)
+          do k = 2, nk
+            do j = 1, nj
+              do i = 1, ni
+                if (denom_v_filt(i,j,k).lt.dmin) then
+                  khv(i,j,k) =  numer_v_filt(i,j,k) / denom_v_filt(i,j,k)
+                else
+                  khv(i,j,k) =  numer_v_filt(i,j,k) / dmin
+                end if
+                if (khv(i,j,k).lt.kclip) then
+                  khv(i,j,k) = kclip
+                end if
+                !  limit for numerical stability:
+                khv(i,j,k) = min( khv(i,j,k) , tem1*ruh(i)*ruh(i) , tem2*rvh(j)*rvh(j), tem3*rmf(i,j,k)*rmf(i,j,k) )
+              end do
+            end do
+          end do
+        end if
+      end if
+     !--------------------------------------------------------------
+
+      if(timestats.ge.1) time_turb=time_turb+mytime()
+      call bcw(khh,1)
+      call bcw(khv,1)
+#ifdef MPI
+      call comm_1t_start(khh,khcw1,khcw2,khce1,khce2,   &
+      khcs1,khcs2,khcn1,khcn2,reqs_khc)
+      call comm_1t_start(khv,kvcw1,kvcw2,kvce1,kvce2,   &
+      kvcs1,kvcs2,kvcn1,kvcn2,reqs_kvc)
+      call comm_1t_end(khh,khcw1,khcw2,khce1,khce2,   &
+      khcs1,khcs2,khcn1,khcn2,reqs_khc)
+      call comm_1t_end(khv,kvcw1,kvcw2,kvce1,kvce2,   &
+      kvcs1,kvcs2,kvcn1,kvcn2,reqs_kvc)
+      call getcornert(khh,nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
+      call getcornert(khv,nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
+      call bct2(khh)
+      call bct2(khv)
+#endif
+
+      !--------------------------------------------------------------
+      !  cm1r18: surface
+
+      if ( bbc.eq.3 ) then
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j)
+        do j=0,nj+1
+          do i=0,ni+1
+            khv(i,j,1) = kmv(i,j,1)*prinv
+            khh(i,j,1) = kmh(i,j,1)*prinv
+          enddo
+        enddo
+      end if
+
+      !--------------------------------------------------------------
+
+      if(timestats.ge.1) time_turb=time_turb+mytime()
+
+      return
+    end subroutine dyn_wl_scalar
 
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
