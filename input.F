@@ -52,6 +52,10 @@
               ibi,iei,jbi,jei,kbi,kei,iice,idm,idmplus,                       &
               ibc,iec,jbc,jec,kbc,kec,                                        &
               ibt,iet,jbt,jet,kbt,ket,                                        &
+              !================================================================
+              ! DRM indices. XS 11/05/2018
+              ibdrm,iedrm,jbdrm,jedrm,kbdrm,kedrm,                            &
+              !================================================================
               ibp,iep,jbp,jep,kbp,kep,                                        &
               itb,ite,jtb,jte,ktb,kte,                                        &
               ipb,ipe,jpb,jpe,kpb,kpe,                                        &
@@ -92,6 +96,10 @@
               advwenos,advwenov,weno_order,                                   &
               idiff,mdiff,difforder,imoist,sgsmodel,horizturb,                &
               tconfig,bcturbs,doimpl,                                         &
+              !================================================================
+              ! DRM parameters. XS 11/16/2018
+              reconstr,dyn_scalar,dyn_all,dyn_correct,                        &
+              !================================================================
               irdamp,hrdamp,psolver,nsound,ptype,ihail,iautoc,cuparam,        &
               icor,betaplane,lspgrad,eqtset,idiss,efall,rterm,                &
               wbc,ebc,sbc,nbc,bbc,tbc,irbc,roflux,nudgeobc,                   &
@@ -114,6 +122,10 @@
               output_zh,output_th,output_thpert,output_prs,output_prspert,    &
               output_pi,output_pipert,output_rho,output_rhopert,output_tke,   &
               output_km,output_kh,                                            &
+              !================================================================
+              ! DRM parameter. XS 11/16/2018.
+              output_drm,                                                     &
+              !================================================================
               output_qv,output_qvpert,output_q,output_dbz,output_buoyancy,    &
               output_u,output_upert,output_uinterp,                           &
               output_v,output_vpert,output_vinterp,output_w,output_winterp,   &
@@ -269,6 +281,10 @@
           advwenos,advwenov,weno_order,                                 &
           apmasscon,idiff,mdiff,difforder,imoist,                       &
           ipbl,sgsmodel,tconfig,bcturbs,horizturb,doimpl,               &
+          !=====================================================================
+          ! DRM parameters. XS 11/16/2018
+          reconstr,dyn_scalar,dyn_all,dyn_correct,                      &
+          !=====================================================================
           irdamp,hrdamp,psolver,ptype,ihail,iautoc,cuparam,             &
           icor,betaplane,lspgrad,eqtset,idiss,efall,rterm,              &
           wbc,ebc,sbc,nbc,bbc,tbc,irbc,roflux,nudgeobc,                 &
@@ -294,6 +310,10 @@
               output_th,output_thpert,output_prs,output_prspert,              &
               output_pi,output_pipert,output_rho,output_rhopert,output_tke,   &
               output_km,output_kh,                                            &
+              !=====================================================================
+              ! DRM parameters. XS 11/16/2018
+              output_drm,                                                     &
+              !=====================================================================
               output_qv,output_qvpert,output_q,output_dbz,output_buoyancy,    &
               output_u,output_upert,output_uinterp,                           &
               output_v,output_vpert,output_vinterp,output_w,output_winterp,   &
