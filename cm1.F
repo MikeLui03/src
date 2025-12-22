@@ -3907,8 +3907,12 @@
                    reqs_u,reqs_v,reqs_w,reqs_s,reqs_p,reqs_p2,reqs_p3, &
                    reqs_x,reqs_y,reqs_z,reqs_tk,reqs_tk2,reqs_q,reqs_t, &
                    nw1,nw2,ne1,ne2,sw1,sw2,se1,se2,                  &
+                   !---------------------------------------------------------
+                   !added for drm
+                   n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2,    &
+                   !---------------------------------------------------------
                    ww1,ww2,we1,we2,ws1,ws2,wn1,wn2,                  &
-                   pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,                  &
+                   pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,                  &c 
                    p2w1,p2w2,p2e1,p2e2,p2s1,p2s2,p2n1,p2n2,          &
                    vw1,vw2,ve1,ve2,vs1,vs2,vn1,vn2,                  &
                    zw1,zw2,ze1,ze2,zs1,zs2,zn1,zn2,                  &

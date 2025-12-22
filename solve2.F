@@ -1734,20 +1734,15 @@
       call comm_3w_start(w3d,ww31,ww32,we31,we32,   &
                              ws31,ws32,wn31,wn32,reqs_w)
 #endif
-      !IF(nrk.lt.nrkmax)THEN
-        !call bcp(rho)
-!#ifdef MPI
-        !call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
-!#endif
-      if( nrk.lt.nrkmax )then
-        call bcs(rho)
+      IF(nrk.lt.nrkmax)THEN
+        call bcp(rho)
 #ifdef MPI
+        !call comm_1s_start(rho,pw1,pw2,pe1,pe2,ps1,ps2,pn1,pn2,reqs_s)
         call comm_3s_start(rho, pw31, pw32, pe31, pe32, &
                                 ps31, ps32, pn31, pn32, reqs_s)
 #endif
 ! XS 2/3/2019. comm_3s, in lieu of comm_1s, is used for DRM.
 
-    endif
         call bcp(pp3d)
 #ifdef MPI
         call comm_1s_start(pp3d,vw1,vw2,ve1,ve2,vs1,vs2,vn1,vn2,reqs_x)

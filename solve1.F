@@ -1257,6 +1257,9 @@
         call turbs(1,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,thflux,   &
                    rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                    dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,sadv,thten1,khh,khv,cm0,dum7,dum8, &
+                   !-------------- DRM variables ----------------
+                   u1th_re,u2th_re,u3th_re,u1s_re_w,u2s_re_w,                          &
+                   !---------------------------------------------
                    dotbud,ibdt,iedt,jbdt,jedt,kbdt,kedt,ntdiag,tdiag,td_hturb,td_vturb,1)
 
         IF( imoist.eq.1 )THEN
@@ -1349,7 +1352,7 @@
                            !-------------- DRM variables ----------------
                            u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                            !---------------------------------------------
-                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,2)
+                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0) !0 the end
                 else
                   if (n.eq.nnc1) then
 !$omp parallel do default(shared)  &
@@ -1369,7 +1372,7 @@
                            !-------------- DRM variables ----------------
                            u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                            !---------------------------------------------
-                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,2)
+                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)!0 the end
                 end if
               elseif (dyn_all.eq.1) then   ! DRM-A
 !$omp parallel do default(shared)   &
@@ -1398,7 +1401,7 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                          !---------------------------------------------
-                         .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,2)
+                         .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)!0 the end
               end if
 
 !===========================================================================================

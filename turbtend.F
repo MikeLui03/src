@@ -405,7 +405,7 @@
       call       turbsz(iflux,dt,dosfcflx,sflux,mh,mf,  &
                        turbz,dumx,dumy,dumz,rho,rr,rf,s,khv,dum7,dum8,    &
                        !-------------- DRM variables,XS ----------------
-                       u1s_re,u2s_re,u3s_re,u1s_re_w,u2s_re_w,            &
+                       u1s_re,u2s_re,u3s_re,          &
                        !---------------------------------------------
                        ivar)
 
@@ -519,11 +519,11 @@
 
 
       subroutine turbsz(iflux,dt,dosfcflx,sflux,mh,mf,  &
-                       turbz,dum1,dum2,dumz,rho,rr,rf,s,khv,dum7,dum8
+                       turbz,dum1,dum2,dumz,rho,rr,rf,s,khv,dum7,dum8, &
                        !-------------- DRM variables,XS ----------------
-                       u1s_re,u2s_re,u3s_re,u1s_re_w,u2s_re_w,                              &
+                       u1s_re,u2s_re,u3s_re,                              &
                        !---------------------------------------------
-                       ,ivar)
+                       ivar)
       use input
       use constants
       use cm1libs , only : rslf,rsif
@@ -542,7 +542,7 @@
       !------------------------------------------
       ! DRM variables. XS 12/31/2018
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1s_re,u2s_re,u3s_re
-      real, dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: u1s_re_w,u2s_re_w  ! store flux at w points
+      
       !------------------------------------------
       integer, intent(in) :: ivar
 

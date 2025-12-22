@@ -2640,23 +2640,44 @@
         enddo
 
         call     turbsz(1,dt,dosfcflx,thflux,mh,mf,  &
-                       thpten,dum1,dum2,dum3,rho,rr,rf,sadv,khv,thten,thten1,1)
+                       thpten,dum1,dum2,dum3,rho,rr,rf,sadv,khv,thten,thten1,    &
+                       !-------------- DRM variables,XS ----------------
+                       u1th_re,u2th_re,u3th_re,                              &
+                       !---------------------------------------------
+                       1)
         if( imoist.eq.1 )  &
         call     turbsz(1,dt,dosfcflx,qvflux,mh,mf,  &
-                       qvpten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqv),khv,thten,thten1,2)
+                       qvpten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqv),khv,thten,thten1, &
+                       !-------------- DRM variables,XS ----------------
+                       u1q_re(ib,jb,kb,nqv),u2q_re(ib,jb,kb,nqv),u3q_re(ib,jb,kb,nqv),  &
+                       2)
         if( imoist.eq.1 .and. nqc.ge.1 )  &
         call     turbsz(0,dt,dosfcflx,qvflux,mh,mf,  &
-                       qcpten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqc),khv,thten,thten1,0)
+                       qcpten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqc),khv,thten,thten1,  &
+                       !-------------- DRM variables,XS ----------------
+                       u1q_re(ib,jb,kb,nqc),u2q_re(ib,jb,kb,nqc),u3q_re(ib,jb,kb,nqc),  &
+                       !---------------------------------------------
+                       0)
         if( imoist.eq.1 .and. nqi.ge.1 )  &
         call     turbsz(0,dt,dosfcflx,qvflux,mh,mf,  &
-                       qipten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqi),khv,thten,thten1,0)
+                       qipten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqi),khv,thten,thten1, &
+                       !-------------- DRM variables,XS ----------------
+                       u1q_re(ib,jb,kb,nqi),u2q_re(ib,jb,kb,nqi),u3q_re(ib,jb,kb,nqi),  &
+                       !---------------------------------------------
+                       0)
         call     turbuz(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                        upten,dum1,dum2,dum3,thten,thten1,ua,wa,t11,t12,t13,t22,kmv, &
+                       !-------------- DRM variables ----------------
+                       t11_re,t12_re,t13_re,                        &
+                       !-------------- XS 12/27/2018 ----------------
                        kmw,ufw,u1b,u2pt,ufwk)
         call     turbvz(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                        vpten,dum1,dum2,dum3,thten,thten1,va,wa,t12,t22,t23,kmv, &
+                       !-----------------DRM variables, XS----------------------
+                       t12_re,t22_re,t23_re,                               &
+                       !-------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk)
 
       endif  dobr09
@@ -4624,6 +4645,14 @@
       double precision, intent(in) :: avgsfcu,avgsfcv,avgsfcs,avgsfcsu,avgsfcsv
       logical, intent(in), dimension(ibib:ieib,jbib:jeib,kbib:keib) :: bndy
       integer, intent(in), dimension(ibib:ieib,jbib:jeib) :: kbdy
+      !-----------------------------------------------------------
+      ! Near-wall model variables
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: rho, zh
+      real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: zf
+      real, dimension(ib:ie,jb:je,kb:ke) :: wsp, az, t13wall, t23wall
+      real ::  c_c, h_c, rhc, usp, vsp
+      integer  kmax
+      !-----------------------------------------------------------
         
       integer i,j,k,kk
       real :: tem

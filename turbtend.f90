@@ -18,6 +18,9 @@
       subroutine turbs(iflux,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,sflux,  &
                        rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                        turbx,turby,turbz,dumx,dumy,dumz,rho,rr,rf,s,sten,khh,khv,cm0,dum7,dum8, &
+                       !-------------- DRM variables,XS ----------------
+                       u1s_re,u2s_re,u3s_re,u1s_re_w,u2s_re_w,                              &
+                       !---------------------------------------------
                        dobud,ibd,ied,jbd,jed,kbd,ked,ndiag,diag,sd_hturb,sd_vturb,ivar)
       use input
       use constants
@@ -260,7 +263,7 @@
         enddo
       enddo
 
-      !------------ RSFS fluxes from DRM ----------------
+      !------------ RSFS fluxes from DRM, XS ----------------
       if (sgsmodel.eq.7 .and. reconstr.ge.0) then
       !$omp parallel do default(shared)   &
       !$omp private(i,j,k,r1,r2)
@@ -293,7 +296,7 @@
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
       do k=1,nk
-      if (sgsmodel.ne.7 .or. reconstr.lt.0) then
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
         ! x-tendency
         do j=1,nj
         do i=1,ni
@@ -317,7 +320,7 @@
         enddo
       
       else
-        ! include RSFS fluxes
+        ! include RSFS fluxes, XS
           ! x-tendency
           do j=1,nj
           do i=1,ni
@@ -400,7 +403,12 @@
   IF( dovturb )THEN
 
       call       turbsz(iflux,dt,dosfcflx,sflux,mh,mf,  &
-                       turbz,dumx,dumy,dumz,rho,rr,rf,s,khv,dum7,dum8,ivar)
+                       turbz,dumx,dumy,dumz,rho,rr,rf,s,khv,dum7,dum8,    &
+                       !-------------- DRM variables,XS ----------------
+                       u1s_re,u2s_re,u3s_re,          &
+                       !---------------------------------------------
+                       ivar)
+
 
   ELSE  dovert
 
@@ -511,7 +519,11 @@
 
 
       subroutine turbsz(iflux,dt,dosfcflx,sflux,mh,mf,  &
-                       turbz,dum1,dum2,dumz,rho,rr,rf,s,khv,dum7,dum8,ivar)
+                       turbz,dum1,dum2,dumz,rho,rr,rf,s,khv,dum7,dum8, &
+                       !-------------- DRM variables,XS ----------------
+                       u1s_re,u2s_re,u3s_re,                              &
+                       !---------------------------------------------
+                       ivar)
       use input
       use constants
       use cm1libs , only : rslf,rsif
@@ -527,6 +539,11 @@
       real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: rho,rr,rf,s
       real, intent(in), dimension(ibc:iec,jbc:jec,kbc:kec) :: khv
       real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: dum7,dum8
+      !------------------------------------------
+      ! DRM variables. XS 12/31/2018
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1s_re,u2s_re,u3s_re
+      
+      !------------------------------------------
       integer, intent(in) :: ivar
 
       integer :: i,j,k
@@ -759,6 +776,17 @@
         enddo
 
   ENDIF  ifimpls
+      !-------------- DRM,XS ----------------
+    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+      do k = 1, nk
+        do j = 1, nj
+          do i = 1, ni
+            turbz(i,j,k) = turbz(i,j,k) - (u3s_re(i,j,k+1)-u3s_re(i,j,k))*rdz*mh(i,j,k)
+          end do
+        end do
+      end do
+    end if
+    !------------------------------------------
 
       end subroutine turbsz
 
@@ -1188,6 +1216,31 @@
 
       enddo
 
+
+      ! RSFS stress from DRM
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then   !XS
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k=1,nk
+
+          !  x-direction
+          do j=1,nj
+          do i=1,ni+1
+            turbx(i,j,k) = turbx(i,j,k) + (t11_re(i,j,k)-t11_re(i-1,j,k))*rdx*uf(i)
+          enddo
+          enddo
+
+          !  y-direction
+          do j=1,nj
+          do i=1,ni+1
+            turby(i,j,k) = turby(i,j,k) + (t12_re(i,j+1,k)-t12_re(i,j,k))*rdy*vh(j)
+          enddo
+          enddo
+
+        enddo
+
+      end if
+
     ELSE
 
 !$omp parallel do default(shared)   &
@@ -1218,6 +1271,7 @@
       ! dum2 stores t12 at w-pts:
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k,r1,r2)
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
       do j=1,nj+1
 
           ! lowest model level:
@@ -1270,6 +1324,78 @@
         enddo
 
       enddo
+
+      else  ! include RSFS stress, XS
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,r1,r2)
+      do j=1,nj+1
+
+          ! lowest model level:
+          do i=0,ni+1
+            dum1(i,j,1) = cgs1*(t11(i,j,1)+t11_re(i,j,1)) + &
+                          cgs2*(t11(i,j,2)+t11_re(i,j,2)) + &
+                          cgs3*(t11(i,j,3)+t11_re(i,j,3))
+            dum2(i,j,1) = cgs1*(t12(i,j,1)+t12_re(i,j,1)) + &
+                          cgs2*(t12(i,j,2)+t12_re(i,j,2)) + &
+                          cgs3*(t12(i,j,3)+t12_re(i,j,3))
+          enddo
+
+          ! upper-most model level:
+          do i=0,ni+1
+            dum1(i,j,nk+1) = cgt1*(t11(i,j,nk)+t11_re(i,j,nk)) + &
+                             cgt2*(t11(i,j,nk-1)+t11_re(i,j,nk-1)) + &
+                             cgt3*(t11(i,j,nk-2)+t11_re(i,j,nk-2))
+            dum2(i,j,nk+1) = cgt1*(t12(i,j,nk)+t12_re(i,j,nk)) + &
+                             cgt2*(t12(i,j,nk-1)+t12_re(i,j,nk-1)) + &
+                             cgt3*(t12(i,j,nk-2)+t12_re(i,j,nk-2))
+          enddo
+
+          ! interior:
+          do k=2,nk
+          r2 = (sigmaf(k)-sigma(k-1))*rds(k)
+          r1 = 1.0-r2
+          do i=0,ni+1
+            dum1(i,j,k) = r1*(t11(i,j,k-1)+t11_re(i,j,k-1)) + &
+                          r2*(t11(i,j,k) + t11_re(i,j,k))
+            dum2(i,j,k) = r1*(t12(i,j,k-1)+t12_re(i,j,k-1)) + &
+                          r2*(t12(i,j,k) + t12_re(i,j,k))
+          enddo
+          enddo
+
+      enddo
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,r1,r2)
+      do k=1,nk
+
+        !  x-direction
+        do j=1,nj
+        do i=1,ni+1
+          turbx(i,j,k)=gzu(i,j)*((t11(i,j,k)+t11_re(i,j,k))*rgz(i,j) - &
+                      (t11(i-1,j,k)+t11_re(i-1,j,k))*rgz(i-1,j))*rdx*uf(i)  &
+                      +0.5*( gxu(i,j,k+1)*(dum1(i-1,j,k+1)+dum1(i,j,k+1))                &
+                            -gxu(i,j,k  )*(dum1(i-1,j,k  )+dum1(i,j,k  )) )*rdsf(k)
+        enddo
+        enddo
+
+        !  y-direction
+        do j=1,nj
+        do i=1,ni+1
+          r1 = 0.25*((rgz(i-1,j-1)+rgz(i,j))+(rgz(i-1,j)+rgz(i,j-1)))
+          r2 = 0.25*((rgz(i-1,j+1)+rgz(i,j))+(rgz(i-1,j)+rgz(i,j+1)))
+          turby(i,j,k)=gzu(i,j)*((t12(i,j+1,k)+t12_re(i,j+1,k))*r2 - &
+                       (t12(i,j,k)+t12_re(i,j,k))*r1)*rdy*vh(j)      &
+                      +0.5*( (zt-sigmaf(k+1))*(dum2(i,j,k+1)+dum2(i,j+1,k+1))  &
+                            -(zt-sigmaf(k  ))*(dum2(i,j,k  )+dum2(i,j+1,k  ))  &
+                           )*gzu(i,j)*(r2-r1)*rdy*vh(j)*rdsf(k)
+        enddo
+        enddo
+
+      enddo
+
+    end if
+
+
 
   ENDIF  ! endif for terrain check
 
@@ -1330,6 +1456,9 @@
       call       turbuz(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                        turbz,dum1,dum2,dum3,dum7,dum9,u ,w ,t11,t12,t13,t22,kmv, &
+                       !-------------- DRM variables ----------------
+                       t11_re,t12_re,t13_re,                        &
+                       !-------------- XS 12/27/2018 ----------------
                        kmw,ufw,u1b,u2pt,ufwk)
 
   ELSE  dovert
@@ -1447,6 +1576,9 @@
       subroutine turbuz(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                        turbz,dum1,dum2,dum3,dum7,dum9,u ,w ,t11,t12,t13,t22,kmv, &
+                       !-------------- DRM variables ----------------
+                       t11_re,t12_re,t13_re,                        &
+                       !-------------- XS 12/27/2018 ----------------
                        kmw,ufw,u1b,u2pt,ufwk)
       use input
       use constants
@@ -1469,6 +1601,9 @@
       real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: w
       real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: t11,t12,t13,t22
       real, intent(in), dimension(ibc:iec,jbc:jec,kbc:kec) :: kmv
+      !-------------------- DRM Variables, XS --------------------
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re
+      !-------------------------------------------------------vv
       real, intent(in), dimension(kb:ke) :: kmw,ufw,u1b
       real, intent(inout), dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: u2pt
       real, intent(in),    dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: ufwk
@@ -1828,6 +1963,24 @@
 
   ENDIF  ifimplu
 
+  
+  !--------------------------------------------------------
+  ! RSFS stress from DRM,XS
+  if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+    do k=1,nk
+      do j=1,nj
+        do i=1,ni+1
+          turbz(i,j,k)=turbz(i,j,k) + &
+          (t13_re(i,j,k+1)-t13_re(i,j,k))*rdz*0.5*(mh(i-1,j,k)+mh(i,j,k))
+        enddo
+      enddo
+    enddo
+  end if
+   !--------------------------------------------------------
+
+
       IF(axisymm.eq.1)THEN
         !$omp parallel do default(shared)   &
         !$omp private(k)
@@ -1894,6 +2047,9 @@
       subroutine turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                        turbx,turby,turbz,dum1,dum2,dum3,dum7,dum8,dum9,v,vten,w,t12,t22,t23,kmv,cm0, &
+                       !-----------------DRM variables, XS----------------------
+                       t12_re,t22_re,t23_re,                               &
+                       !--------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
       use input
       use constants
@@ -1924,6 +2080,9 @@
       real, intent(in),    dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: vfwk
       logical, intent(in) :: dovbud
       real, intent(inout) , dimension(ibdv:iedv,jbdv:jedv,kbdv:kedv,nvdiag) :: vdiag
+      !---------------------  DRM variables, XS ----------------------
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t12_re,t22_re,t23_re
+      !-----------------------------------------------------------  
  
       integer :: i,j,k,j1,j2
       real :: rdt,tema,temb,temc
@@ -1953,6 +2112,29 @@
         enddo
 
       enddo
+!----------------DRM-------------------------------
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then   !XS
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+        do k=1,nk
+
+          !  x-direction
+          do j=1,nj+1
+          do i=1,ni
+            turbx(i,j,k)=turbx(i,j,k) + (t12_re(i+1,j,k)-t12_re(i,j,k))*rdx*uh(i)
+          enddo
+          enddo
+
+          !  y-direction
+          do j=1,nj+1
+          do i=1,ni
+            turby(i,j,k)=turby(i,j,k) + (t22_re(i,j,k)-t22_re(i,j-1,k))*rdy*vf(j)
+          enddo
+          enddo
+
+        enddo
+      end if
+!-------------------------------------------------
 
     ELSE
 
@@ -1980,7 +2162,7 @@
 !  Terrain:
 
   ELSE
-
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
       ! dum1 stores t12 at w-pts:
       ! dum2 stores t22 at w-pts:
 !$omp parallel do default(shared)   &
@@ -2037,6 +2219,78 @@
         enddo
 
       enddo
+      else   ! include RSFS stress from DRM. XS 12/27/2018
+      ! dum1 stores t12 at w-pts:
+      ! dum2 stores t22 at w-pts:
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,r1,r2)
+      do j=0,nj+1
+
+          ! lowest model level:
+          do i=1,ni+1
+            dum1(i,j,1) = cgs1*(t12(i,j,1)+t12_re(i,j,1)) + &
+                          cgs2*(t12(i,j,2)+t12_re(i,j,2)) + &
+                          cgs3*(t12(i,j,3)+t12_re(i,j,3))
+            dum2(i,j,1) = cgs1*(t22(i,j,1)+t22_re(i,j,1)) + &
+                          cgs2*(t22(i,j,2)+t22_re(i,j,2)) + &
+                          cgs3*(t22(i,j,3)+t22_re(i,j,3))
+          enddo
+
+          ! upper-most model level:
+          do i=1,ni+1
+            dum1(i,j,nk+1) = cgt1*(t12(i,j,nk)+t12_re(i,j,nk)) + &
+                            cgt2*(t12(i,j,nk-1)+t12_re(i,j,nk-1)) + &
+                            cgt3*(t12(i,j,nk-2)+t12_re(i,j,nk-2))
+            dum2(i,j,nk+1) = cgt1*(t22(i,j,nk)+t22_re(i,j,nk)) + &
+                            cgt2*(t22(i,j,nk-1)+t22_re(i,j,nk-1)) + &
+                            cgt3*(t22(i,j,nk-2)+t22_re(i,j,nk-2))
+          enddo
+
+          ! interior:
+          do k=2,nk
+          r2 = (sigmaf(k)-sigma(k-1))*rds(k)
+          r1 = 1.0-r2
+          do i=1,ni+1
+            dum1(i,j,k) = r1*(t12(i,j,k-1)+t12_re(i,j,k-1)) + &
+                          r2*(t12(i,j,k)+t12_re(i,j,k))
+            dum2(i,j,k) = r1*(t22(i,j,k-1)+t22_re(i,j,k-1)) + &
+                          r2*(t22(i,j,k)+t22_re(i,j,k))
+          enddo
+          enddo
+
+      enddo
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k,r1,r2)
+      do k=1,nk
+
+        !  x-direction
+        do j=1,nj+1
+        do i=1,ni
+          r1 = 0.25*((rgz(i-1,j-1)+rgz(i,j))+(rgz(i-1,j)+rgz(i,j-1)))
+          r2 = 0.25*((rgz(i+1,j-1)+rgz(i,j))+(rgz(i+1,j)+rgz(i,j-1)))
+          turbx(i,j,k)=gzv(i,j)*((t12(i+1,j,k)+t12_re(i+1,j,k))*r2- &
+                      (t12(i,j,k)+t12_re(i,j,k))*r1)*rdx*uh(i)      &
+                      +0.5*( (zt-sigmaf(k+1))*(dum1(i,j,k+1)+dum1(i+1,j,k+1))  &
+                      -(zt-sigmaf(k  ))*(dum1(i,j,k  )+dum1(i+1,j,k  ))  &
+                      )*gzv(i,j)*(r2-r1)*rdx*uh(i)*rdsf(k)
+        enddo
+        enddo
+
+        !  y-direction
+        do j=1,nj+1
+        do i=1,ni
+          turby(i,j,k)=gzv(i,j)*((t22(i,j,k)+t22_re(i,j,k))*rgz(i,j)- &
+                    (t22(i,j-1,k)+t22_re(i,j-1,k))*rgz(i,j-1))*rdy*vf(j)  &
+                    +0.5*( gyv(i,j,k+1)*(dum2(i,j-1,k+1)+dum2(i,j,k+1))   &
+                    -gyv(i,j,k  )*(dum2(i,j-1,k  )+dum2(i,j,k  )) )*rdsf(k)
+        enddo
+        enddo
+
+      enddo
+
+    end if
+
 
   ENDIF  ! endif for terrain check
 
@@ -2097,6 +2351,9 @@
       call       turbvz(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                        turbz,dum1,dum2,dum3,dum7,dum9,v ,w ,t12,t22,t23,kmv, &
+                       !-----------------DRM variables, XS----------------------
+                       t12_re,t22_re,t23_re,                               &
+                       !--------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk)
 
   ELSE  dovert
@@ -2214,6 +2471,9 @@
       subroutine turbvz(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                        turbz,dum1,dum2,dum3,dum7,dum9,v ,w ,t12,t22,t23,kmv, &
+                       !-----------------DRM variables, XS----------------------
+                       t12_re,t22_re,t23_re,                               &
+                       !--------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk)
       use input
       use constants
@@ -2237,6 +2497,9 @@
       real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: w
       real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: t12,t22,t23
       real, intent(in), dimension(ibc:iec,jbc:jec,kbc:kec) :: kmv
+      !---------------------  DRM variables,XS ----------------------
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t12_re,t22_re,t23_re
+      !-----------------------------------------------------------
       real, intent(in), dimension(kb:ke) :: kmw,vfw,v1b
       real, intent(inout), dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: v2pt
       real, intent(in),    dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: vfwk
@@ -2499,6 +2762,18 @@
       ENDIF
 
   ENDIF  ifimplv
+   !RSFS stress from DRM, XS                     
+    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+      do k=1,nk
+        do j=1,nj+1
+          do i=1,ni
+            turbz(i,j,k)= turbz(i,j,k) + (t23_re(i,j,k+1)-t23_re(i,j,k))*rdz*0.5*(mh(i,j-1,k)+mh(i,j,k))
+          enddo
+        enddo
+      enddo
+    end if
 
 !-----------------------------------------------------------------
 !  2nd part of 2-part model:
@@ -2550,6 +2825,9 @@
  
       subroutine turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                        turbx,turby,turbz,dum1,dum2,dum3,w,wten,t13,t23,t33,t22,kmh,cm0,  &
+                       !-------------- RSFS stress from DRM,XS ----------------
+                       t13_re,t23_re,t33_re,                                         &
+                       !----------------------------------------------------
                        dowbud,wdiag)
       use input
       use constants
@@ -2572,6 +2850,9 @@
       real, intent(in), dimension(ib:ie,jb:je) :: cm0
       logical, intent(in) :: dowbud
       real, intent(inout) , dimension(ibdv:iedv,jbdv:jedv,kbdv:kedv,nwdiag) :: wdiag
+      !------------------ DRM variables,XS ------------------
+      real, dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t13_re,t23_re,t33_re
+      !---------------------------------------------------
  
       integer :: i,j,k
       real :: rdt,tema,temb,temc
@@ -2602,6 +2883,27 @@
         enddo
 
       enddo
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then !XS
+        !$omp parallel do default(shared)   &
+        !$omp private(i,j,k)
+        do k=2,nk
+
+          !  x-direction
+          do j=1,nj
+            do i=1,ni
+              turbx(i,j,k)=turbx(i,j,k) + (t13_re(i+1,j,k)-t13_re(i,j,k))*rdx*uh(i)
+            enddo
+          enddo
+
+          !  y-direction
+          do j=1,nj
+            do i=1,ni
+              turby(i,j,k)=turby(i,j,k) + (t23_re(i,j+1,k)-t23_re(i,j,k))*rdy*vh(j)
+            enddo
+          enddo
+
+        enddo
+      end if
 
     ELSE
       ! axisymmetric:
@@ -2630,6 +2932,7 @@
 !----------------------------------------------------------------
 
   ELSE
+  if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
       ! Cartesian with terrain:
 
 !$omp parallel do default(shared)   &
@@ -2676,6 +2979,52 @@
 
       enddo
 
+
+    else !RSFS stress from DRM
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k=1,nk
+        do j=1,nj
+        do i=1,ni
+          dum1(i,j,k) = 0.25*( (t13(i,j,k+1) + t13_re(i,j,k+1) +t13(i+1,j,k+1) + t13_re(i+1,j,k+1) ) &
+                  +(t13(i,j,k  ) + t13_re(i,j,k)   +t13(i+1,j,k  ) + t13_re(i+1,j,k) ) )
+        enddo
+        enddo
+        do j=1,nj
+        do i=1,ni
+          dum2(i,j,k) = 0.25*( (t23(i,j,k+1) + t23_re(i,j,k+1) + t23(i,j+1,k+1) + t23_re(i,j+1,k+1)) &
+            +(t23(i,j,k  ) + t23_re(i,j,k)   + t23(i,j+1,k  ) + t23_re(i,j+1,k)) )
+        enddo
+        enddo
+      enddo
+
+
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k=2,nk
+
+        do j=1,nj
+        do i=1,ni
+          turbx(i,j,k)=gz(i,j)*( (t13(i+1,j,k)+t13_re(i+1,j,k)) *rgzu(i+1,j)  &
+              -(t13(i,j,k)+t13_re(i,j,k))*rgzu(i,j) )*rdx*uh(i) &
+              +( (zt-sigma(k  ))*dum1(i,j,k  )                        &
+              -(zt-sigma(k-1))*dum1(i,j,k-1)                        &
+              )*gz(i,j)*(rgzu(i+1,j)-rgzu(i,j))*rdx*uh(i)*rds(k)
+        enddo
+        enddo
+
+        do j=1,nj
+        do i=1,ni
+          turby(i,j,k)=gz(i,j)*( (t23(i,j+1,k)+t23_re(i,j+1,k))*rgzv(i,j+1)             &
+              -(t23(i,j,k)  +t23_re(i,j,k))   *rgzv(i,j  ) )*rdy*vh(j) &
+              +( (zt-sigma(k  ))*dum2(i,j,k  )                        &
+              -(zt-sigma(k-1))*dum2(i,j,k-1)                        &
+              )*gz(i,j)*(rgzv(i,j+1)-rgzv(i,j))*rdy*vh(j)*rds(k)
+        enddo
+        enddo
+
+      enddo
+    end if
   ENDIF  ! endif for terrain check
 
 !-----------------------------------------------------------------
@@ -2859,6 +3208,20 @@
       ENDIF
 
   ENDIF  ifimplw
+
+  !---------DRM,XS-------------------------------------------------
+    if (sgsmodel.eq.3 .and. reconstr.ge.0) then
+!$omp parallel do default(shared)   &
+!$omp private(i,j,k)
+      do k=2,nk
+        do j=1,nj
+          do i=1,ni
+            turbz(i,j,k)=turbz(i,j,k) + (t33_re(i,j,k)-t33_re(i,j,k-1))*rdz*mf(i,j,k)
+          enddo
+        enddo
+      enddo
+    end if
+!---------DRM-------------------------------------------------
 
   ELSE  dovert
 
