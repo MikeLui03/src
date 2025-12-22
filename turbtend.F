@@ -46,6 +46,11 @@
       logical, intent(in) :: dobud
       integer, intent(in) :: ibd,ied,jbd,jed,kbd,ked,ndiag,sd_hturb,sd_vturb
       real, intent(inout) , dimension(ibd:ied,jbd:jed,kbd:ked,ndiag) :: diag
+      !------------------------------------------
+      ! DRM variables. XS 12/31/2018
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1s_re,u2s_re,u3s_re
+      real, dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: u1s_re_w,u2s_re_w  ! store flux at w points
+      !------------------------------------------
       integer, intent(in) :: ivar    ! 1 = potential temperature
                                      ! 2 = water vapor mixing ratio
 
@@ -109,6 +114,17 @@
           turby(i,j,k) = -(dumy(i,j+1,k)-dumy(i,j,k))*rdy*vh(j)
         enddo
         enddo
+
+        !-------------- if we need the RSFS fluxes ----------------
+        if (sgsmodel.eq.7 .and. reconstr.ge.0) then  
+          do j=1,nj
+          do i=1,ni
+            turbx(i,j,k) = turbx(i,j,k) - (u1s_re(i+1,j,k)-u1s_re(i,j,k))*rdx*uh(i)
+            turby(i,j,k) = turby(i,j,k) - (u2s_re(i,j+1,k)-u2s_re(i,j,k))*rdy*vh(j)
+          enddo
+          enddo
+        end if
+        !--------------------- XS 12/31/2018 ----------------------
 
       enddo
 
@@ -244,10 +260,40 @@
         enddo
       enddo
 
+      !------------ RSFS fluxes from DRM ----------------
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k,r1,r2)
+         do j=1,nj+1
+            ! lowest model level:
+            do i=1,ni+1
+               u1s_re_w(i,j,1) = cgs1*u1s_re(i,j,1)+cgs2*u1s_re(i,j,2)+cgs3*u1s_re(i,j,3)
+               u2s_re_w(i,j,1) = cgs1*u2s_re(i,j,1)+cgs2*u2s_re(i,j,2)+cgs3*u2s_re(i,j,3)
+            enddo
+
+            ! upper-most model level:
+            do i=1,ni+1
+               u1s_re_w(i,j,nk+1) = cgt1*u1s_re(i,j,nk)+cgt2*u1s_re(i,j,nk-1)+cgt3*u1s_re(i,j,nk-2)
+               u2s_re_w(i,j,nk+1) = cgt1*u2s_re(i,j,nk)+cgt2*u2s_re(i,j,nk-1)+cgt3*u2s_re(i,j,nk-2)
+            enddo
+
+            ! interior:
+            do k=2,nk
+               r2 = (sigmaf(k)-sigma(k-1))*rds(k)
+               r1 = 1.0-r2
+               do i=1,ni+1
+                  u1s_re_w(i,j,k) = r1*u1s_re(i,j,k-1)+r2*u1s_re(i,j,k)
+                  u2s_re_w(i,j,k) = r1*u2s_re(i,j,k-1)+r2*u2s_re(i,j,k)
+               enddo
+            enddo
+         enddo
+      end if
+      !---------------------------------------------------
+
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
       do k=1,nk
-
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then
         ! x-tendency
         do j=1,nj
         do i=1,ni
@@ -269,6 +315,31 @@
                  )*0.5*rdsf(k)
         enddo
         enddo
+      
+      else
+        ! include RSFS fluxes
+          ! x-tendency
+          do j=1,nj
+          do i=1,ni
+            turbx(i,j,k) = -gz(i,j)*((dumx(i+1,j,k)+u1s_re(i+1,j,k))*rgzu(i+1,j)             &
+                                    -(dumx(i,j,k)+u1s_re(i,j,k))*rgzu(i,j))*rdx*uh(i) &
+                  -( ( gx(i,j,k+1)*(turbz(i,j,k+1)+turbz(i+1,j,k+1) + u1s_re_w(i,j,k+1)+u1s_re_w(i+1,j,k+1))   &
+                      -gx(i,j,k)*(turbz(i,j,k)+turbz(i+1,j,k)+u1s_re_w(i,j,k)+u1s_re_w(i+1,j,k))      &
+                   ))*0.5*rdsf(k)
+          enddo
+          enddo
+
+          ! y-tendency
+          do j=1,nj
+          do i=1,ni
+            turby(i,j,k) = -gz(i,j)*((dumy(i,j+1,k)+u2s_re(i,j+1,k))*rgzv(i,j+1)             &
+                                    -(dumy(i,j,k)+u2s_re(i,j,k))*rgzv(i,j))*rdy*vh(j) &
+                  -( ( gy(i,j,k+1)*(dumz(i,j,k+1)+dumz(i,j+1,k+1) + u2s_re_w(i,j,k+1)+u2s_re_w(i,j+1,k+1))     &
+                      -gy(i,j,k)*(dumz(i,j,k)+dumz(i,j+1,k) + u2s_re_w(i,j,k)+u2s_re_w(i,j+1,k))      &
+                   ))*0.5*rdsf(k)
+          enddo
+          enddo
+        end if
 
       enddo
 
@@ -1052,6 +1123,9 @@
       subroutine turbu(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
                        turbx,turby,turbz,dum1,dum2,dum3,dum7,dum8,dum9,u,uten,w,t11,t12,t13,t22,kmv,cm0, &
+                       !-------------- DRM variables ----------------
+                       t11_re,t12_re,t13_re,                        &
+                       !-------------- XS 12/27/2018 ----------------
                        kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
       use input
       use constants
@@ -1075,6 +1149,9 @@
       real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: w
       real, intent(in), dimension(ib:ie,jb:je,kb:ke) :: t11,t12,t13,t22
       real, intent(in), dimension(ibc:iec,jbc:jec,kbc:kec) :: kmv
+      !-------------------- DRM Variables --------------------
+      real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re
+      !-------------------------------------------------------
       real, intent(in), dimension(ib:ie,jb:je) :: cm0
       real, intent(in), dimension(kb:ke) :: kmw,ufw,u1b
       real, intent(inout), dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: u2pt
@@ -1115,6 +1192,7 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(j,k)
+
       do k=1,nk
 
         do j=1,nj
