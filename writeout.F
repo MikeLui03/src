@@ -6405,21 +6405,57 @@
         desc_output(n_out) = 'reconstructed stress'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni
+            dum1(i,j,k) = t11_re(i,j,k)
+          enddo
+          enddo
+          enddo
+      call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
+      
+
         n_out = n_out + 1
         name_output(n_out) = 're_t22'
         desc_output(n_out) = 'reconstructed stress'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni
+            dum1(i,j,k) = t22_re(i,j,k)
+          enddo
+          enddo
+          enddo
+        call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
+
         n_out = n_out + 1
         name_output(n_out) = 're_t33'
         desc_output(n_out) = 'reconstructed stress'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni
+            dum1(i,j,k) = t33_re(i,j,k)
+          enddo
+          enddo
+          enddo
+        call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
+
         n_out = n_out + 1
         name_output(n_out) = 're_t12'
         desc_output(n_out) = 'reconstructed stress, originally at s12 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni
+            dum1(i,j,k) = t12_re(i,j,k)
+          enddo
+          enddo
+          enddo 
+        call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9) 
       ENDIF
       !======================================================
 
@@ -7281,6 +7317,15 @@
       unit_output(n_out) = 'K m/s'
       grid_output(n_out) = 'u'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
 
+      do k=1,maxk
+      do j=1,nj
+      do i=1,ni+1
+        dumu(i,j,k) = u1th_re(i,j,k)
+      enddo
+      enddo
+      enddo
+      call   writeu(dumu,unum,urec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
       if (imoist.eq.1) then
         do n = 1, numq
           text1 = 're_u1   '
@@ -7295,6 +7340,16 @@
           unit_output(n_out) = qunit(n)//'m/s'
           grid_output(n_out) = 'u'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
           cmpr_output(n_out) = .true.
+
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni+1
+            dumu(i,j,k) = u1q_re(i,j,k,nn)
+          enddo
+          enddo
+          enddo
+
+          call   writeu(dumu,unum,urec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
         end do
       endif
     end if
@@ -7769,6 +7824,16 @@
       unit_output(n_out) = 'K m/s'
       grid_output(n_out) = 'v'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
 
+      do k=1,maxk
+      do j=1,nj+1
+      do i=1,ni
+        dumv(i,j,k) = u2th_re(i,j,k)
+      enddo
+      enddo
+      enddo
+
+      call   writev(dumv,vnum,vrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
       if (imoist.eq.1) then
         do n = 1, numq
           text1 = 're_u2   '
@@ -7783,6 +7848,16 @@
           unit_output(n_out) = qunit(n)//'m/s'
           grid_output(n_out) = 'v'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
           cmpr_output(n_out) = .true.
+
+          do k=1,maxk
+          do j=1,nj+1
+          do i=1,ni
+            dumv(i,j,k) = u2q_re(i,j,k,nn)
+          enddo
+          enddo
+          enddo
+
+          call   writev(dumv,vnum,vrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
         end do
       endif
     end if
@@ -8713,11 +8788,32 @@
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
 
+        do k=1,maxk+1
+        do j=1,nj
+        do i=1,ni
+          dumw(i,j,k) = t13_re(i,j,k)
+        enddo
+        enddo
+        enddo
+
+        call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
         n_out = n_out + 1
         name_output(n_out) = 're_t23'
         desc_output(n_out) = 'reconstructed stress, originally at s23 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+        do k=1,maxk+1
+        do j=1,nj
+        do i=1,ni
+          dumw(i,j,k) = t23_re(i,j,k)
+        enddo
+        enddo
+        enddo
+
+
+        call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
 
         ! n_out = n_out + 1
         ! name_output(n_out) = 't13wall'
@@ -8737,6 +8833,16 @@
         unit_output(n_out) = 'K m/s'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
 
+        do k=1,maxk+1
+        do j=1,nj
+        do i=1,ni
+          dumw(i,j,k) = u3th_re(i,j,k)
+        enddo
+        enddo
+        enddo
+
+        call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
         if (imoist.eq.1) then
           do n = 1, numq
             text1 = 're_u3   '
@@ -8751,6 +8857,17 @@
             unit_output(n_out) = qunit(n)//'m/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
             cmpr_output(n_out) = .true.
+
+
+            do k=1,maxk+1
+            do j=1,nj
+            do i=1,ni
+              dumw(i,j,k) = u3q_re(i,j,k,nn)
+            enddo
+            enddo
+            enddo
+
+            call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
           end do
 
           if (dyn_scalar.eq.1 .and. dyn_all.eq.0) then
@@ -8760,12 +8877,31 @@
             unit_output(n_out) = 'm^2/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
 
+            do k=1,maxk+1
+            do j=1,nj
+            do i=1,ni
+              dumw(i,j,k) = kqh(i,j,k)
+            enddo
+            enddo
+            enddo
+
+            call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
             if (tconfig.eq.2) then
               n_out = n_out + 1
               name_output(n_out) = 'kqv'
               desc_output(n_out) = 'vertical eddy diffusivity for moisture'
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+              do k=1,maxk+1
+              do j=1,nj
+              do i=1,ni
+                dumw(i,j,k) = kqv(i,j,k)
+              enddo
+              enddo
+              enddo
+
+              call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
             endif
 
             n_out = n_out + 1
@@ -8773,6 +8909,14 @@
             desc_output(n_out) = 'horizontal eddy diffusivity for particle # concentration'
             unit_output(n_out) = 'm^2/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            do k=1,maxk+1
+            do j=1,nj
+            do i=1,ni
+              dumw(i,j,k) = knh(i,j,k)
+            enddo
+            enddo
+            enddo
+            call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
 
             if (tconfig.eq.2) then
               n_out = n_out + 1
@@ -8780,6 +8924,15 @@
               desc_output(n_out) = 'vertical eddy diffusivity for particle # concentration'
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+              do k=1,maxk+1
+              do j=1,nj
+              do i=1,ni
+                dumw(i,j,k) = knv(i,j,k)
+              enddo
+              enddo
+              enddo
+              call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
             endif
           elseif (dyn_scalar.eq.1 .and. dyn_all.eq.1) then
             do n = 1, numq
@@ -8795,6 +8948,15 @@
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
               cmpr_output(n_out) = .true.
+              do k=1,maxk+1
+              do j=1,nj
+              do i=1,ni
+                dumw(i,j,k) = kq4d(i,j,k,nn)
+              enddo
+              enddo
+              enddo
+
+              call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
             end do
 
             if (tconfig.eq.2) then
@@ -8811,6 +8973,16 @@
                 unit_output(n_out) = 'm^2/s'
                 grid_output(n_out) = 'w'   ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
                 cmpr_output(n_out) = .true.
+
+                do k=1,maxk+1
+                do j=1,nj
+                do i=1,ni
+                  dumw(i,j,k) = kqv4d(i,j,k,nn)
+                enddo
+                enddo
+                enddo
+
+                call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
               end do
             end if   ! tconfig
           end if   ! dyn_scalar, dyn_all
