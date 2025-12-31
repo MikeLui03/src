@@ -6405,6 +6405,8 @@
         desc_output(n_out) = 'reconstructed stress'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
           do k=1,maxk
           do j=1,nj
           do i=1,ni
@@ -6420,6 +6422,8 @@
         desc_output(n_out) = 'reconstructed stress'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
           do k=1,maxk
           do j=1,nj
           do i=1,ni
@@ -6434,6 +6438,8 @@
         desc_output(n_out) = 'reconstructed stress'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
           do k=1,maxk
           do j=1,nj
           do i=1,ni
@@ -6448,6 +6454,8 @@
         desc_output(n_out) = 'reconstructed stress, originally at s12 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
           do k=1,maxk
           do j=1,nj
           do i=1,ni
@@ -7316,7 +7324,8 @@
       desc_output(n_out) = 'reconstructed theta flux'
       unit_output(n_out) = 'K m/s'
       grid_output(n_out) = 'u'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
-
+      !$omp parallel do default(shared)  &
+      !$omp private(i,j,k)
       do k=1,maxk
       do j=1,nj
       do i=1,ni+1
@@ -7340,7 +7349,8 @@
           unit_output(n_out) = qunit(n)//'m/s'
           grid_output(n_out) = 'u'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
           cmpr_output(n_out) = .true.
-
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
           do k=1,maxk
           do j=1,nj
           do i=1,ni+1
@@ -7823,7 +7833,8 @@
       desc_output(n_out) = 'reconstructed theta flux'
       unit_output(n_out) = 'K m/s'
       grid_output(n_out) = 'v'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
-
+      !$omp parallel do default(shared)  &
+      !$omp private(i,j,k)
       do k=1,maxk
       do j=1,nj+1
       do i=1,ni
@@ -7848,7 +7859,8 @@
           unit_output(n_out) = qunit(n)//'m/s'
           grid_output(n_out) = 'v'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
           cmpr_output(n_out) = .true.
-
+          !$omp parallel do default(shared)  &
+          !$omp private(i,j,k)
           do k=1,maxk
           do j=1,nj+1
           do i=1,ni
@@ -8787,7 +8799,9 @@
         desc_output(n_out) = 'reconstructed stress, originally at s13 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
-
+        
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
         do k=1,maxk+1
         do j=1,nj
         do i=1,ni
@@ -8803,7 +8817,10 @@
         desc_output(n_out) = 'reconstructed stress, originally at s23 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        
 
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
         do k=1,maxk+1
         do j=1,nj
         do i=1,ni
@@ -8832,7 +8849,10 @@
         desc_output(n_out) = 'reconstructed theta flux'
         unit_output(n_out) = 'K m/s'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        
 
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
         do k=1,maxk+1
         do j=1,nj
         do i=1,ni
@@ -8858,7 +8878,8 @@
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
             cmpr_output(n_out) = .true.
 
-
+            !$omp parallel do default(shared)  &
+            !$omp private(i,j,k)
             do k=1,maxk+1
             do j=1,nj
             do i=1,ni
@@ -8876,7 +8897,9 @@
             desc_output(n_out) = 'horizontal eddy diffusivity for moisture'
             unit_output(n_out) = 'm^2/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
-
+            
+            !$omp parallel do default(shared)  &
+            !$omp private(i,j,k)
             do k=1,maxk+1
             do j=1,nj
             do i=1,ni
@@ -8893,6 +8916,10 @@
               desc_output(n_out) = 'vertical eddy diffusivity for moisture'
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+
+              !$omp parallel do default(shared)  &
+              !$omp private(i,j,k)
               do k=1,maxk+1
               do j=1,nj
               do i=1,ni
@@ -8909,6 +8936,10 @@
             desc_output(n_out) = 'horizontal eddy diffusivity for particle # concentration'
             unit_output(n_out) = 'm^2/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+
+
+            !$omp parallel do default(shared)  &
+            !$omp private(i,j,k)
             do k=1,maxk+1
             do j=1,nj
             do i=1,ni
@@ -8924,7 +8955,9 @@
               desc_output(n_out) = 'vertical eddy diffusivity for particle # concentration'
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
-
+              
+              !$omp parallel do default(shared)  &
+              !$omp private(i,j,k)
               do k=1,maxk+1
               do j=1,nj
               do i=1,ni
@@ -8948,6 +8981,9 @@
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
               cmpr_output(n_out) = .true.
+
+              !$omp parallel do default(shared)  &
+              !$omp private(i,j,k)
               do k=1,maxk+1
               do j=1,nj
               do i=1,ni
@@ -8958,7 +8994,7 @@
 
               call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
             end do
-
+        
             if (tconfig.eq.2) then
               do n = 1, numq
                 text1 = 'kv_     '
@@ -8974,6 +9010,9 @@
                 grid_output(n_out) = 'w'   ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
                 cmpr_output(n_out) = .true.
 
+
+                !$omp parallel do default(shared)  &
+                !$omp private(i,j,k)
                 do k=1,maxk+1
                 do j=1,nj
                 do i=1,ni
