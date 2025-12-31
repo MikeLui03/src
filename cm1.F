@@ -2243,7 +2243,7 @@
       !=========================================================================  
       ! Allocate DRM variables
       ! XS 11/01/2018
-      if ((sgsmodel .eq. 7) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then  ! only allocate these when DRM is used !SACP
+      if ((sgsmodel .eq. 7) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then  ! only allocate these when DRM is used !RNA
 
         allocate(  l11(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) )
         l11 = 0.0

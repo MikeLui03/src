@@ -5214,7 +5214,7 @@
 
       !===========================================
       ! DRM indices. XS 11/05/2018
-      if( (sgsmodel.eq.7) .or. (sgsmodel.eq.6 .and. reconstr.ge.0) )then  ! if DRM is used !SACP
+      if( (sgsmodel.eq.7) .or. (sgsmodel.eq.6 .and. reconstr.ge.0) )then  ! if DRM is used !RNA
         ibdrm=ib
         iedrm=ie
         jbdrm=jb
