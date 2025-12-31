@@ -7274,7 +7274,7 @@
   !.............................................
   !========================================================
     ! DRM variables. XS 1/2/2019
-    if (sgsmodel.eq.3 .and. output_drm.eq.1) then
+    if (sgsmodel.eq.7 .and. output_drm.eq.1) then
       n_out = n_out + 1
       name_output(n_out) = 're_u1th'
       desc_output(n_out) = 'reconstructed theta flux'
@@ -7762,7 +7762,7 @@
   !.............................................
   !========================================================
     ! DRM variables. XS 1/2/2019
-    if (sgsmodel.eq.3 .and. output_drm.eq.1) then
+    if (sgsmodel.eq.7 .and. output_drm.eq.1) then
       n_out = n_out + 1
       name_output(n_out) = 're_u2th'
       desc_output(n_out) = 'reconstructed theta flux'
@@ -8705,7 +8705,7 @@
   !.............................................
     !========================================================
       ! DRM variables. XS 1/2/2019
-      if (sgsmodel.eq.3 .and. output_drm.eq.1) then
+      if (sgsmodel.eq.7 .and. output_drm.eq.1) then
 
         n_out = n_out + 1
         name_output(n_out) = 're_t13'

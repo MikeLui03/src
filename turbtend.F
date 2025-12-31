@@ -3210,7 +3210,7 @@
   ENDIF  ifimplw
 
   !---------DRM,XS-------------------------------------------------
-    if (sgsmodel.eq.3 .and. reconstr.ge.0) then
+    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
       do k=2,nk

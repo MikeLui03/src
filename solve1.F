@@ -1260,7 +1260,7 @@
                    !-------------- DRM variables ----------------
                    u1th_re,u2th_re,u3th_re,u1s_re_w,u2s_re_w,                          &
                    !---------------------------------------------
-                   dotbud,ibdt,iedt,jbdt,jedt,kbdt,kedt,ntdiag,tdiag,td_hturb,td_vturb,1)
+                   dotbud,ibdt,iedt,jbdt,jedt,kbdt,kedt,ntdiag,tdiag,td_hturb,td_vturb,1) !1 at the end for potential temp
 
         IF( imoist.eq.1 )THEN
           ! moisture:
@@ -1273,7 +1273,7 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
                          !---------------------------------------------
-                         doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2)
+                         doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2) !2 at the vapor mixing ratio
               !================================DRM==============================
               elseif (dyn_all.eq.0) then   ! sgsmodel.eq.3 .and. dyn_scalar.eq.1, DRM-D
 !$omp parallel do default(shared)  &
@@ -1331,7 +1331,7 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                          !---------------------------------------------
-                         .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)
+                         .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)!0 the end for other mixing ratios
               !================================DRM==============================
               elseif (dyn_all.eq.0) then   ! ! .eq.3 .and. dyn_scalar.eq.1, DRM-D
                 if ((n.lt.nnc1 .and. nnc1.ne.1) .or. (nnc1.eq.1)) then
@@ -1352,7 +1352,7 @@
                            !-------------- DRM variables ----------------
                            u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                            !---------------------------------------------
-                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0) !0 the end
+                           .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0) !0 the end for other mixing ratios
                 else
                   if (n.eq.nnc1) then
 !$omp parallel do default(shared)  &
