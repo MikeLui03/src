@@ -6399,7 +6399,7 @@
 
       !======================================================
       ! DRM variables. XS 1/2/2019
-      IF ( sgsmodel.eq.7 .and. output_drm.eq.1) THEN
+      IF ( (sgsmodel.eq.7 .or. (sgsmodel.eq.6 .and reconstr.ge.1)) .and. output_drm.eq.1) THEN !rna
         n_out = n_out + 1
         name_output(n_out) = 're_t11'
         desc_output(n_out) = 'reconstructed stress'
@@ -7354,7 +7354,7 @@
           do k=1,maxk
           do j=1,nj
           do i=1,ni+1
-            dumu(i,j,k) = u1q_re(i,j,k,nn)
+            dumu(i,j,k) = u1q_re(i,j,k,n) !nn to n
           enddo
           enddo
           enddo
@@ -7864,7 +7864,7 @@
           do k=1,maxk
           do j=1,nj+1
           do i=1,ni
-            dumv(i,j,k) = u2q_re(i,j,k,nn)
+            dumv(i,j,k) = u2q_re(i,j,k,n) !nn to n
           enddo
           enddo
           enddo
@@ -8883,7 +8883,7 @@
             do k=1,maxk+1
             do j=1,nj
             do i=1,ni
-              dumw(i,j,k) = u3q_re(i,j,k,nn)
+              dumw(i,j,k) = u3q_re(i,j,k,n) !nn to n
             enddo
             enddo
             enddo
@@ -8987,7 +8987,7 @@
               do k=1,maxk+1
               do j=1,nj
               do i=1,ni
-                dumw(i,j,k) = kq4d(i,j,k,nn)
+                dumw(i,j,k) = kq4d(i,j,k,n) !nn to n
               enddo
               enddo
               enddo
@@ -9016,7 +9016,7 @@
                 do k=1,maxk+1
                 do j=1,nj
                 do i=1,ni
-                  dumw(i,j,k) = kqv4d(i,j,k,nn)
+                  dumw(i,j,k) = kqv4d(i,j,k,n) !nn to n
                 enddo
                 enddo
                 enddo
