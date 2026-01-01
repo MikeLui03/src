@@ -6399,7 +6399,7 @@
 
       !======================================================
       ! DRM variables. XS 1/2/2019
-      IF ( (sgsmodel.eq.7 .or. (sgsmodel.eq.6 .and reconstr.ge.1)) .and. output_drm.eq.1) THEN !rna
+      IF ((sgsmodel.eq.7 .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) .and. output_drm.eq.1) THEN !rna
         n_out = n_out + 1
         name_output(n_out) = 're_t11'
         desc_output(n_out) = 'reconstructed stress'
