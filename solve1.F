@@ -1266,7 +1266,7 @@
           ! moisture:
           do n=1,numq
             if( n.eq.nqv )then
-              if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. (sgsmodel.eq.7 .and. dyn_scalar.eq.0)) then !XS !RNA
+              if ((sgsmodel.ne.7 .and. (sgsmodel.ne.6 .or. reconstr.lt.0)) .or. (sgsmodel.eq.7 .and. dyn_scalar.eq.0)) then !XS !RNA
               call turbs(1,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
                          rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                          dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),khh,khv,cm0,dum7,dum8, &
@@ -1324,7 +1324,7 @@
               endif
             !==================================================================================================
             else
-              if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. (sgsmodel.eq.7 .and. dyn_scalar.eq.0)) then !RNA
+              if ((sgsmodel.ne.7 .and. (sgsmodel.ne.6 .or. reconstr.lt.0)) .or. (sgsmodel.eq.7 .and. dyn_scalar.eq.0)) then !RNA
               call turbs(0,dt,dosfcflx,xh,rxh,arh1,arh2,uh,xf,arf1,arf2,uf,vh,vf,qvflux,   &
                          rds,sigma,rdsf,sigmaf,mh,mf,gz,rgz,gzu,rgzu,gzv,rgzv,gx,gxu,gy,gyv, &
                          dum1,dum2,dum3,dum4,dum5,sten,rho,rr,rf,qa(ib,jb,kb,n),qten(ib,jb,kb,n),khh,khv,cm0,dum7,dum8, &
