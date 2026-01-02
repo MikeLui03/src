@@ -119,7 +119,7 @@
         enddo
 
         !-------------- if we need the RSFS fluxes ----------------
-        if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then  !RNA
+        if (sgsmodel.eq.7 .and. reconstr.ge.0) then  
           do j=1,nj
           do i=1,ni
             turbx(i,j,k) = turbx(i,j,k) - (u1s_re(i+1,j,k)-u1s_re(i,j,k))*rdx*uh(i)
@@ -264,7 +264,7 @@
       enddo
 
       !------------ RSFS fluxes from DRM, XS ----------------
-      if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then  !RNA
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then
       !$omp parallel do default(shared)   &
       !$omp private(i,j,k,r1,r2)
          do j=1,nj+1
@@ -296,7 +296,7 @@
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
       do k=1,nk
-      if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) . then !XS
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
         ! x-tendency
         do j=1,nj
         do i=1,ni
@@ -777,7 +777,7 @@
 
   ENDIF  ifimpls
       !-------------- DRM,XS ----------------
-    if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then  !RNA
+    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
       do k = 1, nk
         do j = 1, nj
           do i = 1, ni
@@ -1218,7 +1218,7 @@
 
 
       ! RSFS stress from DRM
-      if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then  !XS RNA
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then   !XS
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
         do k=1,nk
@@ -1271,7 +1271,7 @@
       ! dum2 stores t12 at w-pts:
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k,r1,r2)
-      if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS !RNA
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
       do j=1,nj+1
 
           ! lowest model level:
@@ -1966,7 +1966,7 @@
   
   !--------------------------------------------------------
   ! RSFS stress from DRM,XS
-  if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then !RNA
+  if (sgsmodel.eq.7 .and. reconstr.ge.0) then
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
     do k=1,nk
@@ -2113,7 +2113,7 @@
 
       enddo
 !----------------DRM-------------------------------
-      if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then   !XS !RNA
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then   !XS
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
         do k=1,nk
@@ -2162,7 +2162,7 @@
 !  Terrain:
 
   ELSE
-      if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS !RNA
+      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
       ! dum1 stores t12 at w-pts:
       ! dum2 stores t22 at w-pts:
 !$omp parallel do default(shared)   &
@@ -2763,7 +2763,7 @@
 
   ENDIF  ifimplv
    !RSFS stress from DRM, XS                     
-    if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then !RNA
+    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
       !$omp parallel do default(shared)   &
       !$omp private(i,j,k)
       do k=1,nk
@@ -2883,7 +2883,7 @@
         enddo
 
       enddo
-      if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then !XS !RNA
+      if (sgsmodel.eq.7 .and. reconstr.ge.0) then !XS
         !$omp parallel do default(shared)   &
         !$omp private(i,j,k)
         do k=2,nk
@@ -2932,7 +2932,7 @@
 !----------------------------------------------------------------
 
   ELSE
-  if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS !RNA
+  if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
       ! Cartesian with terrain:
 
 !$omp parallel do default(shared)   &
@@ -3210,7 +3210,7 @@
   ENDIF  ifimplw
 
   !---------DRM,XS-------------------------------------------------
-    if ((sgsmodel.eq.7 .or. sgsmodel.eq.6) .and. reconstr.ge.0) then !RNA
+    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
       do k=2,nk

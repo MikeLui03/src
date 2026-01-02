@@ -1519,7 +1519,60 @@
                          kw1,kw2,ke1,ke2,ks1,ks2,kn1,kn2,reqs_s,   &
                          nw1,nw2,ne1,ne2,sw1,sw2,se1,se2)
 
-      ELSEIF (sgsmodel.eq.7) THEN  ! call DRM subroutines. XS 12/6/2018
+        ! RNA
+        if (reconstr.ge.0) then   ! if RSFS part is to be included
+          !=================
+          ! reconstruct RSFS momentum fluxes
+          call reconstruct(ua,va,wa,rho,rf,c1,c2,           &
+          t11_re,t12_re,t13_re,t22_re,t23_re,t33_re,    &
+          u_re,v_re,w_re,u_re_filt,v_re_filt,w_re_filt, &
+          u1u1,u1u2,u1u3,u2u2,u2u3,u3u3,                &
+          u1u1_filt,u1u2_filt,u1u3_filt,                &
+          u2u2_filt,u2u3_filt,u3u3_filt,                &  !----------- argument keywords --------------
+          l11,l12,l13,l22,l23,l33,                      &  !uf1uf1,uf1uf2,uf1uf3,uf2uf2,uf2uf3,uf3uf3, &
+          u_te_filt,v_te_filt,w_te_filt,lh33,           &  !u_temp,v_temp,w_temp,x_temp,
+          u_re_add,v_re_add,w_re_add,                   &
+          filtuw31,filtuw32,filtue31,filtue32,          &
+          filtus31,filtus32,filtun31,filtun32,          &
+          filtvw31,filtvw32,filtve31,filtve32,          &
+          filtvs31,filtvs32,filtvn31,filtvn32,          &
+          filtww31,filtww32,filtwe31,filtwe32,          &
+          filtws31,filtws32,filtwn31,filtwn32,          &
+          n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+          !=================
+          ! reconstruct RSFS theta fluxes
+          call reconstruct_s(th_total,rho,rf,c1,c2,     &  !----------- argument keywords --------------
+          u_re,u_re_filt,v_re,v_re_filt,w_re,w_re_filt, &  ! u_re,u_filt,v_re,v_filt,w_re,w_filt,
+          u1th_re,u2th_re,u3th_re,                      &  ! u1s_re,u2s_re,u3s_re,
+          u1th,u2th,u3th,                               &  ! u1s,u2s,u3s
+          lh11,lh22,                                    &  ! s_re,s_filt,
+          u1s_filt,u2s_filt,u3s_filt,                   &
+          l11,l22,l33,                                  &  ! uf1sf,uf2sf,uf3sf,
+          lh33,lh23,                                    &  ! s_temp,s_re_add
+          filtw31,filtw32,filte31,filte32,              &
+          filts31,filts32,filtn31,filtn32,              &
+          n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+
+          !======================
+          ! reconstruct moist variable fluxes (separately)
+          if (imoist.eq.1) then
+            do n = 1, numq
+              call reconstruct_s(qa(ib,jb,kb,n),rho,rf,c1,c2,   &
+              u_re,u_re_filt,v_re,v_re_filt,w_re,w_re_filt, &
+              u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),  &
+              u1s,u2s,u3s,                                  &
+              lh11,lh22,                                    & ! s_re,s_filt,
+              u1s_filt,u2s_filt,u3s_filt,                   &
+              l11,l22,l33,                                  & ! uf1sf,uf2sf,uf3sf,
+              lh33,lh23,                                    & ! s_temp,s_re_add,
+              filtw31,filtw32,filte31,filte32, &
+              filts31,filts32,filtn31,filtn32, &
+              n3w1,n3w2,n3e1,n3e2,s3w1,s3w2,s3e1,s3e2)
+            end do
+          end if
+        end if
+
+      ELSEIF (sgsmodel.eq.7) THEN  ! call DRM subroutines. XS 12/6/2018  
         ! use total theta in the calculation
         th_total = th0 + tha
 
