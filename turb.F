@@ -1549,6 +1549,8 @@
 
         ! RNA
         if (reconstr.ge.0) then   ! if RSFS part is to be included
+          ! use total theta in the calculation
+          th_total = th0 + tha
           !=================
           ! reconstruct RSFS momentum fluxes
           call reconstruct(ua,va,wa,rho,rf,c1,c2,           &
