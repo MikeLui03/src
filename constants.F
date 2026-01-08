@@ -82,6 +82,28 @@
       ! alpha is the ratio of test-grid spacing to explicit-grid spacing
       real, parameter :: alpha43 = 2.0**(4./3.)
       !================
+      
+
+      !===============
+      !sacp constants
+      ! 1D filter weights for 3x3 convolution
+      real, parameter, dimension(-1:1) :: fwt1d_3 = [1, 1, 1]
+
+      ! 2D filter weights for 5x5, 7x7 convolution
+      real, parameter, dimension(-2:2, -2:2) :: fwt2d_5 = reshape([[1,1,1,1,1], &
+                                                                  [1,1,1,1,1], &
+                                                                  [1,1,1,1,1], &
+                                                                  [1,1,1,1,1], &
+                                                                  [1,1,1,1,1]],[5,5])
+      real, parameter, dimension(-3:3, -3:3) :: fwt2d_7 = reshape([[1,1,1,1,1,1,1], &
+                                                                  [1,1,1,1,1,1,1], &
+                                                                  [1,1,1,1,1,1,1], &
+                                                                  [1,1,1,1,1,1,1], &
+                                                                  [1,1,1,1,1,1,1], &
+                                                                  [1,1,1,1,1,1,1], &
+                                                                  [1,1,1,1,1,1,1]],[7,7])
+      !===============     
+
 
   CONTAINS
 
