@@ -761,7 +761,7 @@
       ramp_time = max( ramp_time , 1.0e-10 )
 
       if( cm1setup.eq.1 .or. cm1setup.eq.4 )  idoles = .true.
-      if( cm1setup.eq.2 .or. cm1setup.eq.4 )  idopbl = .true.
+      if( cm1setup.eq.2 .or. cm1setup.eq.4 .or. (cm1setup.eq.1 .and. ipbl.ge.1) )  idopbl = .true. !sacp, allow ipbl=0 for cm1setup=1
 
       !------------
 
@@ -1525,26 +1525,26 @@
         call stopcm1
       ENDIF
       ENDIF
-      !-----
-      IF( ipbl.ge.1 )THEN
-      IF( .not. idopbl )THEN
-        if(myid.eq.0)then
-        print *
-        print *,'  ipbl     = ',ipbl
-        print *,'  idopbl   = ',idopbl
-        print *,'  cm1setup = ',cm1setup
-        print *
-        print *,'  ipbl >= 1  requires cm1setup=2,4 '
-        print *
-        print *,'   stopping model .... '
-        print *
-        endif
-#ifdef MPI
-        call MPI_BARRIER (MPI_COMM_WORLD,ierr)
-#endif
-        call stopcm1
-      ENDIF
-      ENDIF
+      !-----!sacp, allow ipbl=0 for cm1setup=1
+!       IF( ipbl.ge.1 )THEN
+!       IF( .not. idopbl )THEN
+!         if(myid.eq.0)then
+!         print *
+!         print *,'  ipbl     = ',ipbl
+!         print *,'  idopbl   = ',idopbl
+!         print *,'  cm1setup = ',cm1setup
+!         print *
+!         print *,'  ipbl >= 1  requires cm1setup=2,4 '
+!         print *
+!         print *,'   stopping model .... '
+!         print *
+!         endif
+! #ifdef MPI
+!         call MPI_BARRIER (MPI_COMM_WORLD,ierr)
+! #endif
+!         call stopcm1
+!       ENDIF
+!       ENDIF
       !-----
       IF(bcturbs.lt.1.or.bcturbs.gt.2)THEN
         if(myid.eq.0)then
