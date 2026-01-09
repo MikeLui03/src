@@ -353,7 +353,7 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine cu_ntiedtke_wrapper(pu,pv,pt,pqv,pqc,pqi,pqvf,ptf,poz,pzz,pomg, &
-     &         pap,paph,evap,hfx,zprecc,lndj,lq,km,km1,dt,dx,errmsg,errflg)
+     &         pap,paph,evap,hfx,zprecc,lndj,lq,km,km1,dt,dx,errmsg,errflg, sacp_alphamax) !sacp
       use cu_ntiedtke, only : cu_ntiedtke_run
       implicit none
 
@@ -361,7 +361,7 @@
       integer,intent(in),dimension(lq):: lndj
 
       real(kind=kind_phys),intent(in):: dt
-      real(kind=kind_phys),intent(in),dimension(lq):: dx
+      real(kind=kind_phys),intent(in),dimension(lq):: dx, sacp_alphamax !sacp
       real(kind=kind_phys),intent(in),dimension(lq):: evap,hfx
       real(kind=kind_phys),intent(in),dimension(lq,km):: pqvf,ptf
       real(kind=kind_phys),intent(in),dimension(lq,km):: poz,pomg,pap
@@ -399,7 +399,8 @@
                                  dt=dt,          &
                                  dx=dx,          &
                                  errmsg=errmsg,  &
-                                 errflg=errflg)
+                                 errflg=errflg,  &
+                                 sacp_alphamax=sacp_alphamax )!sacp
 
       end subroutine cu_ntiedtke_wrapper
 

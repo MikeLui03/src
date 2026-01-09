@@ -325,6 +325,12 @@
       call MPI_BCAST(dyn_all   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(dyn_correct,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       !=========================================================================
+      !=========================================================================
+      ! sacp Parameters. 
+      call MPI_BCAST(dosacp  ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(sacp_alphaf,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(sacp_betaf   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      !=========================================================================
       call MPI_BCAST(irdamp   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(hrdamp   ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(psolver  ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -2933,6 +2939,12 @@
       if(dowr) write(outfile,*) 'dyn_scalar=',dyn_scalar
       if(dowr) write(outfile,*) 'dyn_all   =',dyn_all
       if(dowr) write(outfile,*) 'dyn_correct=',dyn_correct
+      !==================================================
+      !==================================================
+      ! sacp parameters. 
+      if(dowr) write(outfile,*) 'dosacp  =',dosacp
+      if(dowr) write(outfile,*) 'sacp_alphaf=',sacp_alphaf
+      if(dowr) write(outfile,*) 'sacp_betaf   =',sacp_betaf
       !==================================================
       if(dowr) write(outfile,*) 'irdamp    =',irdamp
       if(dowr) write(outfile,*) 'hrdamp    =',hrdamp

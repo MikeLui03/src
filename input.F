@@ -100,6 +100,10 @@
               ! DRM parameters. XS 11/16/2018
               reconstr,dyn_scalar,dyn_all,dyn_correct,                        &
               !================================================================
+              !================================================================
+              ! sacp parameters. 
+              dosacp,sacp_alphaf,sacp_betaf,                        &
+              !================================================================
               irdamp,hrdamp,psolver,nsound,ptype,ihail,iautoc,cuparam,        &
               icor,betaplane,lspgrad,eqtset,idiss,efall,rterm,                &
               wbc,ebc,sbc,nbc,bbc,tbc,irbc,roflux,nudgeobc,                   &
@@ -284,6 +288,10 @@
           !=====================================================================
           ! DRM parameters. XS 11/16/2018
           reconstr,dyn_scalar,dyn_all,dyn_correct,                      &
+          !=====================================================================
+          !=====================================================================
+          ! sacp parameters. 
+          dosacp,sacp_alphaf,sacp_betaf,                        &
           !=====================================================================
           irdamp,hrdamp,psolver,ptype,ihail,iautoc,cuparam,             &
           icor,betaplane,lspgrad,eqtset,idiss,efall,rterm,              &

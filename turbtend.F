@@ -21,6 +21,9 @@
                        !-------------- DRM variables,XS ----------------
                        u1s_re,u2s_re,u3s_re,u1s_re_w,u2s_re_w,                              &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        dobud,ibd,ied,jbd,jed,kbd,ked,ndiag,diag,sd_hturb,sd_vturb,ivar)
       use input
       use constants
@@ -54,6 +57,9 @@
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1s_re,u2s_re,u3s_re
       real, dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1) :: u1s_re_w,u2s_re_w  ! store flux at w points
       !------------------------------------------
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------
       integer, intent(in) :: ivar    ! 1 = potential temperature
                                      ! 2 = water vapor mixing ratio
 
@@ -111,21 +117,43 @@
           enddo
         ENDIF
 
-        do j=1,nj
-        do i=1,ni
-          turbx(i,j,k) = -(dumx(i+1,j,k)-dumx(i,j,k))*rdx*uh(i)
-          turby(i,j,k) = -(dumy(i,j+1,k)-dumy(i,j,k))*rdy*vh(j)
-        enddo
-        enddo
-
-        !-------------- if we need the RSFS fluxes ----------------
-        if (sgsmodel.eq.7 .and. reconstr.ge.0) then  
+        if (dosacp .ge. 1) then !sacp
           do j=1,nj
           do i=1,ni
-            turbx(i,j,k) = turbx(i,j,k) - (u1s_re(i+1,j,k)-u1s_re(i,j,k))*rdx*uh(i)
-            turby(i,j,k) = turby(i,j,k) - (u2s_re(i,j+1,k)-u2s_re(i,j,k))*rdy*vh(j)
+            turbx(i,j,k) = -(0.5*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k))*dumx(i+1,j,k) &
+                            -0.5*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k))*dumx(i,j,k))*rdx*uh(i)
+            turby(i,j,k) = -(0.5*(sacp_betas(i,j,k)+sacp_betas(i,j+1,k))*dumy(i,j+1,k) &
+                             -0.5*(sacp_betas(i,j-1,k)+sacp_betas(i,j,k))*dumy(i,j,k))*rdy*vh(j)
           enddo
           enddo
+        else 
+          do j=1,nj
+          do i=1,ni
+            turbx(i,j,k) = -(dumx(i+1,j,k)-dumx(i,j,k))*rdx*uh(i)
+            turby(i,j,k) = -(dumy(i,j+1,k)-dumy(i,j,k))*rdy*vh(j)
+          enddo
+          enddo
+        end if
+
+        !-------------- if we need the RSFS fluxes ----------------
+        if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
+          if (dosacp .ge. 1) then !sacp
+            do j=1,nj
+            do i=1,ni
+              turbx(i,j,k) = turbx(i,j,k) - (0.5*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k))*u1s_re(i+1,j,k)&
+                                            -0.5*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k))*u1s_re(i,j,k))*rdx*uh(i)
+              turby(i,j,k) = turby(i,j,k) - (0.5*(sacp_betas(i,j,k)+sacp_betas(i,j+1,k))*u2s_re(i,j+1,k)&
+                                            -0.5*(sacp_betas(i,j-1,k)+sacp_betas(i,j,k))*u2s_re(i,j,k))*rdy*vh(j)
+            enddo
+            enddo
+          else
+            do j=1,nj
+            do i=1,ni
+              turbx(i,j,k) = turbx(i,j,k) - (u1s_re(i+1,j,k)-u1s_re(i,j,k))*rdx*uh(i)
+              turby(i,j,k) = turby(i,j,k) - (u2s_re(i,j+1,k)-u2s_re(i,j,k))*rdy*vh(j)
+            enddo
+            enddo
+          end if
         end if
         !--------------------- XS 12/31/2018 ----------------------
 
@@ -264,7 +292,7 @@
       enddo
 
       !------------ RSFS fluxes from DRM, XS ----------------
-      if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+      if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
       !$omp parallel do default(shared)   &
       !$omp private(i,j,k,r1,r2)
          do j=1,nj+1
@@ -296,7 +324,7 @@
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
       do k=1,nk
-      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
+      if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS
         ! x-tendency
         do j=1,nj
         do i=1,ni
@@ -407,6 +435,9 @@
                        !-------------- DRM variables,XS ----------------
                        u1s_re,u2s_re,u3s_re,          &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        ivar)
 
 
@@ -523,6 +554,9 @@
                        !-------------- DRM variables,XS ----------------
                        u1s_re,u2s_re,u3s_re,                              &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        ivar)
       use input
       use constants
@@ -544,6 +578,9 @@
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: u1s_re,u2s_re,u3s_re
       
       !------------------------------------------
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------
       integer, intent(in) :: ivar
 
       integer :: i,j,k
@@ -635,11 +672,20 @@
 
         ENDIF
 
-        do k=1,nk
-        do i=1,ni
-          turbz(i,j,k) = -(dumz(i,j,k+1)-dumz(i,j,k))*rdz*mh(i,j,k)
-        enddo
-        enddo
+        if (dosacp .ge. 1) then !sacp
+          do k=1,nk
+          do i=1,ni
+            turbz(i,j,k) = -(0.5*(sacp_betas(i,j,k)+sacp_betas(i,j,k+1))*dumz(i,j,k+1) &
+                            -0.5*(sacp_betas(i,j,k-1)+sacp_betas(i,j,k))*dumz(i,j,k))*rdz*mh(i,j,k)
+          enddo
+          enddo
+        else
+          do k=1,nk
+          do i=1,ni
+            turbz(i,j,k) = -(dumz(i,j,k+1)-dumz(i,j,k))*rdz*mh(i,j,k)
+          enddo
+          enddo
+        end if 
 
       ENDDO
 
@@ -777,14 +823,27 @@
 
   ENDIF  ifimpls
       !-------------- DRM,XS ----------------
-    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+      !$omp parallel do default(shared)   &
+      !$omp private(i,j,k)
+    if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
+      if (dosacp .ge. 1) then
+        do k = 1, nk
+          do j = 1, nj
+            do i = 1, ni
+              turbz(i,j,k) = turbz(i,j,k) - (u3s_re(i,j,k+1)-u3s_re(i,j,k))*rdz*mh(i,j,k)
+            end do
+          end do
+        end do
+      else 
       do k = 1, nk
         do j = 1, nj
           do i = 1, ni
-            turbz(i,j,k) = turbz(i,j,k) - (u3s_re(i,j,k+1)-u3s_re(i,j,k))*rdz*mh(i,j,k)
+            turbz(i,j,k) = turbz(i,j,k) - (0.5*(sacp_betas(i,j,k)+sacp_betas(i,j,k+1))*u3s_re(i,j,k+1)&
+                                          -0.5*(sacp_betas(i,j,k-1)+sacp_betas(i,j,k))*u3s_re(i,j,k))*rdz*mh(i,j,k)
           end do
         end do
       end do
+      end if
     end if
     !------------------------------------------
 
@@ -1154,6 +1213,9 @@
                        !-------------- DRM variables ----------------
                        t11_re,t12_re,t13_re,                        &
                        !-------------- XS 12/27/2018 ----------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
       use input
       use constants
@@ -1180,6 +1242,9 @@
       !-------------------- DRM Variables --------------------
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re
       !-------------------------------------------------------
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------
       real, intent(in), dimension(ib:ie,jb:je) :: cm0
       real, intent(in), dimension(kb:ke) :: kmw,ufw,u1b
       real, intent(inout), dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: u2pt
@@ -1203,6 +1268,23 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+      do k=1,nk
+
+        !  x-direction
+        !  y-direction
+        do j=1,nj
+        do i=1,ni+1
+          turbx(i,j,k)=(sacp_betas(i,j,k)*t11(i,j,k)-sacp_betas(i-1,j,k)*t11(i-1,j,k))*rdx*uf(i)
+          turby(i,j,k)=(0.25*(sacp_betas(i-1,j+1,k)+sacp_betas(i,j+1,k)+sacp_betas(i,j,k)+sacp_betas(i-1,j,k)) &
+                        *t12(i,j+1,k) &
+                        -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i-1,j-1,k))&
+                        *t12(i,j,k))*rdy*vh(j)
+        enddo
+        enddo
+
+      enddo
+      else
       do k=1,nk
 
         !  x-direction
@@ -1215,12 +1297,36 @@
         enddo
 
       enddo
+      end if 
 
 
       ! RSFS stress from DRM
-      if (sgsmodel.eq.7 .and. reconstr.ge.0) then   !XS
+      if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then   !XS
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+
+      if (dosacp .ge. 1) then
+        do k=1,nk
+
+          !  x-direction
+          do j=1,nj
+          do i=1,ni+1
+            turbx(i,j,k) = turbx(i,j,k) + (sacp_betas(i,j,k)*t11_re(i,j,k)-sacp_betas(i-1,j,k)*t11_re(i-1,j,k))*rdx*uf(i)
+          enddo
+          enddo
+
+          !  y-direction
+          do j=1,nj
+          do i=1,ni+1
+            turby(i,j,k) = turby(i,j,k) + (0.25*(sacp_betas(i-1,j+1,k)+sacp_betas(i,j+1,k)+sacp_betas(i,j,k)+sacp_betas(i-1,j,k)) &
+                                           *t12_re(i,j+1,k)&
+                                           -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i-1,j-1,k))&
+                                           *t12_re(i,j,k))*rdy*vh(j)
+          enddo
+          enddo
+
+        enddo
+      else
         do k=1,nk
 
           !  x-direction
@@ -1239,6 +1345,7 @@
 
         enddo
 
+      end if 
       end if
 
     ELSE
@@ -1271,7 +1378,7 @@
       ! dum2 stores t12 at w-pts:
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k,r1,r2)
-      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
+      if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS
       do j=1,nj+1
 
           ! lowest model level:
@@ -1459,6 +1566,9 @@
                        !-------------- DRM variables ----------------
                        t11_re,t12_re,t13_re,                        &
                        !-------------- XS 12/27/2018 ----------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,ufw,u1b,u2pt,ufwk)
 
   ELSE  dovert
@@ -1579,6 +1689,9 @@
                        !-------------- DRM variables ----------------
                        t11_re,t12_re,t13_re,                        &
                        !-------------- XS 12/27/2018 ----------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,ufw,u1b,u2pt,ufwk)
       use input
       use constants
@@ -1604,6 +1717,9 @@
       !-------------------- DRM Variables, XS --------------------
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t11_re,t12_re,t13_re
       !-------------------------------------------------------vv
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------
       real, intent(in), dimension(kb:ke) :: kmw,ufw,u1b
       real, intent(inout), dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: u2pt
       real, intent(in),    dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: ufwk
@@ -1624,13 +1740,26 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
-      do k=1,nk
-      do j=1,nj
-      do i=1,ni+1
-        turbz(i,j,k)=(t13(i,j,k+1)-t13(i,j,k))*tem*(mh(i-1,j,k)+mh(i,j,k))
-      enddo
-      enddo
-      enddo
+      if (dosacp .ge. 1) then
+        do k=1,nk
+        do j=1,nj
+        do i=1,ni+1
+          turbz(i,j,k)=(0.25*(sacp_betas(i-1,j,k+1)+sacp_betas(i,j,k+1)+sacp_betas(i,j,k)+sacp_betas(i-1,j,k))&
+                       *t13(i,j,k+1)&
+                       -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1))&
+                       *t13(i,j,k))*tem*(mh(i-1,j,k)+mh(i,j,k))
+        enddo
+        enddo
+        enddo
+      else
+        do k=1,nk
+        do j=1,nj
+        do i=1,ni+1
+          turbz(i,j,k)=(t13(i,j,k+1)-t13(i,j,k))*tem*(mh(i-1,j,k)+mh(i,j,k))
+        enddo
+        enddo
+        enddo
+      end if 
 
   ELSE
 
@@ -1966,9 +2095,22 @@
   
   !--------------------------------------------------------
   ! RSFS stress from DRM,XS
-  if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+  if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+  if (dosacp .ge. 1) then
+    do k=1,nk
+      do j=1,nj
+        do i=1,ni+1
+          turbz(i,j,k)=turbz(i,j,k) + &
+          (0.25*(sacp_betas(i-1,j,k+1)+sacp_betas(i,j,k+1)+sacp_betas(i,j,k)+sacp_betas(i-1,j,k))&
+          *t13_re(i,j,k+1)&
+          -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1))&
+          *t13_re(i,j,k))*rdz*0.5*(mh(i-1,j,k)+mh(i,j,k))
+        enddo
+      enddo
+    enddo
+  else
     do k=1,nk
       do j=1,nj
         do i=1,ni+1
@@ -1977,6 +2119,7 @@
         enddo
       enddo
     enddo
+  end if
   end if
    !--------------------------------------------------------
 
@@ -2050,6 +2193,9 @@
                        !-----------------DRM variables, XS----------------------
                        t12_re,t22_re,t23_re,                               &
                        !--------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
       use input
       use constants
@@ -2082,7 +2228,10 @@
       real, intent(inout) , dimension(ibdv:iedv,jbdv:jedv,kbdv:kedv,nvdiag) :: vdiag
       !---------------------  DRM variables, XS ----------------------
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t12_re,t22_re,t23_re
-      !-----------------------------------------------------------  
+      !-----------------------------------------------------------
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------  
  
       integer :: i,j,k,j1,j2
       real :: rdt,tema,temb,temc
@@ -2100,6 +2249,22 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+      do k=1,nk
+
+        !  x-direction
+        !  y-direction
+        do j=1,nj+1
+        do i=1,ni
+          turbx(i,j,k)=(0.25*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k)+sacp_betas(i+1,j-1,k)+sacp_betas(i,j-1,k))&
+                       *t12(i+1,j,k)&
+                       -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i-1,j-1,k))&
+                       *t12(i,j,k))*rdx*uh(i)
+          turby(i,j,k)=(sacp_betas(i,j,k)*t22(i,j,k)-sacp_betas(i,j-1,k)*t22(i,j-1,k))*rdy*vf(j)
+        enddo
+        enddo
+      enddo
+      else
       do k=1,nk
 
         !  x-direction
@@ -2112,10 +2277,33 @@
         enddo
 
       enddo
+      end if
 !----------------DRM-------------------------------
-      if (sgsmodel.eq.7 .and. reconstr.ge.0) then   !XS
+      if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then   !XS
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+        do k=1,nk
+
+            !  x-direction
+            do j=1,nj+1
+            do i=1,ni
+              turbx(i,j,k)=turbx(i,j,k) + (0.25*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k)+sacp_betas(i+1,j-1,k)+sacp_betas(i,j-1,k))&
+                                           *t12_re(i+1,j,k)&
+                                           -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i-1,j-1,k))&
+                                           *t12_re(i,j,k))*rdx*uh(i)
+            enddo
+            enddo
+
+            !  y-direction
+            do j=1,nj+1
+            do i=1,ni
+              turby(i,j,k)=turby(i,j,k) + (sacp_betas(i,j,k)*t22_re(i,j,k)-sacp_betas(i,j-1,k)*t22_re(i,j-1,k))*rdy*vf(j)
+            enddo
+            enddo
+
+          enddo
+      else
         do k=1,nk
 
           !  x-direction
@@ -2133,6 +2321,7 @@
           enddo
 
         enddo
+      end if 
       end if
 !-------------------------------------------------
 
@@ -2162,7 +2351,7 @@
 !  Terrain:
 
   ELSE
-      if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
+      if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS
       ! dum1 stores t12 at w-pts:
       ! dum2 stores t22 at w-pts:
 !$omp parallel do default(shared)   &
@@ -2354,6 +2543,9 @@
                        !-----------------DRM variables, XS----------------------
                        t12_re,t22_re,t23_re,                               &
                        !--------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk)
 
   ELSE  dovert
@@ -2474,6 +2666,9 @@
                        !-----------------DRM variables, XS----------------------
                        t12_re,t22_re,t23_re,                               &
                        !--------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk)
       use input
       use constants
@@ -2500,6 +2695,9 @@
       !---------------------  DRM variables,XS ----------------------
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t12_re,t22_re,t23_re
       !-----------------------------------------------------------
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------
       real, intent(in), dimension(kb:ke) :: kmw,vfw,v1b
       real, intent(inout), dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: v2pt
       real, intent(in),    dimension(ib2pt:ie2pt,jb2pt:je2pt,kb2pt:ke2pt) :: vfwk
@@ -2520,6 +2718,18 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+      do k=1,nk
+      do j=1,nj+1
+      do i=1,ni
+        turbz(i,j,k)=(0.25*(sacp_betas(i,j,k+1)+sacp_betas(i,j-1,k+1)+sacp_betas(i,j-1,k)+sacp_betas(i,j,k))&
+                     *t23(i,j,k+1)&                     
+                     -0.25*(sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i,j-1,k-1)+sacp_betas(i,j,k-1))&
+                     *t23(i,j,k))*tem*(mh(i,j-1,k)+mh(i,j,k))
+      enddo
+      enddo
+      enddo
+      else
       do k=1,nk
       do j=1,nj+1
       do i=1,ni
@@ -2527,6 +2737,7 @@
       enddo
       enddo
       enddo
+      end if
 
   ELSE
 
@@ -2763,9 +2974,21 @@
 
   ENDIF  ifimplv
    !RSFS stress from DRM, XS                     
-    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+    if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
       !$omp parallel do default(shared)   &
       !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+      do k=1,nk
+        do j=1,nj+1
+          do i=1,ni
+            turbz(i,j,k)= turbz(i,j,k) + (0.25*(sacp_betas(i,j,k+1)+sacp_betas(i,j-1,k+1)+sacp_betas(i,j-1,k)+sacp_betas(i,j,k))&
+                                          *t23_re(i,j,k+1)&
+                                          -0.25*(sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i,j-1,k-1)+sacp_betas(i,j,k-1))&
+                                          *t23_re(i,j,k))*rdz*0.5*(mh(i,j-1,k)+mh(i,j,k))
+          enddo
+        enddo
+      enddo
+      else
       do k=1,nk
         do j=1,nj+1
           do i=1,ni
@@ -2773,6 +2996,7 @@
           enddo
         enddo
       enddo
+      endif 
     end if
 
 !-----------------------------------------------------------------
@@ -2828,6 +3052,9 @@
                        !-------------- RSFS stress from DRM,XS ----------------
                        t13_re,t23_re,t33_re,                                         &
                        !----------------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        dowbud,wdiag)
       use input
       use constants
@@ -2853,6 +3080,9 @@
       !------------------ DRM variables,XS ------------------
       real, dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm) :: t13_re,t23_re,t33_re
       !---------------------------------------------------
+      !------------------ sacp variables------------------
+      real, dimension(ib:ie,jb:je,kb:ke) :: sacp_betas
+      !---------------------------------------------------
  
       integer :: i,j,k
       real :: rdt,tema,temb,temc
@@ -2871,6 +3101,22 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+        !  x-direction
+        !  y-direction
+        do j=1,nj
+        do i=1,ni
+          turbx(i,j,k)=(0.25*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k)+sacp_betas(i+1,j,k-1)+sacp_betas(i,j,k-1))&
+                       *t13(i+1,j,k)&
+                       -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1)&
+                       *t13(i,j,k)))*rdx*uh(i)
+          turby(i,j,k)=(0.25*(sacp_betas(i,j+1,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i,j+1,k-1))&
+                        *t23(i,j+1,k)&
+                        -0.25*(sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i,j-1,k-1)+sacp_betas(i,j,k-1))&
+                        *t23(i,j,k))*rdy*vh(j)
+        enddo
+        enddo
+      else
       do k=2,nk
 
         !  x-direction
@@ -2883,9 +3129,40 @@
         enddo
 
       enddo
-      if (sgsmodel.eq.7 .and. reconstr.ge.0) then !XS
+
+      end if 
+
+      if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then !XS
         !$omp parallel do default(shared)   &
         !$omp private(i,j,k)
+
+        if (dosacp .ge. 1) then
+
+        do k=2,nk
+
+          !  x-direction
+          do j=1,nj
+            do i=1,ni
+              turbx(i,j,k)=turbx(i,j,k) + (0.25*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k)+sacp_betas(i+1,j,k-1)+sacp_betas(i,j,k-1))&
+                                           *t13_re(i+1,j,k)&
+                                           -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1)&
+                                           *t13_re(i,j,k)))*rdx*uh(i)
+            enddo
+          enddo
+
+          !  y-direction
+          do j=1,nj
+            do i=1,ni
+              turby(i,j,k)=turby(i,j,k) + (0.25*(sacp_betas(i,j+1,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i,j+1,k-1))&
+                                           *t23_re(i,j+1,k)&
+                                           -0.25*(sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i,j-1,k-1)+sacp_betas(i,j,k-1))&
+                                           *t23_re(i,j,k))*rdy*vh(j)
+            enddo
+          enddo
+
+        enddo
+
+        else
         do k=2,nk
 
           !  x-direction
@@ -2903,6 +3180,8 @@
           enddo
 
         enddo
+
+        endif
       end if
 
     ELSE
@@ -2932,7 +3211,7 @@
 !----------------------------------------------------------------
 
   ELSE
-  if (sgsmodel.ne.7 .or. reconstr.lt.0) then !XS
+  if ((sgsmodel.ne.7 .and. sgsmodel.ne.6) .or. reconstr.lt.0) then !XS
       ! Cartesian with terrain:
 
 !$omp parallel do default(shared)   &
@@ -3087,6 +3366,15 @@
 
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+      if (dosacp .ge. 1) then
+      do k=2,nk
+      do j=1,nj
+      do i=1,ni
+        turbz(i,j,k)=(sacp_betas(i,j,k)*t33(i,j,k)-sacp_betas(i,j,k-1)*t33(i,j,k-1))*rdz*mf(i,j,k)
+      enddo
+      enddo
+      enddo
+      else
       do k=2,nk
       do j=1,nj
       do i=1,ni
@@ -3094,6 +3382,7 @@
       enddo
       enddo
       enddo
+      end if
 
   ELSE
 
@@ -3210,9 +3499,18 @@
   ENDIF  ifimplw
 
   !---------DRM,XS-------------------------------------------------
-    if (sgsmodel.eq.7 .and. reconstr.ge.0) then
+    if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
 !$omp parallel do default(shared)   &
 !$omp private(i,j,k)
+    if (dosacp .ge. 1) then
+     do k=2,nk
+        do j=1,nj
+          do i=1,ni
+            turbz(i,j,k)=turbz(i,j,k) + (sacp_betas(i,j,k)*t33_re(i,j,k)-sacp_betas(i,j,k-1)*t33_re(i,j,k-1))*rdz*mf(i,j,k)
+          enddo
+        enddo
+      enddo
+    else
       do k=2,nk
         do j=1,nj
           do i=1,ni
@@ -3220,6 +3518,7 @@
           enddo
         enddo
       enddo
+    end if 
     end if
 !---------DRM-------------------------------------------------
 

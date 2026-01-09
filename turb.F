@@ -48,6 +48,11 @@
                    q_denom_h_filt,q_denom_v_filt,                    &
                    c_b,prandtl_t,                                    &
                    !==================================================
+                   !===================================================
+                   ! sacp variables. 
+                   sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac,   &
+                   sacp_alphas, sacp_betas, sacp_alphamax,            &
+                   !===================================================
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,rru,ua ,ugr ,fsu  ,                            &
                    v0,rrv,va ,vgr ,fsv  ,                            &
@@ -212,6 +217,12 @@
       real, parameter :: dmin_m = -1.0e-20
       real, parameter :: dmin_t = -1.0e-8
       integer :: nmass
+      !=========================================================================
+      !=========================================================================
+      ! sacp variables.   XS 11/19/2018
+      real, intent(inout), dimension(ib:ie, jb:je, kb:ke+1) :: sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac
+      real, intent(inout), dimension(ib:ie, jb:je, kb:ke) :: sacp_alphas, sacp_betas
+      real, intent(inout), dimension(ib:ie, jb:je) :: sacp_alphamax
       !=========================================================================
       real, intent(inout), dimension(ibnba:ienba,jbnba:jenba,kbnba:kenba) :: m11,m12,m13,m22,m23,m33
       real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: u0
@@ -1460,6 +1471,50 @@
                      dum1,dum2,ua,va,wa,t11,t12,t13,t22,t23,t33,gx,gy,rho,rr,rf)
 
       ENDIF
+!--------------------------------------
+!  sacp: classification of convective regimes
+   if (dosacp.ge.1) then
+    
+      call sacp_convolution(wa, sacp_sconv)
+
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
+    do k = kb, ke+1
+    do j = jb, je
+    do i = ib, ie
+        ! for sconv<4 -> out of convection -> sconv=0
+        if (sacp_sconv(i,j,k) >=4) then
+          sacp_scale_fac(i,j,k) = (sqrt(sacp_sconv(i,j,k))-2.0)/(5.0)
+        endif
+        sacp_alpha(i,j,k) = (1.0 + log(15000.0/dx)) ** (3*sacp_scale_fac(i,j,k))
+        sacp_beta(i,j,k) =  (sacp_scale_fac(i,j,k)*(15000.0-dx)/14000.0)**(0.5)
+    end do
+    end do
+    end do
+
+    ! convert to scalar points
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
+    do k = kb, ke
+    do j = jb, je
+    do i = ib, ie
+        sacp_alphas(i,j,k) = 0.5* (sacp_alpha(i,j,k) + sacp_alpha(i,j,k+1))
+        sacp_betas(i,j,k) =  0.5* (sacp_beta(i,j,k) + sacp_beta(i,j,k+1))
+    end do
+    end do
+    end do
+
+
+    ! find max alpha in a column 
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
+    do j = jb, je
+    do i = ib, ie
+        sacp_alphamax(i,j) = maxval(sacp_alphas(i,j,:))
+    end do
+    end do
+  end if 
+
 
 !--------------------------------------
 !  LES subgrid models:
@@ -2699,12 +2754,18 @@
                        !-------------- DRM variables,XS ----------------
                        u1th_re,u2th_re,u3th_re,                              &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        1)
         if( imoist.eq.1 )  &
         call     turbsz(1,dt,dosfcflx,qvflux,mh,mf,  &
                        qvpten,dum1,dum2,dum3,rho,rr,rf,qa(ib,jb,kb,nqv),khv,thten,thten1, &
                        !-------------- DRM variables,XS ----------------
                        u1q_re(ib,jb,kb,nqv),u2q_re(ib,jb,kb,nqv),u3q_re(ib,jb,kb,nqv),  &
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        2)
         if( imoist.eq.1 .and. nqc.ge.1 )  &
         call     turbsz(0,dt,dosfcflx,qvflux,mh,mf,  &
@@ -2712,6 +2773,9 @@
                        !-------------- DRM variables,XS ----------------
                        u1q_re(ib,jb,kb,nqc),u2q_re(ib,jb,kb,nqc),u3q_re(ib,jb,kb,nqc),  &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        0)
         if( imoist.eq.1 .and. nqi.ge.1 )  &
         call     turbsz(0,dt,dosfcflx,qvflux,mh,mf,  &
@@ -2719,6 +2783,9 @@
                        !-------------- DRM variables,XS ----------------
                        u1q_re(ib,jb,kb,nqi),u2q_re(ib,jb,kb,nqi),u3q_re(ib,jb,kb,nqi),  &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        0)
         call     turbuz(dt,xh,ruh,xf,rxf,arf1,arf2,uf,vh,mh,mf,rmf,rho,rf,  &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gxu,     &
@@ -2726,6 +2793,9 @@
                        !-------------- DRM variables ----------------
                        t11_re,t12_re,t13_re,                        &
                        !-------------- XS 12/27/2018 ----------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,ufw,u1b,u2pt,ufwk)
         call     turbvz(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                        zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
@@ -2733,6 +2803,9 @@
                        !-----------------DRM variables, XS----------------------
                        t12_re,t22_re,t23_re,                               &
                        !-------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        kmw,vfw,v1b,v2pt,vfwk)
 
       endif  dobr09
@@ -3493,6 +3566,15 @@
             tmp1d(i,2) = max( dx*ruh(i) , dy*rvh(j) )
           enddo
         ENDIF
+        
+        !====================================================================
+        !sacp
+        if (dosacp .ge. 1) then
+          do i=1,ni
+            tmp1d(i,3) = sacp_alphamax(i,j)
+          enddo
+        end if
+        !====================================================================
 
         call     cu_ntiedtke_wrapper(pu=tmp2d(ibtmp,kbtmp,1),  &  ! u
                                  pv=tmp2d(ibtmp,kbtmp,2),  &  ! v
@@ -3517,7 +3599,8 @@
                                  dt=dt,  &
                                  dx=tmp1d(ibtmp,2),  &
                                  errmsg=errmsg,  &
-                                 errflg=errflg)
+                                 errflg=errflg, &
+                                 sacp_alphamax=tmp1d(ibtmp,3))! sacp alpha max
 
         do k=1,nk
           kk = nk+1-k
@@ -12702,6 +12785,88 @@
 
       return
     end subroutine dyn_wl_scalar
+
+    
+    subroutine sacp_convolution(arr,arr_filt) !sacp
+    use input
+    use constants
+    implicit none
+    real, intent(in), dimension(ib:ie,jb:je,kb:ke+1) :: arr
+    real, intent(inout), dimension(ib:ie,jb:je,kb:ke+1) :: arr_filt
+
+    real, dimension(ib-1:ie+1,jb-1:je+1,kb:ke+1) :: arr0, arr_temp1, arr_temp2
+    integer :: i, j, ii, jj, k
+
+    arr0 = 0.0
+    arr0(ib:ie,jb:je,kb:ke+1) = arr
+
+
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
+    ! convert to 1 or zero
+    do k = kb, ke+1
+    do j = jb-1, je+1
+    do i = ib-1, ie+1
+          if (arr0(i,j,k) >= 1.0) then
+            arr0(i,j,k) = 1.0
+          else
+            arr0(i,j,k) = 0.0
+          end if
+    end do
+    end do
+    end do
+    
+    
+    ! convolution process
+    ! 3x3 convolution
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
+    do k = kb, ke+1
+    do j = jb, je
+    do i = ib, ie
+          arr_temp1(i,j,k) = fwt1d_3(-1) * arr0(i-1,j,k) + fwt1d_3(0) * arr0(i,j,k) + fwt1d_3(1) * arr0(i+1,j,k)
+    end do
+    end do
+    end do
+    
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
+    do k = kb, ke+1
+    do j = jb, je
+    do i = ib, ie
+          arr_temp2(i,j,k) = fwt1d_3(-1) * arr_temp1(i,j-1,k) + fwt1d_3(0) * arr_temp1(i,j,k) + fwt1d_3(1) * arr_temp1(i,j+1,k)
+    end do
+    end do
+    end do
+    
+    
+    do k = kb, ke+1
+    do j = jb, je
+    do i = ib, ie
+      ! >= 9 cells
+      if (arr_temp2(i,j,k) >= 9) then
+          arr_temp2(i,j,k) = 0
+          do jj=-2,2
+          do ii=-2,2
+            arr_temp2(i,j,k) = arr_temp2(i,j,k) + fwt2d_5(ii,jj)*arr0(i+ii,j+jj,k)
+          end do
+          end do
+          ! >= 25 cells
+          if (arr_temp2(i,j,k) >= 25) then
+            arr_temp2(i,j,k) = 0
+            do jj=-3,3
+            do ii=-3,3
+              arr_temp2(i,j,k) = arr_temp2(i,j,k) + fwt2d_7(ii,jj)*arr0(i+ii,j+jj,k)
+            end do
+            end do
+          end if
+      end if
+    end do
+    end do
+    end do
+
+    arr_filt = arr_temp2(ib:ie,jb:je,kb:ke+1)
+  end subroutine sacp_convolution
 
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

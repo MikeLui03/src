@@ -163,6 +163,12 @@
       ! stability correction factor and Prandtl number
       real, dimension(:,:,:), allocatable :: c_b,prandtl_t
       !=========================================================================
+      !=========================================================================
+      ! sacp variables.   XS 11/19/2018
+      real, dimension(:,:,:), allocatable :: sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac
+      real, dimension(:,:,:), allocatable :: sacp_alphas, sacp_betas
+      real, dimension(:,:), allocatable :: sacp_alphamax
+      !=========================================================================      
       real, dimension(:,:,:), allocatable :: m11,m12,m13,m22,m23,m33
       real, dimension(:,:,:), allocatable :: rru,ua,u3d,uten,uten1
       real, dimension(:,:,:), allocatable :: rrv,va,v3d,vten,vten1
@@ -2487,6 +2493,25 @@
 
       end if
       !=========================================================================
+      !=========================================================================
+      ! Allocate sacp variables
+      if (dosacp .ge. 1) then
+        allocate(    sacp_sconv(ib:ie,jb:je,kb:ke+1) )
+        sacp_sconv = 0.0
+        allocate(    sacp_alpha(ib:ie,jb:je,kb:ke+1) )
+        sacp_alpha = 0.0
+        allocate(    sacp_beta(ib:ie,jb:je,kb:ke+1) )
+        sacp_beta = 0.0
+        allocate(    sacp_scale_fac(ib:ie,jb:je,kb:ke+1) )
+        sacp_scale_fac = 0.0
+        allocate(    sacp_alphas (ib:ie,jb:je,kb:ke) )
+        sacp_alphas = 0.0
+        allocate(    sacp_betas(ib:ie,jb:je,kb:ke) )
+        sacp_betas = 0.0
+        allocate(    sacp_alphamax(ib:ie,jb:je) )
+        sacp_alphamax = 0.0
+      end if
+
 
 #ifdef MPI
           call MPI_BARRIER (MPI_COMM_WORLD,ierr)
@@ -3846,6 +3871,10 @@
                    u1q_re,u2q_re,u3q_re,                              &
                    kqh,kqv,knh,knv,kq4d,kqv4d,                        &
                    !===================================================
+                   !===================================================
+                   ! sacp variables. 
+                   sacp_betas,                                        &
+                   !===================================================
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,ua,u3d,uten1,                                  &
                    v0,va,v3d,vten1,                                  &
@@ -4311,7 +4340,12 @@
                    q_numer_h_filt,q_numer_v_filt,                    &
                    q_denom_h_filt,q_denom_v_filt,                    &
                    c_b,prandtl_t,                                    &
-                   !==================================================  
+                   !==================================================
+                   !===================================================
+                   ! sacp variables. 
+                   sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac,   &
+                   sacp_alphas, sacp_betas, sacp_alphamax,            &
+                   !===================================================  
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,rru,u3d,uten,uten1,                            &
                    v0,rrv,v3d,vten,vten1,                            &

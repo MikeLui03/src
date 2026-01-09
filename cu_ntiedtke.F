@@ -62,6 +62,7 @@
  module cu_ntiedtke
  use ccpp_kind_types,only: kind_phys
  use cu_ntiedtke_common
+ use input,only: dosacp, sacp_alphaf !sacp
 
 
  implicit none
@@ -137,7 +138,7 @@
 !=================================================================================================================
 !     level 1 subroutine 'cu_ntiedkte_run'
       subroutine cu_ntiedtke_run(pu,pv,pt,pqv,pqc,pqi,pqvf,ptf,poz,pzz,pomg, &
-     &         pap,paph,evap,hfx,zprecc,lndj,lq,km,km1,dt,dx,errmsg,errflg)
+     &         pap,paph,evap,hfx,zprecc,lndj,lq,km,km1,dt,dx,errmsg,errflg, sacp_alphamax) !sacp
 !=================================================================================================================
 !     this is the interface between the model and the mass flux convection module
 !     m.tiedtke      e.c.m.w.f.      1989
@@ -181,7 +182,7 @@
       integer,intent(in),dimension(:):: lndj
 
       real(kind=kind_phys),intent(in):: dt
-      real(kind=kind_phys),intent(in),dimension(:):: dx
+      real(kind=kind_phys),intent(in),dimension(:):: dx, sacp_alphamax !sacp
       real(kind=kind_phys),intent(in),dimension(:):: evap,hfx
       real(kind=kind_phys),intent(in),dimension(:,:):: pqvf,ptf
       real(kind=kind_phys),intent(in),dimension(:,:):: poz,pomg,pap
@@ -221,8 +222,13 @@
       dxref = 15000.
       do j=1,lq
       if (dx(j).lt.dxref) then
-          scale_fac(j) = (1.06133+log(dxref/dx(j)))**3
-          scale_fac2(j) = scale_fac(j)**0.5
+          if (dosacp .ge. 1) then  !sacp
+            scale_fac(j) = sacp_alphamax(j) 
+            scale_fac2(j) = scale_fac(j)**0.5
+          else
+            scale_fac(j) = (1.06133+log(dxref/dx(j)))**3
+            scale_fac2(j) = scale_fac(j)**0.5
+          endif 
       else
           scale_fac(j) = 1.+1.33e-5*dx(j)
           scale_fac2(j) = 1.

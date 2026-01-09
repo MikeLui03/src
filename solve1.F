@@ -99,6 +99,10 @@
                    u1q_re,u2q_re,u3q_re,                             &
                    kqh,kqv,knh,knv,kq4d,kqv4d,                       &
                    !===================================================
+                   !===================================================
+                   ! sacp variables. 
+                   sacp_betas,                                       &
+                   !===================================================
                    m11,m12,m13,m22,m23,m33,                          &
                    u0,ua,u3d,uten1,                                  &
                    v0,va,v3d,vten1,                                  &
@@ -189,6 +193,10 @@
       real, intent(inout), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) :: kq4d, kqv4d
                               ! kq4d and kqv4d are needed only when each cloud species
                               ! has its own eddy diffusivity (DWL-A)
+      !=========================================================================
+      !=========================================================================
+      ! sacp variables.   XS 11/19/2018
+      real, intent(inout), dimension(ib:ie, jb:je, kb:ke) :: sacp_betas
       !=========================================================================
       real, intent(in), dimension(ibnba:ienba,jbnba:jenba,kbnba:kenba) :: m11,m12,m13,m22,m23,m33
       real, intent(in), dimension(ib:ie+1,jb:je,kb:ke) :: u0
@@ -1149,19 +1157,28 @@
                      !-------------- DRM variables ----------------
                      t11_re,t12_re,t13_re,                        &
                      !-------------- XS 12/27/2018 ----------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------                    
                      kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
           call turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
                      dum1,dum2,dum3,dum4,dum5,dum6,dum7,dum8,dum9,va,vten1,wa,m12,m22,m23,kmv,cm0, &
                      !--------- RSFS stress from DRM -------------
-                    t12_re,t22_re,t23_re,                               &
-                     !-------------- XS 12/27/2018 --------------- 
+                     t12_re,t22_re,t23_re,                               &
+                     !-------------- XS 12/27/2018 ---------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !---------------------------------------------- 
                      kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
           call turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                      dum1,dum2,dum3,dum4,dum5,dum6,wa,wten1,m13,m23,m33,m22,kmh,cm0,  &
                      !-------------- RSFS stress from DRM ----------------
                      t13_re,t23_re,t33_re,                                        &
                      !---------------------------------------------------- 
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------
                      dowbud,wdiag)
 
         elseif( sgsmodel.eq.3 )then
@@ -1174,6 +1191,9 @@
                      !-------------- DRM variables ----------------
                      t11_re,t12_re,t13_re,                        &
                      !-------------- XS 12/27/2018 ----------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------  
                      kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
           call turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
@@ -1181,12 +1201,17 @@
                      !--------- RSFS stress from DRM -------------
                      t12_re,t22_re,t23_re,                               &
                      !-------------- XS 12/27/2018 ---------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------  
                      kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
           call turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                      dum1,dum2,dum3,dum4,dum5,dum6,wa,wten1,t13,t23,t33,t22,wten,cm0,  &
                      !-------------- RSFS stress from DRM ----------------
                      t13_re,t23_re,t33_re,                                        &
-                     !---------------------------------------------------- 
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------   
                      dowbud,wdiag)
 
         else
@@ -1198,6 +1223,9 @@
                      !-------------- DRM variables ----------------
                      t11_re,t12_re,t13_re,                        &
                      !-------------- XS 12/27/2018 ----------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------  
                      kmw,ufw,u1b,u2pt,ufwk,doubud,udiag)
           call turbv(dt,xh,rxh,arh1,arh2,uh,xf,rvh,vf,mh,mf,rho,rr,rf,   &
                      zs,gz,rgz,gzu,gzv,rds,sigma,rdsf,sigmaf,gyv,  &
@@ -1205,12 +1233,18 @@
                      !--------- RSFS stress from DRM -------------
                     t12_re,t22_re,t23_re,                               &
                      !-------------- XS 12/27/2018 ---------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------
                      kmw,vfw,v1b,v2pt,vfwk,dovbud,vdiag)
           call turbw(dt,xh,rxh,arh1,arh2,uh,xf,vh,mh,mf,rho,rf,gz,rgzu,rgzv,rds,sigma,   &
                      dum1,dum2,dum3,dum4,dum5,dum6,wa,wten1,t13,t23,t33,t22,kmh,cm0,  &
                      !-------------- RSFS stress from DRM ----------------
                      t13_re,t23_re,t33_re,                                        &
                      !---------------------------------------------------
+                     !-------------- sacp variables ----------------
+                     sacp_betas,                       &
+                     !----------------------------------------------
                      dowbud,wdiag)
 
         endif
@@ -1260,6 +1294,9 @@
                    !-------------- DRM variables ----------------
                    u1th_re,u2th_re,u3th_re,u1s_re_w,u2s_re_w,                          &
                    !---------------------------------------------
+                   !-------------- sacp variables ----------------
+                   sacp_betas,                       &
+                   !----------------------------------------------
                    dotbud,ibdt,iedt,jbdt,jedt,kbdt,kedt,ntdiag,tdiag,td_hturb,td_vturb,1) !1 at the end for potential temp
 
         IF( imoist.eq.1 )THEN
@@ -1273,6 +1310,9 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
                          !---------------------------------------------
+                         !-------------- sacp variables ----------------
+                         sacp_betas,                       &
+                         !----------------------------------------------
                          doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2) !2 at the vapor mixing ratio
               !================================DRM==============================
               elseif (dyn_all.eq.0) then   ! sgsmodel.eq.3 .and. dyn_scalar.eq.1, DRM-D
@@ -1292,6 +1332,9 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
                          !---------------------------------------------
+                         !-------------- sacp variables ----------------
+                         sacp_betas,                       &
+                         !----------------------------------------------
                          doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2)!2 the end
               elseif (dyn_all.eq.1) then   ! DRM-A
 !$omp parallel do default(shared)   &
@@ -1320,6 +1363,9 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,  &
                          !---------------------------------------------
+                         !-------------- sacp variables ----------------
+                         sacp_betas,                       &
+                         !----------------------------------------------
                          doqbud,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,qd_hturb,qd_vturb,2) !2 the end
               endif
             !==================================================================================================
@@ -1331,6 +1377,9 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                          !---------------------------------------------
+                         !-------------- sacp variables ----------------
+                         sacp_betas,                       &
+                         !----------------------------------------------
                          .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)!0 the end for other mixing ratios
               !================================DRM==============================
               elseif (dyn_all.eq.0) then   ! ! .eq.3 .and. dyn_scalar.eq.1, DRM-D
@@ -1352,6 +1401,9 @@
                            !-------------- DRM variables ----------------
                            u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                            !---------------------------------------------
+                           !-------------- sacp variables ----------------
+                           sacp_betas,                       &
+                           !----------------------------------------------
                            .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0) !0 the end for other mixing ratios
                 else
                   if (n.eq.nnc1) then
@@ -1372,6 +1424,9 @@
                            !-------------- DRM variables ----------------
                            u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                            !---------------------------------------------
+                           !-------------- sacp variables ----------------
+                           sacp_betas,                       &
+                           !----------------------------------------------
                            .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)!0 the end
                 end if
               elseif (dyn_all.eq.1) then   ! DRM-A
@@ -1401,6 +1456,9 @@
                          !-------------- DRM variables ----------------
                          u1q_re(ib,jb,kb,n),u2q_re(ib,jb,kb,n),u3q_re(ib,jb,kb,n),u1s_re_w,u2s_re_w,                              &
                          !---------------------------------------------
+                         !-------------- sacp variables ----------------
+                         sacp_betas,                       &
+                         !----------------------------------------------
                          .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)!0 the end
               end if
 
@@ -1420,6 +1478,9 @@
                        ! XS 12/31/2018
                        u1th_re,u2th_re,u3th_re,u1s_re_w,u2s_re_w,                              &
                        !---------------------------------------------
+                       !-------------- sacp variables ----------------
+                       sacp_betas,                       &
+                       !----------------------------------------------
                        .false.,ibdq,iedq,jbdq,jedq,kbdq,kedq,nqdiag,qdiag,1,1,0)
           enddo
         ENDIF
