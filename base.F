@@ -2287,8 +2287,8 @@
 
         udep1   =     0.0    ! height of bottom of shear layer (m)
         udep2   =  2500.0    ! height of top of shear layer (m)
-        uconst1 =     0.0    ! u at bottom of shear layer
-        uconst2 =    10.0    ! u at top of shear layer
+        uconst1 =     -10.0    ! u at bottom of shear layer
+        uconst2 =    0.0    ! u at top of shear layer
 
         do k=1,nk
         do j=0,nj+1

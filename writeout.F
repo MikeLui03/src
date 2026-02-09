@@ -36,6 +36,12 @@
                         u1th_re,u2th_re,u3th_re,u1q_re,u2q_re,u3q_re,                          &
                         kqh,kqv,knh,knv,kq4d,kqv4d,                                            &
                         !=======================================================================
+                        !=========================================================================
+                        ! sacp variables
+                        sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac,                    &
+                        sacp_alphas, sacp_betas,                                              &
+                        sacp_alphamax,                                                        &
+                        !=========================================================================  
                         rru,ua ,dumu,ugr  ,rrv,va ,dumv,vgr  ,rrw,wa ,dumw,ppi ,tha ,phi2,     &
                         sadv,thten,nm,defv,defh,lenscl,dissten,epst,epsd1,epsd2,               &
                         thpten,qvpten,qcpten,qipten,upten,vpten,qnipten,qncpten,xkzh,xkzq,xkzm, &
@@ -135,6 +141,12 @@
       real, intent(in), dimension(ibdrm:iedrm,jbdrm:jedrm,kbdrm:kedrm+1,numq) :: kq4d, kqv4d
                               ! kq4d and kqv4d are needed only when each cloud species
                               ! has its own eddy diffusivity (DWL-A)
+      !=========================================================================
+      !=========================================================================
+      ! sacp variables.   
+      real, intent(in), dimension(ib:ie, jb:je, kb:ke+1) :: sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac
+      real, intent(in), dimension(ib:ie, jb:je, kb:ke) :: sacp_alphas, sacp_betas
+      real, intent(in), dimension(ib:ie, jb:je) :: sacp_alphamax
       !=========================================================================
       real, dimension(ib:ie,jb:je,kb:ke), intent(in) :: rho,prs
       real, dimension(ib:ie,jb:je,kb:ke), intent(inout) :: divx
@@ -388,6 +400,21 @@
         call   write2d(rain(ib,jb,1),fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
     endif
 
+  !.............................................
+
+  !=============================sacp=====================================================
+   if(dosacp.ge.1 .and.   output_sacp.eq.1)then
+      n_out = n_out + 1
+      name_output(n_out) = 'alphamax'
+      desc_output(n_out) = 'alphamax for CAPE adjustment time scale'
+      unit_output(n_out) = 'dimensionless'
+      grid_output(n_out) = '2'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+      cmpr_output(n_out) = .true.
+
+        call   write2d(sacp_alphamax(ib,jb),fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+    endif
+  
+  !=============================sacp=====================================================
   !.............................................
 
     if(output_rain   .eq.1 .and. cuparam.ge.1 )then
@@ -6467,6 +6494,46 @@
       ENDIF
       !======================================================
 
+      !==================sacp============================
+      ! sacp variables. 
+      IF (dosacp.ge.1 .and. output_sacp.eq.1) THEN 
+        n_out = n_out + 1
+        name_output(n_out) = 'alphas'
+        desc_output(n_out) = 'alpha at scalar points'
+        unit_output(n_out) = 'dimensionless'
+        grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni
+            dum1(i,j,k) = sacp_alphas(i,j,k)
+          enddo
+          enddo
+          enddo
+      call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
+
+
+        n_out = n_out + 1
+        name_output(n_out) = 'betas'
+        desc_output(n_out) = 'beta at scalar points'
+        unit_output(n_out) = 'dimensionless'
+        grid_output(n_out) = 's'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        !$omp parallel do default(shared)  &
+        !$omp private(i,j,k)
+          do k=1,maxk
+          do j=1,nj
+          do i=1,ni
+            dum1(i,j,k) = sacp_betas(i,j,k)
+          enddo
+          enddo
+          enddo
+      call   writes(dum1,fnum,srec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out),sigma,zs,zh,dum9)
+
+      ENDIF
+
+      !======================================================
+
   !.............................................
 
 
@@ -7364,6 +7431,7 @@
       endif
     end if
     !======================================================
+
 
     ! arbitrary output (out3d array)
 
@@ -8799,6 +8867,7 @@
         desc_output(n_out) = 'reconstructed stress, originally at s13 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        levs_output(n_out) = maxk+1
         
         !$omp parallel do default(shared)  &
         !$omp private(i,j,k)
@@ -8817,6 +8886,7 @@
         desc_output(n_out) = 'reconstructed stress, originally at s23 pts'
         unit_output(n_out) = 'm^2/s^2'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        levs_output(n_out) = maxk+1
         
 
         !$omp parallel do default(shared)  &
@@ -8849,6 +8919,7 @@
         desc_output(n_out) = 'reconstructed theta flux'
         unit_output(n_out) = 'K m/s'
         grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+        levs_output(n_out) = maxk+1
         
 
         !$omp parallel do default(shared)  &
@@ -8876,6 +8947,7 @@
             desc_output(n_out) = text2
             unit_output(n_out) = qunit(n)//'m/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            levs_output(n_out) = maxk+1
             cmpr_output(n_out) = .true.
 
             !$omp parallel do default(shared)  &
@@ -8897,6 +8969,7 @@
             desc_output(n_out) = 'horizontal eddy diffusivity for moisture'
             unit_output(n_out) = 'm^2/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            levs_output(n_out) = maxk+1
             
             !$omp parallel do default(shared)  &
             !$omp private(i,j,k)
@@ -8916,7 +8989,7 @@
               desc_output(n_out) = 'vertical eddy diffusivity for moisture'
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
-
+              levs_output(n_out) = maxk+1
 
               !$omp parallel do default(shared)  &
               !$omp private(i,j,k)
@@ -8936,6 +9009,7 @@
             desc_output(n_out) = 'horizontal eddy diffusivity for particle # concentration'
             unit_output(n_out) = 'm^2/s'
             grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+            levs_output(n_out) = maxk+1
 
 
             !$omp parallel do default(shared)  &
@@ -8955,6 +9029,7 @@
               desc_output(n_out) = 'vertical eddy diffusivity for particle # concentration'
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+              levs_output(n_out) = maxk+1
               
               !$omp parallel do default(shared)  &
               !$omp private(i,j,k)
@@ -8981,6 +9056,7 @@
               unit_output(n_out) = 'm^2/s'
               grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
               cmpr_output(n_out) = .true.
+              levs_output(n_out) = maxk+1
 
               !$omp parallel do default(shared)  &
               !$omp private(i,j,k)
@@ -9009,7 +9085,7 @@
                 unit_output(n_out) = 'm^2/s'
                 grid_output(n_out) = 'w'   ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
                 cmpr_output(n_out) = .true.
-
+                levs_output(n_out) = maxk+1
 
                 !$omp parallel do default(shared)  &
                 !$omp private(i,j,k)
@@ -9029,6 +9105,97 @@
       end if   ! sgsmodel, output_drm
       !======================================================
 
+      !========================================================
+        !sacp variables. 
+        if (dosacp.ge.1 .and. output_sacp.eq.1) then
+
+          n_out = n_out + 1
+          name_output(n_out) = 'alpha'
+          desc_output(n_out) = 'alpha at w points'
+          unit_output(n_out) = 'dimensionless'
+          grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          levs_output(n_out) = maxk+1
+          
+          !$omp parallel do default(shared)  &
+          !$omp private(i,j,k)
+          do k=1,maxk+1
+          do j=1,nj
+          do i=1,ni
+            dumw(i,j,k) = sacp_alpha(i,j,k)
+          enddo
+          enddo
+          enddo
+
+          call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
+          n_out = n_out + 1
+          name_output(n_out) = 'beta'
+          desc_output(n_out) = 'beta at w points'
+          unit_output(n_out) = 'dimensionless'
+          grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          levs_output(n_out) = maxk+1
+          
+
+          !$omp parallel do default(shared)  &
+          !$omp private(i,j,k)
+          do k=1,maxk+1
+          do j=1,nj
+          do i=1,ni
+            dumw(i,j,k) = sacp_beta(i,j,k)
+          enddo
+          enddo
+          enddo
+
+
+          call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
+
+
+
+          n_out = n_out + 1
+          name_output(n_out) = 'sconv'
+          desc_output(n_out) = 'sconv at w points'
+          unit_output(n_out) = 'dimensionless'
+          grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          levs_output(n_out) = maxk+1
+          
+
+          !$omp parallel do default(shared)  &
+          !$omp private(i,j,k)
+          do k=1,maxk+1
+          do j=1,nj
+          do i=1,ni
+            dumw(i,j,k) = sacp_sconv(i,j,k)
+          enddo
+          enddo
+          enddo
+
+
+          call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+
+
+          n_out = n_out + 1
+          name_output(n_out) = 'scale_fac'
+          desc_output(n_out) = 'scale factor at w points'
+          unit_output(n_out) = 'dimensionless'
+          grid_output(n_out) = 'w'     ! s=scalar pts (3d) ; u=u pts (3d) ; v=v pts (3d) ; w=w pts (3d) ; 2=2d scalar pts
+          levs_output(n_out) = maxk+1
+          
+
+          !$omp parallel do default(shared)  &
+          !$omp private(i,j,k)
+          do k=1,maxk+1
+          do j=1,nj
+          do i=1,ni
+            dumw(i,j,k) = sacp_scale_fac(i,j,k)
+          enddo
+          enddo
+          enddo
+
+
+          call   writew(dumw,wnum,wrec,nwrite,nloop,dat1,dat2,dat3,reqt,myi1p,myi2p,myj1p,myj2p,ncid,time_index,name_output(n_out),levs_output(n_out))
+        end if  
+       !========================================================
     ! arbitrary output (out3d array)
 
 ! KLUDGE !

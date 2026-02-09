@@ -492,20 +492,38 @@
         if(dowr) write(outfile,*) '  Cold pool .... periodic in N-S'
         if(dowr) write(outfile,*)
 
-        ric      =   centerx   ! eastern edge of cold pool
-        zdep     =    2500.0   ! depth of cold pool (m)
-        bptpert  =      -6.0   ! max temp perturbation at sfc (K)
+        ric      =   80000.0   ! eastern edge of cold pool
+        zdep     =    2000.0   ! depth of cold pool (m)
+        bptpert  =      -8.0   ! max temp perturbation at sfc (K)
+        amplitude= 0.2
 
         ! By default, CM1 sets qv=constant at a constant height level for 
         ! this value of iinit.  If you would rather have rh=constant at 
         ! a constant height level, then set this to .true.
-        maintain_rh = .true.
+        maintain_rh = .false.
+
+
+        ! this makes sure that each processor has a different set
+        ! of random numbers for MPI runs 
+        ! copied from cm1r16
+        do n=1,myid
+        do k=1,nk
+        do j=1,nj
+        do i=1,ni
+          call random_number(rand)
+        enddo
+        enddo
+        enddo
+        enddo
 
         do k=1,nk
         do j=1,nj
         do i=1,ni
+
+          call random_number(rand)
+          
           if( (xh(i).le.ric).and.(zh(i,j,k).lt.zdep) )then
-            tha(i,j,k)=bptpert*(zdep-zh(i,j,k))/zdep
+            tha(i,j,k)=bptpert*(zdep-zh(i,j,k))/zdep + amplitude*(2.0*rand-1.0)
           else
             tha(i,j,k)=0.0
           endif
@@ -1461,7 +1479,7 @@
 
         ! this is the amplitude of the theta perturbations
         ! (plus or minus this value in K)
-        amplitude = 0.25
+        amplitude = 0.2
 
         ! random numbers added here
         ! (can be modified to only place perturbations in certain

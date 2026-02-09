@@ -4580,6 +4580,12 @@
                         u1th_re,u2th_re,u3th_re,u1q_re,u2q_re,u3q_re,                          &
                         kqh,kqv,knh,knv,kq4d,kqv4d,                                            &
                         !=======================================================================
+                        !=========================================================================
+                        ! sacp variables
+                        sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac,                    &
+                        sacp_alphas, sacp_betas,                                              &
+                        sacp_alphamax,                                                        &
+                        !========================================================================= 
                         rru,u3d,uten,uten1,rrv,v3d,vten,vten1,rrw,w3d,wten,pp3d,th3d,phi2,     &
                         sadv,thten,nm,defv,defh,lenscl,dissten,epst,epsd1,epsd2,               &
                         thpten,qvpten,qcpten,qipten,upten,vpten,qnipten,qncpten,xkzh,xkzq,xkzm, &

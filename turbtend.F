@@ -369,7 +369,7 @@
                       -gy(i,j,k)*(dumz(i,j,k)+dumz(i,j+1,k) + u2s_re_w(i,j,k)+u2s_re_w(i,j+1,k))      &
                    ))*0.5*rdsf(k)
           enddo
-          enddo
+          enddo         
         end if
 
       enddo
@@ -828,14 +828,6 @@
     if ((sgsmodel.eq.7 .and. reconstr.ge.0) .or. (sgsmodel.eq.6 .and. reconstr.ge.0)) then
       if (dosacp .ge. 1) then
         do k = 1, nk
-          do j = 1, nj
-            do i = 1, ni
-              turbz(i,j,k) = turbz(i,j,k) - (u3s_re(i,j,k+1)-u3s_re(i,j,k))*rdz*mh(i,j,k)
-            end do
-          end do
-        end do
-      else 
-      do k = 1, nk
         do j = 1, nj
           do i = 1, ni
             turbz(i,j,k) = turbz(i,j,k) - (0.5*(sacp_betas(i,j,k)+sacp_betas(i,j,k+1))*u3s_re(i,j,k+1)&
@@ -843,6 +835,14 @@
           end do
         end do
       end do
+      else      
+        do k = 1, nk
+            do j = 1, nj
+              do i = 1, ni
+                turbz(i,j,k) = turbz(i,j,k) - (u3s_re(i,j,k+1)-u3s_re(i,j,k))*rdz*mh(i,j,k)
+              end do
+            end do
+          end do
       end if
     end if
     !------------------------------------------
@@ -3108,8 +3108,8 @@
         do i=1,ni
           turbx(i,j,k)=(0.25*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k)+sacp_betas(i+1,j,k-1)+sacp_betas(i,j,k-1))&
                        *t13(i+1,j,k)&
-                       -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1)&
-                       *t13(i,j,k)))*rdx*uh(i)
+                       -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1))&
+                       *t13(i,j,k))*rdx*uh(i)
           turby(i,j,k)=(0.25*(sacp_betas(i,j+1,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i,j+1,k-1))&
                         *t23(i,j+1,k)&
                         -0.25*(sacp_betas(i,j,k)+sacp_betas(i,j-1,k)+sacp_betas(i,j-1,k-1)+sacp_betas(i,j,k-1))&
@@ -3145,8 +3145,8 @@
             do i=1,ni
               turbx(i,j,k)=turbx(i,j,k) + (0.25*(sacp_betas(i,j,k)+sacp_betas(i+1,j,k)+sacp_betas(i+1,j,k-1)+sacp_betas(i,j,k-1))&
                                            *t13_re(i+1,j,k)&
-                                           -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1)&
-                                           *t13_re(i,j,k)))*rdx*uh(i)
+                                           -0.25*(sacp_betas(i-1,j,k)+sacp_betas(i,j,k)+sacp_betas(i,j,k-1)+sacp_betas(i-1,j,k-1))&
+                                           *t13_re(i,j,k))*rdx*uh(i)
             enddo
           enddo
 

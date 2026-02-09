@@ -470,6 +470,10 @@
       ! DRM parameter. XS 11/16/2018
       call MPI_BCAST(output_drm    ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       !=========================================================================
+      !=========================================================================
+      ! sacp parameter.
+      call MPI_BCAST(output_sacp    ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+      !=========================================================================
       call MPI_BCAST(output_qv     ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(output_qvpert ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(output_q      ,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -4746,6 +4750,10 @@
       ! DRM parameter. XS 11/16/2018
       output_drm      = max(0,min(1,output_drm))
       !==================================================
+      !==================================================
+      ! sacp parameter.
+      output_sacp      = max(0,min(1,output_sacp))
+      !==================================================
       output_qv      = max(0,min(1,output_qv))
       output_qvpert  = max(0,min(1,output_qvpert))
       output_q       = max(0,min(1,output_q))
@@ -5062,7 +5070,8 @@
         ker=1
       endif
 
-      if( (cm1setup.eq.2.or.cm1setup.eq.4) .and. ipbl.ge.1 )then
+      !if( (cm1setup.eq.2.or.cm1setup.eq.4) .and. ipbl.ge.1 )then
+      if( (cm1setup.eq.1.or.cm1setup.eq.2.or.cm1setup.eq.4) .and. ipbl.ge.1 )then !sacp allow for pbl in cm1setup=1
         ! for boundary-layer schemes:
         ibb=ib
         ieb=ie

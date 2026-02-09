@@ -219,7 +219,7 @@
       integer :: nmass
       !=========================================================================
       !=========================================================================
-      ! sacp variables.   XS 11/19/2018
+      ! sacp variables.  
       real, intent(inout), dimension(ib:ie, jb:je, kb:ke+1) :: sacp_sconv, sacp_alpha, sacp_beta, sacp_scale_fac
       real, intent(inout), dimension(ib:ie, jb:je, kb:ke) :: sacp_alphas, sacp_betas
       real, intent(inout), dimension(ib:ie, jb:je) :: sacp_alphamax
@@ -1482,11 +1482,16 @@
     do k = kb, ke+1
     do j = jb, je
     do i = ib, ie
-        ! for sconv<4 -> out of convection -> sconv=0
-        if (sacp_sconv(i,j,k) >=4) then
+        ! for sconv<4 -> out of convection -> sconv=0 & scale_fac=0
+        if (sacp_sconv(i,j,k) >=4.0) then
           sacp_scale_fac(i,j,k) = (sqrt(sacp_sconv(i,j,k))-2.0)/(5.0)
+        else
+          sacp_scale_fac(i,j,k) = 0.0
         endif
-        sacp_alpha(i,j,k) = (1.0 + log(15000.0/dx)) ** (3*sacp_scale_fac(i,j,k))
+
+        ! alpha and beta functions
+        
+        sacp_alpha(i,j,k) = (1.0 + log(15000.0/dx)) ** (3.0*sacp_scale_fac(i,j,k))
         sacp_beta(i,j,k) =  (sacp_scale_fac(i,j,k)*(15000.0-dx)/14000.0)**(0.5)
     end do
     end do
@@ -12840,6 +12845,8 @@
     end do
     
     
+    !$omp parallel do default(shared)   &
+    !$omp private(i,j,k)
     do k = kb, ke+1
     do j = jb, je
     do i = ib, ie

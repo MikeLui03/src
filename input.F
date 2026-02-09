@@ -130,6 +130,10 @@
               ! DRM parameter. XS 11/16/2018.
               output_drm,                                                     &
               !================================================================
+              !================================================================
+              ! sacp parameter. XS 11/16/2018.
+              output_sacp,                                                     &
+              !================================================================
               output_qv,output_qvpert,output_q,output_dbz,output_buoyancy,    &
               output_u,output_upert,output_uinterp,                           &
               output_v,output_vpert,output_vinterp,output_w,output_winterp,   &
@@ -321,6 +325,10 @@
               !=====================================================================
               ! DRM parameters. XS 11/16/2018
               output_drm,                                                     &
+              !=====================================================================
+              !=====================================================================
+              !sacp parameters. 
+              output_sacp,                                                     &
               !=====================================================================
               output_qv,output_qvpert,output_q,output_dbz,output_buoyancy,    &
               output_u,output_upert,output_uinterp,                           &
