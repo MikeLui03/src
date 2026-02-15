@@ -1474,8 +1474,10 @@
 !--------------------------------------
 !  sacp: classification of convective regimes
    if (dosacp.ge.1) then
-    
+
+    if (sacp_alphaf .ge. 0 .or. sacp_betaf .ge. 0) then !negative 1: orginal formulation
       call sacp_convolution(wa, sacp_sconv)
+    endif
 
     !$omp parallel do default(shared)   &
     !$omp private(i,j,k)
@@ -1489,10 +1491,24 @@
           sacp_scale_fac(i,j,k) = 0.0
         endif
 
-        ! alpha and beta functions
-        
-        sacp_alpha(i,j,k) = (1.0 + log(15000.0/dx)) ** (3.0*sacp_scale_fac(i,j,k))
-        sacp_beta(i,j,k) =  (sacp_scale_fac(i,j,k)*(15000.0-dx)/14000.0)**(0.5)
+        ! alpha 
+        if (sacp_alphaf .eq.-1) then
+          sacp_alpha(i,j,k) = (1.0 + log(15000.0/dx)) ** (3.0)  
+        elseif (sacp_alphaf .eq.0) then
+          sacp_alpha(i,j,k) = (1.0 + log(15000.0/dx)) ** (3.0*sacp_scale_fac(i,j,k))
+        endif
+
+
+        ! beta above pbl
+        if (k .ge. kpbl2d(i,j)) then          
+          if (sacp_betaf .eq.-1) then
+            sacp_beta(i,j,k) = 1.0
+          elseif (sacp_betaf .eq.0) then
+            sacp_beta(i,j,k) =  (sacp_scale_fac(i,j,k)*(15000.0-dx)/14000.0)**(0.5)
+          endif
+        else
+          sacp_beta(i,j,k) = 0.0 !no turbulence model in pbl
+        endif
     end do
     end do
     end do
